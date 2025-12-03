@@ -23,7 +23,7 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #020617;
+  background-color: #0c1929; /* Navy blue-950 */
   color: #f8fafc;
 }
 
