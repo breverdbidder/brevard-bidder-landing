@@ -1,4 +1,4 @@
-// BrevardBidderAI Landing Page V2.1.0 - December 3, 2025
+// BrevardBidderAI Landing Page V2.2.0 - December 3, 2025
 // Built by Ariel Shapira - Real Estate Developer & Founder, Everest Capital USA
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -330,7 +330,7 @@ const App = () => {
               </motion.p>
               
               <motion.p variants={fadeInUp} className="text-lg text-amber-400/80 font-medium mb-8">
-                Built by an investor with 20+ years in Florida real estate.
+                Built by a developer & investor with 20+ years in Florida real estate. For investors everywhere.
               </motion.p>
               
               <motion.div variants={fadeInUp}>
@@ -671,7 +671,7 @@ const App = () => {
             {/* Authenticity Message */}
             <div className="mb-10">
               <p className="text-slate-400 text-lg">
-                Not polished. Not perfect. <span className="text-emerald-400 font-semibold">Just real.</span>
+                Professional-grade auction intelligence. <span className="text-emerald-400 font-semibold">For everyone. Everywhere.</span>
               </p>
             </div>
             
@@ -764,7 +764,7 @@ const App = () => {
           
           <div className="mt-8 pt-8 border-t border-slate-800/50 text-center">
             <p className="text-slate-700 text-xs">
-              Not polished. Not perfect. Just real. — Built by an investor, for investors.
+              Built by a developer & investor. For investors everywhere. — Democratizing USA distressed asset auctions.
             </p>
           </div>
         </div>
