@@ -414,51 +414,59 @@ export default function AnimatedDemo({ onClose }) {
     }
   }, { scope: introRef, dependencies: [phase] });
 
-  // Pipeline animation
-  useGSAP(() => {
-    if (phase === 'pipeline' && currentStage < PIPELINE_STAGES.length) {
-      const stage = PIPELINE_STAGES[currentStage];
+  // Pipeline animation - use standard useEffect for reliable stage progression
+  useEffect(() => {
+    if (phase !== 'pipeline') return;
+    if (currentStage >= PIPELINE_STAGES.length) return;
+    
+    const stage = PIPELINE_STAGES[currentStage];
+    
+    // Add terminal line
+    setIsTyping(true);
+    
+    const timer1 = setTimeout(() => {
+      setTerminalLines(prev => [...prev, {
+        text: `[Stage ${stage.id}/12] ${stage.name}: ${stage.description}...`,
+        type: 'info'
+      }]);
+      setIsTyping(false);
       
-      // Add terminal line
-      setIsTyping(true);
-      setTimeout(() => {
+      // Add success line after "processing"
+      const timer2 = setTimeout(() => {
         setTerminalLines(prev => [...prev, {
-          text: `[Stage ${stage.id}/12] ${stage.name}: ${stage.description}...`,
-          type: 'info'
+          text: `✓ ${stage.detail} complete`,
+          type: 'success'
         }]);
-        setIsTyping(false);
         
-        // Add success line after "processing"
-        setTimeout(() => {
-          setTerminalLines(prev => [...prev, {
-            text: `✓ ${stage.detail} complete`,
-            type: 'success'
-          }]);
-          
-          // Move to next stage
-          setTimeout(() => {
-            if (currentStage < PIPELINE_STAGES.length - 1) {
-              setCurrentStage(prev => prev + 1);
-            } else {
-              // Pipeline complete
-              setTerminalLines(prev => [...prev, {
-                text: '═══════════════════════════════════════',
-                type: 'info'
-              }, {
-                text: '✅ PIPELINE COMPLETE - 12/12 stages',
-                type: 'success'
-              }, {
-                text: `📊 Recommendation: ${propertyData.recommendation}`,
-                type: 'success'
-              }]);
-              
-              setTimeout(() => setPhase('complete'), 1500);
-            }
-          }, 300);
-        }, stage.duration * 500);
-      }, 200);
-    }
-  }, { dependencies: [phase, currentStage] });
+        // Move to next stage
+        const timer3 = setTimeout(() => {
+          if (currentStage < PIPELINE_STAGES.length - 1) {
+            setCurrentStage(prev => prev + 1);
+          } else {
+            // Pipeline complete
+            setTerminalLines(prev => [...prev, {
+              text: '═══════════════════════════════════════',
+              type: 'info'
+            }, {
+              text: '✅ PIPELINE COMPLETE - 12/12 stages',
+              type: 'success'
+            }, {
+              text: `📊 Recommendation: ${propertyData.recommendation}`,
+              type: 'success'
+            }]);
+            
+            setTimeout(() => setPhase('complete'), 1500);
+          }
+        }, 300);
+        
+        return () => clearTimeout(timer3);
+      }, stage.duration * 400); // Slightly faster for better UX
+      
+      return () => clearTimeout(timer2);
+    }, 200);
+    
+    return () => clearTimeout(timer1);
+  }, [phase, currentStage]);
 
   // Completion animation with counter
   useGSAP(() => {
