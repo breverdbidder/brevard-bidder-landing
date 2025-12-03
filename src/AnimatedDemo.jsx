@@ -330,7 +330,7 @@ const TerminalOutput = ({ lines, isTyping }) => {
 };
 
 // Main AnimatedDemo Component
-export default function AnimatedDemo({ isOpen, onClose }) {
+export default function AnimatedDemo({ onClose }) {
   const [phase, setPhase] = useState('intro'); // intro, pipeline, complete
   const [currentStage, setCurrentStage] = useState(0);
   const [terminalLines, setTerminalLines] = useState([]);
@@ -540,8 +540,6 @@ export default function AnimatedDemo({ isOpen, onClose }) {
       type: 'info'
     }]);
   };
-
-  if (!isOpen) return null;
 
   // ============ INTRO SCREEN ============
   if (phase === 'intro') {
