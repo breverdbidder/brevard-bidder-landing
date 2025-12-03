@@ -435,7 +435,7 @@ const App = () => {
             </span>
           </div>
           <div className="text-blue-600 text-sm">
-            © 2025 Ariel Shapira | Real Estate Developer & Founder, Everest Capital USA
+            © 2025 Ariel Shapira | Real Estate Developer & Founder, Everest Capital USA | Solo Founder of BrevardBidderAI & BidDeedAI
           </div>
         </div>
       </footer>
