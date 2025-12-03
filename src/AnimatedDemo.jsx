@@ -309,7 +309,7 @@ const AnimatedDemo = ({ onClose }) => {
 
           {/* Tagline */}
           <p className="intro-tagline text-slate-400 mb-8">
-            Not polished. Not perfect. <span className="text-emerald-400 font-semibold">Just real.</span>
+            Agentic AI for USA distressed asset auctions. <span className="text-emerald-400 font-semibold">For everyone. Everywhere.</span>
           </p>
 
           {/* CTA */}
@@ -327,7 +327,7 @@ const AnimatedDemo = ({ onClose }) => {
 
           {/* Footer */}
           <p className="intro-footer mt-6 text-sm text-slate-600">
-            Built by an investor, for investors
+            Built by a developer & investor. For investors everywhere.
           </p>
         </div>
       </div>
@@ -438,7 +438,7 @@ const AnimatedDemo = ({ onClose }) => {
           {/* Footer */}
           <div className="mt-8 pt-6" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
             <p className="text-xs text-slate-600">
-              BrevardBidderAI • Built by an investor, for investors
+              BrevardBidderAI • For investors everywhere
             </p>
           </div>
         </div>
