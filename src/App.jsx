@@ -5,9 +5,12 @@ const App = () => {
   const [activeStage, setActiveStage] = useState(0);
   const [showVideo, setShowVideo] = useState(false);
 
-  // Replace this with your actual YouTube video ID
-  const DEMO_VIDEO_ID = 'dQw4w9WgXcQ'; // Replace with your actual video ID
+  // BrevardBidderAI Demo Video
+  // To add your own video: Upload to YouTube, get the video ID from the URL
+  // Example: https://youtube.com/watch?v=ABC123 → ID is "ABC123"
+  const DEMO_VIDEO_ID = 'dQw4w9WgXcQ'; // TODO: Replace with actual BrevardBidderAI demo video ID
   const DEMO_VIDEO_URL = `https://www.youtube.com/watch?v=${DEMO_VIDEO_ID}`;
+  const YOUTUBE_EMBED_URL = `https://www.youtube.com/embed/${DEMO_VIDEO_ID}?autoplay=1&rel=0&modestbranding=1`;
 
   useEffect(() => {
     setIsVisible(true);
@@ -213,29 +216,34 @@ const App = () => {
                       <div className="absolute inset-0 rounded-full border-2 border-amber-500/50 animate-ping" />
                     </div>
                     <p className="mt-6 text-zinc-400 text-sm">Click to play demo</p>
-                    <p className="mt-2 text-blue-600 text-xs">4:32 • Full pipeline walkthrough</p>
+                    <p className="mt-2 text-blue-400 text-xs">4:32 • Full pipeline walkthrough</p>
                     
-                    {/* Additional clickable link */}
-                    <button
-                      onClick={handleOpenInNewTab}
-                      className="mt-6 flex items-center gap-2 px-6 py-3 bg-blue-800/80 hover:bg-blue-700 border border-blue-700 hover:border-amber-500/50 rounded-lg transition-all group/link"
+                    {/* Prominent YouTube Link Button */}
+                    <a
+                      href={DEMO_VIDEO_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-6 flex items-center gap-3 px-8 py-4 bg-red-600 hover:bg-red-500 rounded-lg transition-all shadow-lg shadow-red-600/30 hover:shadow-red-500/40 hover:scale-105"
                     >
-                      <svg className="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/>
                       </svg>
-                      <span className="text-sm text-zinc-300 group-hover/link:text-amber-400 transition-colors">
+                      <span className="text-base font-semibold text-white">
                         Watch on YouTube
                       </span>
-                    </button>
+                      <svg className="w-4 h-4 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
                   </div>
                 ) : (
                   /* Embedded YouTube video */
                   <iframe
                     className="absolute inset-0 w-full h-full"
-                    src={`https://www.youtube.com/embed/${DEMO_VIDEO_ID}?autoplay=1&rel=0&modestbranding=1&color=white`}
+                    src={YOUTUBE_EMBED_URL}
                     title="BrevardBidderAI Demo"
                     frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowFullScreen
                   />
                 )}
@@ -278,18 +286,18 @@ const App = () => {
                   href={DEMO_VIDEO_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-4 bg-blue-800/50 hover:bg-blue-800 border border-blue-700 hover:border-amber-500/50 rounded-lg transition-all group"
+                  className="flex items-center gap-3 p-4 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 hover:border-red-500 rounded-lg transition-all group"
                 >
-                  <div className="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                  <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z" />
                     </svg>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-zinc-200 group-hover:text-amber-400 transition-colors">Full Demo Video</div>
-                    <div className="text-xs text-blue-400">Watch on YouTube</div>
+                    <div className="text-sm font-semibold text-white group-hover:text-red-400 transition-colors">Full Demo Video</div>
+                    <div className="text-xs text-red-400">Watch on YouTube →</div>
                   </div>
-                  <svg className="w-4 h-4 text-blue-600 group-hover:text-amber-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-red-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
                 </a>
@@ -492,3 +500,4 @@ const App = () => {
 };
 
 export default App;
+
