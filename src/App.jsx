@@ -435,7 +435,7 @@ const App = () => {
             </span>
           </div>
           <div className="text-blue-600 text-sm">
-            © 2025 Ariel Shapira. All rights reserved.
+            © 2025 Ariel Shapira | Real Estate Developer & Founder, Everest Capital USA
           </div>
         </div>
       </footer>
