@@ -223,7 +223,7 @@ const StageCard = ({ stage, isActive, isComplete, index }) => {
       ref={cardRef}
       className={`
         relative p-4 rounded-xl transition-all duration-300
-        ${isActive ? 'ring-2 ring-offset-2 ring-offset-slate-900' : ''}
+        ${isActive ? 'ring-2 ring-offset-2 ring-offset-blue-900' : ''}
         ${isComplete ? 'opacity-100' : isActive ? 'opacity-100' : 'opacity-40'}
       `}
       style={{
@@ -278,7 +278,7 @@ const StageCard = ({ stage, isActive, isComplete, index }) => {
       
       {/* Progress indicator */}
       {isActive && (
-        <div className="mt-2 h-1 rounded-full overflow-hidden bg-slate-700">
+        <div className="mt-2 h-1 rounded-full overflow-hidden bg-blue-700">
           <div 
             className="h-full rounded-full animate-pulse"
             style={{ 
@@ -305,7 +305,7 @@ const TerminalOutput = ({ lines, isTyping }) => {
   return (
     <div 
       ref={terminalRef}
-      className="bg-slate-950 rounded-lg p-4 font-mono text-xs h-48 overflow-y-auto"
+      className="bg-blue-950 rounded-lg p-4 font-mono text-xs h-48 overflow-y-auto"
       style={{ 
         background: 'linear-gradient(180deg, #0a0a0f 0%, #050508 100%)',
         boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.5)'
@@ -549,7 +549,7 @@ export default function AnimatedDemo({ isOpen, onClose }) {
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.95)' }}>
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors"
+          className="absolute top-4 right-4 p-2 rounded-full bg-blue-800 hover:bg-blue-700 transition-colors"
         >
           <X className="w-6 h-6 text-slate-400" />
         </button>
@@ -618,7 +618,7 @@ export default function AnimatedDemo({ isOpen, onClose }) {
           </button>
 
           {/* Footer - ARIEL SHAPIRA ATTRIBUTION */}
-          <p className="intro-footer mt-6 text-sm text-slate-600">
+          <p className="intro-footer mt-6 text-sm text-blue-600">
             Built by <span className="text-slate-400">Ariel Shapira</span> • Solo Founder • For investors everywhere
           </p>
         </div>
@@ -632,7 +632,7 @@ export default function AnimatedDemo({ isOpen, onClose }) {
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.95)' }}>
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors"
+          className="absolute top-4 right-4 p-2 rounded-full bg-blue-800 hover:bg-blue-700 transition-colors"
         >
           <X className="w-6 h-6 text-slate-400" />
         </button>
@@ -668,7 +668,7 @@ export default function AnimatedDemo({ isOpen, onClose }) {
           <p className="text-slate-400 mb-6">Pipeline processed in {stats.time} seconds</p>
 
           {/* Property Info */}
-          <div className="complete-property bg-slate-800/50 rounded-xl p-4 mb-6 text-left">
+          <div className="complete-property bg-blue-800/50 rounded-xl p-4 mb-6 text-left">
             <p className="text-slate-400 text-sm">Property</p>
             <p className="text-white font-semibold">{propertyData.address}</p>
             <p className="text-slate-500 text-sm font-mono">{propertyData.caseNumber}</p>
@@ -676,19 +676,19 @@ export default function AnimatedDemo({ isOpen, onClose }) {
 
           {/* Stats Grid */}
           <div className="complete-stats grid grid-cols-4 gap-4 mb-6">
-            <div className="bg-slate-800/30 rounded-xl p-3">
+            <div className="bg-blue-800/30 rounded-xl p-3">
               <p className="text-2xl font-bold text-white">{stats.properties}</p>
               <p className="text-xs text-slate-500">Properties</p>
             </div>
-            <div className="bg-slate-800/30 rounded-xl p-3">
+            <div className="bg-blue-800/30 rounded-xl p-3">
               <p className="text-2xl font-bold text-emerald-400">{stats.time}s</p>
               <p className="text-xs text-slate-500">Total Time</p>
             </div>
-            <div className="bg-slate-800/30 rounded-xl p-3">
+            <div className="bg-blue-800/30 rounded-xl p-3">
               <p className="text-2xl font-bold text-cyan-400">{stats.bid}</p>
               <p className="text-xs text-slate-500">BID</p>
             </div>
-            <div className="bg-slate-800/30 rounded-xl p-3">
+            <div className="bg-blue-800/30 rounded-xl p-3">
               <p className="text-2xl font-bold text-slate-400">{stats.skip}</p>
               <p className="text-xs text-slate-500">SKIP</p>
             </div>
@@ -737,7 +737,7 @@ export default function AnimatedDemo({ isOpen, onClose }) {
               href="https://linkedin.com/in/ariel-shapira-533a776"
               target="_blank"
               rel="noopener noreferrer"
-              className="complete-cta px-6 py-3 rounded-xl font-semibold bg-slate-800 text-white transition-all hover:scale-105 hover:bg-slate-700 flex items-center gap-2"
+              className="complete-cta px-6 py-3 rounded-xl font-semibold bg-blue-800 text-white transition-all hover:scale-105 hover:bg-blue-700 flex items-center gap-2"
             >
               <Linkedin className="w-4 h-4" />
               Connect with Ariel
@@ -746,7 +746,7 @@ export default function AnimatedDemo({ isOpen, onClose }) {
 
           {/* Footer - ARIEL SHAPIRA ATTRIBUTION */}
           <div className="mt-8 pt-6" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-blue-600">
               © 2025 Ariel Shapira • BrevardBidderAI • Solo Founder
             </p>
           </div>
@@ -760,7 +760,7 @@ export default function AnimatedDemo({ isOpen, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.95)' }}>
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors z-50"
+        className="absolute top-4 right-4 p-2 rounded-full bg-blue-800 hover:bg-blue-700 transition-colors z-50"
       >
         <X className="w-6 h-6 text-slate-400" />
       </button>
@@ -791,7 +791,7 @@ export default function AnimatedDemo({ isOpen, onClose }) {
             <span className="text-slate-500 text-sm">
               Stage {currentStage + 1} of {PIPELINE_STAGES.length}
             </span>
-            <div className="w-32 h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div className="w-32 h-2 rounded-full bg-blue-800 overflow-hidden">
               <div 
                 className="h-full rounded-full transition-all duration-500"
                 style={{ 
@@ -859,8 +859,8 @@ export default function AnimatedDemo({ isOpen, onClose }) {
           className="flex items-center justify-between p-3"
           style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
         >
-          <p className="text-xs text-slate-600">© 2025 Ariel Shapira • BrevardBidderAI V13.4.0</p>
-          <p className="text-xs text-slate-600">Processing: {propertyData.address}</p>
+          <p className="text-xs text-blue-600">© 2025 Ariel Shapira • BrevardBidderAI V13.4.0</p>
+          <p className="text-xs text-blue-600">Processing: {propertyData.address}</p>
         </div>
       </div>
     </div>
