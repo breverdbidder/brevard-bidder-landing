@@ -1,8 +1,30 @@
 # BrevardBidderAI Landing Page - Version History
 
-## Current Version: 2.1.0
+## Current Version: 2.2.0
 
 ---
+
+## V2.2.0 (December 3, 2025) - Core Value Messaging
+
+### 🎯 Brand Messaging Update
+- **Removed:** "Not polished. Not perfect. Just real." (not aligned with core value)
+- **Added:** "For everyone. Everywhere." positioning
+- **Core Value:** Democratizing USA distressed asset auctions through Agentic AI
+
+### 📝 Updated Taglines
+
+| Location | New Tagline |
+|----------|-------------|
+| **Hero** | "Built by a developer & investor with 20+ years in Florida real estate. For investors everywhere." |
+| **Founder Section** | "Professional-grade auction intelligence. For everyone. Everywhere." |
+| **Footer** | "Built by a developer & investor. For investors everywhere. — Democratizing USA distressed asset auctions." |
+| **Demo Intro** | "Agentic AI for USA distressed asset auctions. For everyone. Everywhere." |
+| **Demo Footer** | "Built by a developer & investor. For investors everywhere." |
+
+### 🌍 Core Value Positioning
+- **BrevardBidderAI** = Foreclosure auctions (Brevard County → expanding)
+- **BidDeedAI** = Tax deed auctions (all USA counties)
+- **Mission** = Agentic AI making distressed asset investing accessible to everyone, everywhere
 
 ## V2.1.0 (December 3, 2025) - GSAP Animation Upgrade
 
