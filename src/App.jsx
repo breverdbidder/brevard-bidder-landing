@@ -4,13 +4,7 @@ import AnimatedDemo from './AnimatedDemo';
 const App = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [activeStage, setActiveStage] = useState(0);
-  const [showVideo, setShowVideo] = useState(false);
   const [showAnimatedDemo, setShowAnimatedDemo] = useState(false);
-
-  // BrevardBidderAI Demo Video (optional - for when you have a real YouTube video)
-  const DEMO_VIDEO_ID = 'dQw4w9WgXcQ'; // Replace with actual video ID when available
-  const DEMO_VIDEO_URL = `https://www.youtube.com/watch?v=${DEMO_VIDEO_ID}`;
-  const YOUTUBE_EMBED_URL = `https://www.youtube.com/embed/${DEMO_VIDEO_ID}?autoplay=1&rel=0&modestbranding=1`;
 
   useEffect(() => {
     setIsVisible(true);
@@ -64,14 +58,6 @@ const App = () => {
       highlight: 'Trade secrets secured',
     },
   ];
-
-  const handlePlayVideo = () => {
-    setShowVideo(true);
-  };
-
-  const handleOpenInNewTab = () => {
-    window.open(DEMO_VIDEO_URL, '_blank', 'noopener,noreferrer');
-  };
 
   return (
     <div className="min-h-screen bg-blue-950 text-white overflow-hidden">
@@ -134,13 +120,13 @@ const App = () => {
           </p>
 
           <div className="flex flex-wrap gap-4">
-            <a 
-              href="#demo"
+            <button 
+              onClick={() => setShowAnimatedDemo(true)}
               className="group px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold rounded-xl hover:shadow-2xl hover:shadow-amber-500/30 transition-all hover:-translate-y-0.5"
             >
               See It In Action
               <span className="inline-block ml-2 group-hover:translate-x-1 transition-transform">→</span>
-            </a>
+            </button>
             <button className="px-8 py-4 border border-blue-700 text-zinc-300 font-semibold rounded-xl hover:border-amber-500/50 hover:text-amber-400 transition-all">
               View Sample Report
             </button>
@@ -162,110 +148,123 @@ const App = () => {
         </div>
       </section>
 
-      {/* Demo Video Section */}
+      {/* Demo Section - Professional Terminal Style */}
       <section id="demo" className="relative z-10 px-8 py-24">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              <span className="text-zinc-100">See the Pipeline</span>{' '}
-              <span className="text-amber-400">In Action</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-sm mb-6">
+              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+              LIVE PIPELINE • BREVARD COUNTY
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">
+              <span className="text-zinc-100">12-Stage Intelligence</span>{' '}
+              <span className="text-amber-400">Pipeline</span>
             </h2>
-            <p className="text-zinc-400 text-lg">
-              Watch a live auction analysis from discovery to recommendation in under 7 minutes.
+            <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
+              Watch autonomous agents analyze foreclosure properties in real-time. 
+              From discovery to decision in under 60 seconds.
             </p>
           </div>
 
-          {/* Video Container with Premium Frame */}
-          <div className="relative group">
-            {/* Glow effect */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-amber-500/20 via-amber-400/10 to-amber-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            
-            {/* Video frame */}
-            <div className="relative bg-gradient-to-b from-blue-800 to-blue-900 p-2 rounded-2xl border border-blue-700 group-hover:border-amber-500/30 transition-colors">
-              {/* Browser-style header */}
-              <div className="flex items-center gap-2 px-4 py-3 bg-blue-900 rounded-t-xl border-b border-blue-800">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
+          {/* Terminal Demo Container */}
+          <div 
+            className="relative rounded-2xl overflow-hidden"
+            style={{ 
+              background: 'linear-gradient(135deg, rgba(22, 27, 34, 0.9) 0%, rgba(13, 17, 23, 0.95) 100%)',
+              border: '1px solid rgba(48, 54, 61, 0.6)',
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.03), 0 24px 48px -12px rgba(0,0,0,0.5)'
+            }}
+          >
+            {/* Terminal Header */}
+            <div 
+              className="flex items-center justify-between px-5 py-4"
+              style={{ 
+                borderBottom: '1px solid rgba(48, 54, 61, 0.6)',
+                background: 'rgba(22, 27, 34, 0.8)'
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                  <div className="w-3 h-3 rounded-full bg-green-500" />
                 </div>
-                <div className="flex-1 mx-4">
-                  <div className="bg-blue-800 rounded-lg px-4 py-1.5 text-xs text-blue-400 font-mono">
-                    brevard-bidder.ai/demo
-                  </div>
+                <div className="px-4 py-1.5 rounded-md text-xs font-mono text-zinc-500" style={{ background: 'rgba(48, 54, 61, 0.5)' }}>
+                  brevard-bidder-ai / pipeline
                 </div>
-                <div className="text-amber-400 text-xs font-semibold">INTERACTIVE DEMO</div>
               </div>
+              <div className="text-xs text-zinc-600 font-mono">v13.4.0</div>
+            </div>
 
-              {/* Demo embed area */}
-              <div className="relative aspect-video bg-black rounded-b-xl overflow-hidden">
-                {/* Demo placeholder with animated preview */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 flex flex-col items-center justify-center">
-                  {/* Animated preview elements */}
-                  <div className="absolute inset-0 overflow-hidden opacity-20">
-                    <div className="absolute top-1/4 left-1/4 w-32 h-32 border border-amber-500/50 rounded-lg animate-pulse" />
-                    <div className="absolute bottom-1/4 right-1/4 w-24 h-24 border border-blue-500/50 rounded-full animate-ping" style={{ animationDuration: '3s' }} />
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent animate-pulse" />
-                  </div>
-                  
-                  <div className="relative z-10">
-                    {/* Play button - launches animated demo */}
-                    <button 
-                      onClick={() => setShowAnimatedDemo(true)}
-                      className="group/play w-24 h-24 bg-amber-500 rounded-full flex items-center justify-center hover:bg-amber-400 transition-all hover:scale-110 shadow-2xl shadow-amber-500/30"
-                    >
-                      <svg className="w-10 h-10 text-black ml-1" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </button>
-                    {/* Pulse rings */}
-                    <div className="absolute inset-0 rounded-full border-2 border-amber-500/50 animate-ping" />
-                  </div>
-                  
-                  <p className="mt-6 text-white text-lg font-semibold">Watch the 12-Stage Pipeline in Action</p>
-                  <p className="mt-2 text-amber-400 text-sm">Interactive Demo • ~47 seconds • Real Data</p>
-                  
-                  {/* Two button options */}
-                  <div className="mt-6 flex items-center gap-4">
-                    {/* Primary: Animated Demo */}
-                    <button
-                      onClick={() => setShowAnimatedDemo(true)}
-                      className="flex items-center gap-3 px-6 py-3 bg-amber-500 hover:bg-amber-400 rounded-lg transition-all shadow-lg shadow-amber-500/30 hover:scale-105"
-                    >
-                      <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <span className="font-semibold text-black">Launch Interactive Demo</span>
-                    </button>
-                    
-                    {/* Secondary: YouTube (when available) */}
-                    <a
-                      href={DEMO_VIDEO_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-5 py-3 bg-red-600/80 hover:bg-red-600 border border-red-500/50 rounded-lg transition-all hover:scale-105"
-                    >
-                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/>
-                      </svg>
-                      <span className="text-sm font-medium text-white">YouTube</span>
-                    </a>
-                  </div>
-                </div>
+            {/* Demo Content */}
+            <div className="relative aspect-video flex flex-col items-center justify-center p-8" style={{ background: 'rgba(13, 17, 23, 0.5)' }}>
+              {/* Animated background elements */}
+              <div className="absolute inset-0 overflow-hidden opacity-20">
+                <div className="absolute top-1/4 left-1/4 w-32 h-32 border border-cyan-500/30 rounded-lg animate-pulse" />
+                <div className="absolute bottom-1/4 right-1/4 w-24 h-24 border border-emerald-500/30 rounded-full" style={{ animation: 'ping 3s infinite' }} />
+                <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent" />
+              </div>
+              
+              {/* Main Play Button */}
+              <button 
+                onClick={() => setShowAnimatedDemo(true)}
+                className="group relative z-10 w-24 h-24 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                style={{
+                  background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                  boxShadow: '0 8px 32px rgba(34, 197, 94, 0.4)'
+                }}
+              >
+                <svg className="w-10 h-10 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+                {/* Pulse ring */}
+                <div className="absolute inset-0 rounded-full border-2 border-emerald-400/50 animate-ping" />
+              </button>
+              
+              <p className="mt-8 text-xl font-semibold text-white">Run Live Pipeline Demo</p>
+              <p className="mt-2 text-emerald-400 text-sm font-medium">Interactive • ~47 seconds • Real Data</p>
+              
+              {/* Action buttons */}
+              <div className="mt-8 flex items-center gap-4">
+                <button
+                  onClick={() => setShowAnimatedDemo(true)}
+                  className="flex items-center gap-3 px-6 py-3 rounded-lg font-semibold text-black transition-all hover:scale-105"
+                  style={{
+                    background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                    boxShadow: '0 4px 16px rgba(34, 197, 94, 0.3)'
+                  }}
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                  Launch Interactive Demo
+                </button>
+                
+                <button
+                  className="flex items-center gap-2 px-5 py-3 rounded-lg font-medium text-zinc-300 transition-all hover:text-white"
+                  style={{ border: '1px solid rgba(48, 54, 61, 0.8)' }}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Sample Report
+                </button>
               </div>
             </div>
 
-            {/* Video stats bar */}
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-6 text-sm">
-              <div className="flex items-center gap-2 text-blue-400">
+            {/* Stats footer */}
+            <div 
+              className="flex flex-wrap items-center justify-center gap-8 px-6 py-4 text-sm"
+              style={{ borderTop: '1px solid rgba(48, 54, 61, 0.6)' }}
+            >
+              <div className="flex items-center gap-2 text-zinc-500">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                 </svg>
-                <span>1,247 views</span>
+                <span>1,847 properties analyzed</span>
               </div>
-              <div className="flex items-center gap-2 text-blue-400">
+              <div className="flex items-center gap-2 text-zinc-500">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -275,68 +274,7 @@ const App = () => {
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                 </svg>
-                <span>Investor favorite</span>
-              </div>
-            </div>
-
-            {/* Additional Video Links Section */}
-            <div className="mt-8 p-6 bg-blue-900/50 border border-blue-800 rounded-xl">
-              <h3 className="text-lg font-semibold text-zinc-100 mb-4 flex items-center gap-2">
-                <svg className="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-                </svg>
-                More Demo Resources
-              </h3>
-              <div className="grid md:grid-cols-3 gap-4">
-                <a
-                  href={DEMO_VIDEO_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-4 bg-red-600/20 hover:bg-red-600/30 border border-red-500/50 hover:border-red-500 rounded-lg transition-all group"
-                >
-                  <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-white group-hover:text-red-400 transition-colors">Full Demo Video</div>
-                    <div className="text-xs text-red-400">Watch on YouTube →</div>
-                  </div>
-                  <svg className="w-5 h-5 text-red-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
-
-                <button className="flex items-center gap-3 p-4 bg-blue-800/50 hover:bg-blue-800 border border-blue-700 hover:border-amber-500/50 rounded-lg transition-all group">
-                  <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 min-w-0 text-left">
-                    <div className="text-sm font-semibold text-zinc-200 group-hover:text-amber-400 transition-colors">Quick Tour</div>
-                    <div className="text-xs text-blue-400">2 min overview</div>
-                  </div>
-                  <svg className="w-4 h-4 text-blue-600 group-hover:text-amber-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-
-                <button className="flex items-center gap-3 p-4 bg-blue-800/50 hover:bg-blue-800 border border-blue-700 hover:border-amber-500/50 rounded-lg transition-all group">
-                  <div className="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 min-w-0 text-left">
-                    <div className="text-sm font-semibold text-zinc-200 group-hover:text-amber-400 transition-colors">Sample Report</div>
-                    <div className="text-xs text-blue-400">View PDF example</div>
-                  </div>
-                  <svg className="w-4 h-4 text-blue-600 group-hover:text-amber-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+                <span className="font-semibold">100x ROI verified</span>
               </div>
             </div>
           </div>
@@ -511,4 +449,3 @@ const App = () => {
 };
 
 export default App;
-
