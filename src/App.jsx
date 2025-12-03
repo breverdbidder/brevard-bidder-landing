@@ -1,3 +1,6 @@
+// BrevardBidderAI Landing Page V2.1.0 - December 3, 2025
+// Built by Ariel Shapira - Real Estate Developer & Founder, Everest Capital USA
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import AnimatedDemo from './AnimatedDemo';
