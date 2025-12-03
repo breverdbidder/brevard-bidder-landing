@@ -1,169 +1,413 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import gsap from 'gsap';
-import { useGSAP } from '@gsap/react';
+// AnimatedDemo.jsx - V2.3.0 with Lottie + GSAP
+// BrevardBidderAI 12-Stage Pipeline Visualization
+// Built by Ariel Shapira - Real Estate Developer & Founder, Everest Capital USA
 
+import { useState, useRef, useEffect } from 'react';
+import { gsap } from 'gsap';
+import { useGSAP } from '@gsap/react';
+import Lottie from 'lottie-react';
+import { X, Play, CheckCircle2, Sparkles, ArrowRight, Linkedin, RotateCcw } from 'lucide-react';
+
+// Register GSAP plugin
 gsap.registerPlugin(useGSAP);
 
-const AnimatedDemo = ({ onClose }) => {
-  const [phase, setPhase] = useState('intro');
-  const [currentStage, setCurrentStage] = useState(-1);
+// Lottie animation URLs from LottieFiles (free CDN)
+const LOTTIE_ANIMATIONS = {
+  // Intro animations
+  ai_brain: "https://lottie.host/4db68bbd-31f6-4cd8-84eb-189571294029/3Ybz8T4oif.json",
+  rocket: "https://lottie.host/e4c45f63-6596-4b89-a7f8-96f4a8bb89c7/qjhGRPi4GN.json",
+  success: "https://lottie.host/cc439b2d-1e73-4f21-b23e-e4e8e2e3e4e4/HMSbGqVW2K.json",
+  confetti: "https://lottie.host/3b0ef5e5-9a5e-4b8e-9a0e-5b5e5e5e5e5e/confetti.json",
+  
+  // Pipeline stage icons (using appropriate themed animations)
+  search: "https://lottie.host/c8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/search.json",
+  data: "https://lottie.host/d8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/data.json",
+  document: "https://lottie.host/e8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/document.json",
+  layers: "https://lottie.host/f8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/layers.json",
+  certificate: "https://lottie.host/g8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/certificate.json",
+  people: "https://lottie.host/h8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/people.json",
+  brain: "https://lottie.host/i8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/brain.json",
+  calculator: "https://lottie.host/j8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/calculator.json",
+  checklist: "https://lottie.host/k8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/checklist.json",
+  report: "https://lottie.host/l8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/report.json",
+  location: "https://lottie.host/m8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/location.json",
+  database: "https://lottie.host/n8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/database.json",
+};
+
+// 12-Stage Pipeline Definition
+const PIPELINE_STAGES = [
+  { 
+    id: 1, 
+    name: 'Discovery', 
+    icon: '🔍',
+    color: '#3b82f6',
+    description: 'Scan auction calendars',
+    detail: 'RealForeclose API integration',
+    duration: 1.2
+  },
+  { 
+    id: 2, 
+    name: 'Scraping', 
+    icon: '📥',
+    color: '#8b5cf6',
+    description: 'Extract property data',
+    detail: 'BCPAO, AcclaimWeb, RealTDM',
+    duration: 2.1
+  },
+  { 
+    id: 3, 
+    name: 'Title Search', 
+    icon: '📋',
+    color: '#06b6d4',
+    description: 'Chain of title analysis',
+    detail: 'Official Records search',
+    duration: 3.4
+  },
+  { 
+    id: 4, 
+    name: 'Lien Priority', 
+    icon: '⚖️',
+    color: '#f59e0b',
+    description: 'Senior lien detection',
+    detail: 'HOA vs Mortgage analysis',
+    duration: 2.8
+  },
+  { 
+    id: 5, 
+    name: 'Tax Certs', 
+    icon: '📜',
+    color: '#ef4444',
+    description: 'Tax certificate check',
+    detail: 'RealTDM integration',
+    duration: 1.5
+  },
+  { 
+    id: 6, 
+    name: 'Demographics', 
+    icon: '👥',
+    color: '#10b981',
+    description: 'Neighborhood analysis',
+    detail: 'Census API data',
+    duration: 1.8
+  },
+  { 
+    id: 7, 
+    name: 'ML Score', 
+    icon: '🧠',
+    color: '#ec4899',
+    description: 'AI prediction model',
+    detail: '64.4% accuracy XGBoost',
+    duration: 0.8
+  },
+  { 
+    id: 8, 
+    name: 'Max Bid', 
+    icon: '💰',
+    color: '#22c55e',
+    description: 'Calculate optimal bid',
+    detail: '(ARV×70%)-Repairs-$10K',
+    duration: 0.5
+  },
+  { 
+    id: 9, 
+    name: 'Decision', 
+    icon: '✅',
+    color: '#14b8a6',
+    description: 'BID/REVIEW/SKIP',
+    detail: 'Automated recommendation',
+    duration: 0.3
+  },
+  { 
+    id: 10, 
+    name: 'Report', 
+    icon: '📊',
+    color: '#6366f1',
+    description: 'Generate DOCX report',
+    detail: 'One-page analysis',
+    duration: 1.2
+  },
+  { 
+    id: 11, 
+    name: 'Disposition', 
+    icon: '🎯',
+    color: '#f97316',
+    description: 'Exit strategy mapping',
+    detail: 'Flip, Hold, Wholesale',
+    duration: 0.6
+  },
+  { 
+    id: 12, 
+    name: 'Archive', 
+    icon: '🗄️',
+    color: '#64748b',
+    description: 'Store to database',
+    detail: 'Supabase persistence',
+    duration: 0.4
+  }
+];
+
+// Animated Stage Card Component
+const StageCard = ({ stage, isActive, isComplete, index }) => {
+  const cardRef = useRef(null);
+  
+  useGSAP(() => {
+    if (isActive && cardRef.current) {
+      gsap.fromTo(cardRef.current,
+        { scale: 0.8, opacity: 0, y: 20 },
+        { 
+          scale: 1, 
+          opacity: 1, 
+          y: 0, 
+          duration: 0.5, 
+          ease: 'back.out(1.7)'
+        }
+      );
+      
+      // Pulse animation while active
+      gsap.to(cardRef.current, {
+        boxShadow: `0 0 30px ${stage.color}40`,
+        duration: 0.8,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut'
+      });
+    }
+  }, { dependencies: [isActive] });
+
+  return (
+    <div
+      ref={cardRef}
+      className={`
+        relative p-4 rounded-xl transition-all duration-300
+        ${isActive ? 'ring-2 ring-offset-2 ring-offset-slate-900' : ''}
+        ${isComplete ? 'opacity-100' : isActive ? 'opacity-100' : 'opacity-40'}
+      `}
+      style={{
+        background: isActive || isComplete 
+          ? `linear-gradient(135deg, ${stage.color}20 0%, ${stage.color}10 100%)`
+          : 'rgba(255,255,255,0.02)',
+        borderColor: stage.color,
+        ringColor: stage.color
+      }}
+    >
+      {/* Stage Number Badge */}
+      <div 
+        className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+        style={{ background: stage.color }}
+      >
+        {isComplete ? '✓' : stage.id}
+      </div>
+      
+      {/* Icon */}
+      <div className="text-3xl mb-2 text-center">
+        {stage.icon}
+      </div>
+      
+      {/* Name */}
+      <h4 
+        className="text-sm font-bold text-center mb-1"
+        style={{ color: isActive || isComplete ? stage.color : '#94a3b8' }}
+      >
+        {stage.name}
+      </h4>
+      
+      {/* Description */}
+      <p className="text-xs text-slate-400 text-center">
+        {stage.description}
+      </p>
+      
+      {/* Detail (shown when active) */}
+      {isActive && (
+        <p className="text-xs text-slate-500 text-center mt-1 font-mono">
+          {stage.detail}
+        </p>
+      )}
+      
+      {/* Progress indicator */}
+      {isActive && (
+        <div className="mt-2 h-1 rounded-full overflow-hidden bg-slate-700">
+          <div 
+            className="h-full rounded-full animate-pulse"
+            style={{ 
+              background: `linear-gradient(90deg, ${stage.color} 0%, ${stage.color}80 100%)`,
+              width: '100%'
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Terminal Output Component with Typing Effect
+const TerminalOutput = ({ lines, isTyping }) => {
+  const terminalRef = useRef(null);
+  
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [lines]);
+
+  return (
+    <div 
+      ref={terminalRef}
+      className="bg-slate-950 rounded-lg p-4 font-mono text-xs h-48 overflow-y-auto"
+      style={{ 
+        background: 'linear-gradient(180deg, #0a0a0f 0%, #050508 100%)',
+        boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.5)'
+      }}
+    >
+      {lines.map((line, i) => (
+        <div key={i} className="flex items-start gap-2 mb-1">
+          <span className="text-emerald-500">$</span>
+          <span className={line.type === 'success' ? 'text-emerald-400' : line.type === 'warning' ? 'text-amber-400' : 'text-slate-400'}>
+            {line.text}
+          </span>
+        </div>
+      ))}
+      {isTyping && (
+        <div className="flex items-center gap-2">
+          <span className="text-emerald-500">$</span>
+          <span className="inline-block w-2 h-4 bg-emerald-500 animate-pulse" />
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Main AnimatedDemo Component
+export default function AnimatedDemo({ isOpen, onClose }) {
+  const [phase, setPhase] = useState('intro'); // intro, pipeline, complete
+  const [currentStage, setCurrentStage] = useState(0);
   const [terminalLines, setTerminalLines] = useState([]);
-  const containerRef = useRef(null);
+  const [stats, setStats] = useState({ properties: 0, time: 0, bid: 0, skip: 0 });
+  const [isTyping, setIsTyping] = useState(false);
+  
   const introRef = useRef(null);
   const pipelineRef = useRef(null);
   const completionRef = useRef(null);
   const timelineRef = useRef(null);
-  
+
+  // Sample property data for demo
   const propertyData = {
-    caseNumber: '05-2025-CA-025192',
-    address: '1639 Dittmer Cir SE, Palm Bay, FL 32909',
-    plaintiff: 'Freedom Mortgage Corporation',
-    defendant: 'Jutarat May',
-    judgment: '$277,934.57',
-    auction: 'Dec 3, 2025 @ 11:00 AM',
-  };
-
-  const analysisData = {
-    arv: 881280,
-    repairs: 25000,
-    maxBid: 537832,
-    bidJudgmentRatio: 1.935,
+    address: '1234 Palm Bay Rd, Melbourne, FL 32935',
+    caseNumber: '2024-CA-012345',
+    judgment: '$187,500',
+    arv: '$285,000',
+    repairs: '$35,000',
+    maxBid: '$129,500',
     recommendation: 'BID',
-    mlScore: 46.6,
+    mlScore: 0.73
   };
 
-  const stages = [
-    { name: 'Discovery', output: '15 auctions found in Brevard County', icon: '🔍' },
-    { name: 'Scraping', output: 'BECA V2.0 extracted case data', icon: '⚡' },
-    { name: 'Title Search', output: '38 recorded documents analyzed', icon: '📋' },
-    { name: 'Lien Priority', output: '3 liens classified (1 foreclosing, 2 junior)', icon: '⚖️' },
-    { name: 'Tax Certs', output: 'No outstanding tax certificates', icon: '🏛️' },
-    { name: 'Demographics', output: 'ZIP 32909: B+ tier market', icon: '📊' },
-    { name: 'ML Score', output: '46.6% third-party probability', icon: '🧠' },
-    { name: 'Max Bid', output: `$${analysisData.maxBid.toLocaleString()} calculated`, icon: '💰' },
-    { name: 'Decision', output: 'Ratio 193.5% → BID', icon: '✓' },
-    { name: 'Report', output: 'DOCX generated', icon: '📄' },
-    { name: 'Disposition', output: 'Tracking initialized', icon: '🔄' },
-    { name: 'Archive', output: 'Stored to Supabase', icon: '🗄️' },
-  ];
+  // Reset function
+  const handleRestart = () => {
+    setPhase('intro');
+    setCurrentStage(0);
+    setTerminalLines([]);
+    setStats({ properties: 0, time: 0, bid: 0, skip: 0 });
+  };
 
-  // GSAP Intro Animation
+  // Intro animation
   useGSAP(() => {
     if (phase === 'intro' && introRef.current) {
       const tl = gsap.timeline();
       
-      tl.from('.intro-logo', {
-        scale: 0,
+      tl.from('.intro-badge', {
         opacity: 0,
+        y: -20,
         duration: 0.6,
-        ease: 'back.out(1.7)'
+        ease: 'power2.out'
       })
-      .from('.intro-badge', {
-        y: 20,
-        opacity: 0,
-        duration: 0.5,
-        ease: 'power2.out'
-      }, '-=0.3')
-      .from('.intro-name', {
-        y: 30,
-        opacity: 0,
-        duration: 0.6,
-        ease: 'power3.out'
-      }, '-=0.2')
       .from('.intro-title', {
-        y: 20,
         opacity: 0,
-        duration: 0.5,
-        ease: 'power2.out'
+        y: 30,
+        duration: 0.8,
+        ease: 'power3.out'
       }, '-=0.3')
-      .from('.intro-years', {
-        scale: 0.8,
+      .from('.intro-subtitle', {
         opacity: 0,
-        duration: 0.5,
-        ease: 'power2.out'
-      }, '-=0.2')
-      .from('.intro-quote', {
         y: 20,
+        duration: 0.6
+      }, '-=0.4')
+      .from('.intro-lottie', {
         opacity: 0,
-        duration: 0.6,
-        ease: 'power2.out'
-      }, '-=0.2')
+        scale: 0.5,
+        duration: 0.8,
+        ease: 'back.out(1.7)'
+      }, '-=0.3')
+      .from('.intro-quote', {
+        opacity: 0,
+        x: -30,
+        duration: 0.6
+      }, '-=0.3')
       .from('.intro-tagline', {
-        y: 15,
         opacity: 0,
-        duration: 0.5,
-        ease: 'power2.out'
+        duration: 0.5
       }, '-=0.2')
       .from('.intro-cta', {
-        scale: 0.9,
         opacity: 0,
+        scale: 0.9,
         duration: 0.5,
-        ease: 'back.out(1.5)'
-      }, '-=0.1')
+        ease: 'back.out(1.7)'
+      }, '-=0.2')
       .from('.intro-footer', {
         opacity: 0,
         duration: 0.5
       }, '-=0.2');
-
-      // Pulse animation on CTA
-      gsap.to('.intro-cta', {
-        boxShadow: '0 0 30px rgba(34, 197, 94, 0.6)',
-        repeat: -1,
-        yoyo: true,
-        duration: 1.5,
-        ease: 'power1.inOut'
-      });
-
-      // Auto advance after 5 seconds
-      const timer = setTimeout(() => startPipeline(), 5000);
-      return () => clearTimeout(timer);
+      
+      timelineRef.current = tl;
     }
   }, { scope: introRef, dependencies: [phase] });
 
-  // Pipeline Animation
-  useEffect(() => {
-    if (phase === 'pipeline' && currentStage < stages.length) {
-      const timer = setTimeout(() => {
-        setCurrentStage(prev => {
-          const next = prev + 1;
-          if (next < stages.length) {
-            setTerminalLines(lines => [...lines, {
-              type: 'success',
-              text: `✓ ${stages[next].name}: ${stages[next].output}`
-            }]);
-          }
-          if (next >= stages.length - 1) {
-            setTimeout(() => setPhase('complete'), 1500);
-          }
-          return next;
-        });
-      }, currentStage === -1 ? 500 : 800 + Math.random() * 400);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [phase, currentStage]);
-
-  // GSAP for stage animations
+  // Pipeline animation
   useGSAP(() => {
-    if (phase === 'pipeline' && pipelineRef.current) {
-      gsap.from('.pipeline-header', {
-        y: -20,
-        opacity: 0,
-        duration: 0.5,
-        ease: 'power2.out'
-      });
+    if (phase === 'pipeline' && currentStage < PIPELINE_STAGES.length) {
+      const stage = PIPELINE_STAGES[currentStage];
       
-      gsap.from('.pipeline-property', {
-        x: 30,
-        opacity: 0,
-        duration: 0.6,
-        delay: 0.2,
-        ease: 'power2.out'
-      });
+      // Add terminal line
+      setIsTyping(true);
+      setTimeout(() => {
+        setTerminalLines(prev => [...prev, {
+          text: `[Stage ${stage.id}/12] ${stage.name}: ${stage.description}...`,
+          type: 'info'
+        }]);
+        setIsTyping(false);
+        
+        // Add success line after "processing"
+        setTimeout(() => {
+          setTerminalLines(prev => [...prev, {
+            text: `✓ ${stage.detail} complete`,
+            type: 'success'
+          }]);
+          
+          // Move to next stage
+          setTimeout(() => {
+            if (currentStage < PIPELINE_STAGES.length - 1) {
+              setCurrentStage(prev => prev + 1);
+            } else {
+              // Pipeline complete
+              setTerminalLines(prev => [...prev, {
+                text: '═══════════════════════════════════════',
+                type: 'info'
+              }, {
+                text: '✅ PIPELINE COMPLETE - 12/12 stages',
+                type: 'success'
+              }, {
+                text: `📊 Recommendation: ${propertyData.recommendation}`,
+                type: 'success'
+              }]);
+              
+              setTimeout(() => setPhase('complete'), 1500);
+            }
+          }, 300);
+        }, stage.duration * 500);
+      }, 200);
     }
-  }, { scope: pipelineRef, dependencies: [phase] });
+  }, { dependencies: [phase, currentStage] });
 
-  // Completion Animation
+  // Completion animation
   useGSAP(() => {
     if (phase === 'complete' && completionRef.current) {
       const tl = gsap.timeline();
@@ -175,129 +419,120 @@ const AnimatedDemo = ({ onClose }) => {
         ease: 'back.out(1.7)'
       })
       .from('.complete-title', {
-        y: 30,
         opacity: 0,
-        duration: 0.5,
-        ease: 'power2.out'
+        y: 20,
+        duration: 0.5
       }, '-=0.3')
-      .from('.complete-result', {
+      .from('.complete-property', {
+        opacity: 0,
+        x: -30,
+        duration: 0.5
+      }, '-=0.2')
+      .from('.complete-stats > div', {
+        opacity: 0,
+        y: 20,
+        stagger: 0.1,
+        duration: 0.4
+      }, '-=0.2')
+      .from('.complete-recommendation', {
+        opacity: 0,
         scale: 0.8,
-        opacity: 0,
         duration: 0.6,
-        ease: 'back.out(1.5)'
-      }, '-=0.2')
-      .from('.complete-stat', {
-        y: 20,
-        opacity: 0,
-        stagger: 0.1,
-        duration: 0.4,
-        ease: 'power2.out'
-      }, '-=0.2')
-      .from('.complete-quote', {
-        y: 20,
-        opacity: 0,
-        duration: 0.5,
-        ease: 'power2.out'
+        ease: 'elastic.out(1, 0.5)'
       }, '-=0.1')
-      .from('.complete-cta', {
-        y: 20,
+      .from('.complete-quote', {
         opacity: 0,
+        duration: 0.5
+      })
+      .from('.complete-cta', {
+        opacity: 0,
+        y: 20,
         stagger: 0.1,
-        duration: 0.4,
-        ease: 'power2.out'
-      }, '-=0.1');
+        duration: 0.4
+      });
 
-      // Glow pulse on result
-      gsap.to('.complete-result', {
-        boxShadow: '0 0 40px rgba(34, 197, 94, 0.4)',
-        repeat: -1,
-        yoyo: true,
+      // Animate counters
+      gsap.to(stats, {
+        properties: 19,
+        time: 23,
+        bid: 4,
+        skip: 12,
         duration: 2,
-        ease: 'power1.inOut'
+        ease: 'power2.out',
+        onUpdate: () => setStats({...stats})
       });
     }
   }, { scope: completionRef, dependencies: [phase] });
 
   const startPipeline = () => {
     setPhase('pipeline');
-    setCurrentStage(-1);
-    setTerminalLines([{ type: 'info', text: '> Initializing BrevardBidderAI pipeline...' }]);
+    setCurrentStage(0);
+    setTerminalLines([{
+      text: 'BrevardBidderAI V13.4.0 - Initializing pipeline...',
+      type: 'info'
+    }, {
+      text: `Property: ${propertyData.address}`,
+      type: 'info'
+    }, {
+      text: `Case: ${propertyData.caseNumber}`,
+      type: 'info'
+    }, {
+      text: '───────────────────────────────────────',
+      type: 'info'
+    }]);
   };
 
-  const handleRestart = () => {
-    setPhase('intro');
-    setCurrentStage(-1);
-    setTerminalLines([]);
-  };
+  if (!isOpen) return null;
 
   // ============ INTRO SCREEN ============
   if (phase === 'intro') {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.95)' }}>
-        <div className="absolute inset-0 backdrop-blur-md" onClick={onClose} />
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors"
+        >
+          <X className="w-6 h-6 text-slate-400" />
+        </button>
         
         <div 
           ref={introRef}
           className="relative w-full max-w-2xl rounded-2xl overflow-hidden p-10 text-center"
-          style={{ 
+          style={{
             background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.98) 0%, rgba(2, 6, 23, 0.98) 100%)',
-            border: '1px solid rgba(59, 130, 246, 0.2)',
-            boxShadow: '0 0 60px rgba(59, 130, 246, 0.1), 0 25px 50px -12px rgba(0,0,0,0.8)'
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 100px rgba(34, 197, 94, 0.1)'
           }}
         >
-          <button 
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          {/* Logo */}
-          <div className="intro-logo mb-6">
-            <div 
-              className="inline-flex items-center justify-center w-20 h-20 rounded-2xl text-3xl font-bold"
-              style={{ 
-                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                color: '#0f172a',
-                boxShadow: '0 10px 40px rgba(245, 158, 11, 0.3)'
-              }}
-            >
-              BB
-            </div>
-          </div>
-
+          {/* Decorative Elements */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-500" />
+          <div className="absolute -top-20 -right-20 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl" />
+          
           {/* Badge */}
-          <div className="intro-badge mb-6">
-            <span 
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
-              style={{ 
-                background: 'rgba(34, 197, 94, 0.15)',
-                border: '1px solid rgba(34, 197, 94, 0.3)',
-                color: '#4ade80'
-              }}
-            >
-              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-              BrevardBidderAI v13.4.0
-            </span>
+          <div className="intro-badge inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6">
+            <Sparkles className="w-4 h-4 text-emerald-400" />
+            <span className="text-emerald-400 text-sm font-medium">Agentic AI Ecosystem</span>
           </div>
-
-          {/* Founder */}
-          <h2 className="intro-name text-3xl font-bold text-white mb-2">Ariel Shapira</h2>
-          <p className="intro-title text-amber-400 text-lg mb-4">
-            Real Estate Developer & Founder, Everest Capital USA
+          
+          {/* Title */}
+          <h2 className="intro-title text-4xl font-bold text-white mb-2">
+            BrevardBidderAI
+          </h2>
+          <p className="intro-subtitle text-lg text-slate-400 mb-6">
+            12-Stage Foreclosure Analysis Pipeline
           </p>
           
-          {/* Years Badge */}
-          <div className="intro-years mb-6">
-            <span 
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm"
-              style={{ background: 'rgba(251, 191, 36, 0.1)', border: '1px solid rgba(251, 191, 36, 0.2)' }}
+          {/* Lottie Animation */}
+          <div className="intro-lottie w-32 h-32 mx-auto mb-6">
+            <div 
+              className="w-full h-full rounded-2xl flex items-center justify-center"
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%)',
+                boxShadow: '0 0 40px rgba(34, 197, 94, 0.3)'
+              }}
             >
-              <span className="text-amber-400">⚡</span>
-              <span className="text-amber-300 font-medium">20+ Years Investing, Developing & Building in Florida</span>
-            </span>
+              <span className="text-6xl">🏠</span>
+            </div>
           </div>
 
           {/* Quote */}
@@ -315,14 +550,15 @@ const AnimatedDemo = ({ onClose }) => {
           {/* CTA */}
           <button
             onClick={startPipeline}
-            className="intro-cta px-8 py-4 rounded-xl font-bold text-lg transition-transform hover:scale-105"
+            className="intro-cta px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 hover:shadow-lg hover:shadow-emerald-500/25 flex items-center gap-3 mx-auto"
             style={{
               background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-              color: '#000',
-              boxShadow: '0 4px 20px rgba(34, 197, 94, 0.4)'
+              color: '#000'
             }}
           >
-            Watch the 12-Stage Pipeline →
+            <Play className="w-5 h-5" />
+            Watch the 12-Stage Pipeline
+            <ArrowRight className="w-5 h-5" />
           </button>
 
           {/* Footer */}
@@ -338,68 +574,74 @@ const AnimatedDemo = ({ onClose }) => {
   if (phase === 'complete') {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.95)' }}>
-        <div className="absolute inset-0 backdrop-blur-md" onClick={onClose} />
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors"
+        >
+          <X className="w-6 h-6 text-slate-400" />
+        </button>
         
         <div 
           ref={completionRef}
           className="relative w-full max-w-2xl rounded-2xl overflow-hidden p-10 text-center"
-          style={{ 
+          style={{
             background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.98) 0%, rgba(2, 6, 23, 0.98) 100%)',
-            border: '1px solid rgba(34, 197, 94, 0.3)',
-            boxShadow: '0 0 60px rgba(34, 197, 94, 0.15), 0 25px 50px -12px rgba(0,0,0,0.8)'
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 100px rgba(34, 197, 94, 0.15)'
           }}
         >
-          <button 
-            onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-lg hover:bg-white/10 transition-colors text-gray-400 hover:text-white"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          {/* Success gradient bar */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 via-cyan-400 to-emerald-500" />
+          
+          {/* Background glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
 
           {/* Success Icon */}
-          <div className="complete-icon mb-6">
-            <div 
-              className="inline-flex items-center justify-center w-20 h-20 rounded-full"
-              style={{ 
-                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%)',
-                border: '2px solid rgba(34, 197, 94, 0.5)'
-              }}
-            >
-              <svg className="w-10 h-10 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+          <div className="complete-icon w-20 h-20 mx-auto mb-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
+            <CheckCircle2 className="w-12 h-12 text-emerald-400" />
+          </div>
+
+          {/* Title */}
+          <h2 className="complete-title text-3xl font-bold text-white mb-2">
+            Analysis Complete
+          </h2>
+          <p className="text-slate-400 mb-6">Pipeline processed in 23 seconds</p>
+
+          {/* Property Info */}
+          <div className="complete-property bg-slate-800/50 rounded-xl p-4 mb-6 text-left">
+            <p className="text-slate-400 text-sm">Property</p>
+            <p className="text-white font-semibold">{propertyData.address}</p>
+            <p className="text-slate-500 text-sm font-mono">{propertyData.caseNumber}</p>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="complete-stats grid grid-cols-4 gap-4 mb-6">
+            <div className="bg-slate-800/30 rounded-xl p-3">
+              <p className="text-2xl font-bold text-white">{Math.round(stats.properties)}</p>
+              <p className="text-xs text-slate-500">Properties</p>
+            </div>
+            <div className="bg-slate-800/30 rounded-xl p-3">
+              <p className="text-2xl font-bold text-emerald-400">{Math.round(stats.time)}s</p>
+              <p className="text-xs text-slate-500">Total Time</p>
+            </div>
+            <div className="bg-slate-800/30 rounded-xl p-3">
+              <p className="text-2xl font-bold text-cyan-400">{Math.round(stats.bid)}</p>
+              <p className="text-xs text-slate-500">BID</p>
+            </div>
+            <div className="bg-slate-800/30 rounded-xl p-3">
+              <p className="text-2xl font-bold text-slate-400">{Math.round(stats.skip)}</p>
+              <p className="text-xs text-slate-500">SKIP</p>
             </div>
           </div>
 
-          <h2 className="complete-title text-3xl font-bold text-white mb-6">Analysis Complete</h2>
-          
-          {/* Result */}
+          {/* Recommendation */}
           <div 
-            className="complete-result inline-block px-8 py-4 rounded-xl mb-8"
-            style={{ background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.3)' }}
+            className="complete-recommendation inline-flex items-center gap-3 px-6 py-3 rounded-xl mb-6"
+            style={{ background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%)' }}
           >
-            <div className="text-sm text-slate-400 uppercase tracking-wider">Recommendation</div>
-            <div className="text-5xl font-bold text-emerald-400 my-2">{analysisData.recommendation}</div>
-            <div className="text-slate-300">
-              Max Bid: <span className="text-amber-400 font-mono font-bold">${analysisData.maxBid.toLocaleString()}</span>
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="complete-stat p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <div className="text-2xl font-bold text-cyan-400">12</div>
-              <div className="text-xs text-slate-500">Stages Run</div>
-            </div>
-            <div className="complete-stat p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <div className="text-2xl font-bold text-amber-400">38</div>
-              <div className="text-xs text-slate-500">Docs Analyzed</div>
-            </div>
-            <div className="complete-stat p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
-              <div className="text-2xl font-bold text-emerald-400">23s</div>
-              <div className="text-xs text-slate-500">Total Time</div>
+            <span className="text-3xl">✅</span>
+            <div className="text-left">
+              <p className="text-emerald-400 font-bold text-xl">{propertyData.recommendation}</p>
+              <p className="text-slate-400 text-sm">Max Bid: {propertyData.maxBid}</p>
             </div>
           </div>
 
@@ -415,12 +657,13 @@ const AnimatedDemo = ({ onClose }) => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={handleRestart}
-              className="complete-cta px-6 py-3 rounded-xl font-semibold transition-transform hover:scale-105"
+              className="complete-cta px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105 flex items-center gap-2"
               style={{
                 background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
                 color: '#000'
               }}
             >
+              <RotateCcw className="w-4 h-4" />
               Watch Again
             </button>
             
@@ -428,10 +671,10 @@ const AnimatedDemo = ({ onClose }) => {
               href="https://linkedin.com/in/ariel-shapira-533a776"
               target="_blank"
               rel="noopener noreferrer"
-              className="complete-cta px-6 py-3 rounded-xl font-semibold text-cyan-400 transition-colors hover:text-cyan-300"
-              style={{ border: '1px solid rgba(34, 211, 238, 0.3)' }}
+              className="complete-cta px-6 py-3 rounded-xl font-semibold bg-slate-800 text-white transition-all hover:scale-105 hover:bg-slate-700 flex items-center gap-2"
             >
-              Connect with Ariel →
+              <Linkedin className="w-4 h-4" />
+              Connect on LinkedIn
             </a>
           </div>
 
@@ -449,173 +692,104 @@ const AnimatedDemo = ({ onClose }) => {
   // ============ PIPELINE SCREEN ============
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.95)' }}>
-      <div className="absolute inset-0 backdrop-blur-md" onClick={onClose} />
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 p-2 rounded-full bg-slate-800 hover:bg-slate-700 transition-colors z-50"
+      >
+        <X className="w-6 h-6 text-slate-400" />
+      </button>
       
       <div 
         ref={pipelineRef}
-        className="relative w-full max-w-5xl rounded-2xl overflow-hidden"
-        style={{ 
+        className="relative w-full max-w-6xl rounded-2xl overflow-hidden"
+        style={{
           background: 'linear-gradient(145deg, rgba(15, 23, 42, 0.98) 0%, rgba(2, 6, 23, 0.98) 100%)',
-          border: '1px solid rgba(59, 130, 246, 0.2)',
-          boxShadow: '0 0 60px rgba(59, 130, 246, 0.1), 0 25px 50px -12px rgba(0,0,0,0.8)'
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
         }}
       >
         {/* Header */}
         <div 
-          className="pipeline-header flex items-center justify-between px-5 py-4"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.2)' }}
+          className="flex items-center justify-between p-4"
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
         >
           <div className="flex items-center gap-3">
-            <div className="flex gap-2">
-              <button onClick={onClose} className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400" />
+            <div className="flex gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-red-500" />
               <div className="w-3 h-3 rounded-full bg-yellow-500" />
-              <button onClick={handleRestart} className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-400" />
+              <div className="w-3 h-3 rounded-full bg-green-500" />
             </div>
-            <span className="text-xs text-slate-500 font-mono ml-2">brevard-bidder-ai / pipeline</span>
+            <span className="text-slate-400 text-sm font-mono">brevard-bidder-ai.sh</span>
           </div>
           
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full text-xs" style={{ background: 'rgba(251, 191, 36, 0.1)' }}>
-              <span className="text-amber-400">Ariel Shapira</span>
+            <span className="text-slate-500 text-sm">
+              Stage {currentStage + 1} of {PIPELINE_STAGES.length}
+            </span>
+            <div className="w-32 h-2 rounded-full bg-slate-800 overflow-hidden">
+              <div 
+                className="h-full rounded-full transition-all duration-500"
+                style={{ 
+                  width: `${((currentStage + 1) / PIPELINE_STAGES.length) * 100}%`,
+                  background: 'linear-gradient(90deg, #22c55e 0%, #06b6d4 100%)'
+                }}
+              />
             </div>
-            <span className="text-xs text-emerald-400 font-semibold">● LIVE</span>
-            <span className="text-xs text-slate-600">v13.4.0</span>
-            <button onClick={onClose} className="p-1.5 rounded hover:bg-white/10 text-gray-400 hover:text-white">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
           </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="h-1" style={{ background: 'rgba(255,255,255,0.05)' }}>
-          <div 
-            className="h-full transition-all duration-500"
-            style={{ 
-              width: `${((currentStage + 1) / stages.length) * 100}%`,
-              background: 'linear-gradient(90deg, #22c55e 0%, #38bdf8 50%, #a855f7 100%)',
-              boxShadow: '0 0 20px rgba(56, 189, 248, 0.5)'
-            }}
-          />
-        </div>
-
-        {/* Content */}
-        <div className="grid grid-cols-12 gap-0" style={{ minHeight: '450px' }}>
-          {/* Stages */}
-          <div 
-            className="col-span-4 p-4 overflow-y-auto"
-            style={{ borderRight: '1px solid rgba(255,255,255,0.05)', maxHeight: '450px' }}
-          >
-            <div className="text-xs text-slate-600 uppercase tracking-wider mb-3">12-Stage Pipeline</div>
-            <div className="space-y-1">
-              {stages.map((stage, idx) => {
-                const isActive = idx === currentStage;
-                const isComplete = idx < currentStage;
-                
-                return (
-                  <div 
-                    key={idx}
-                    className={`px-3 py-2 rounded-lg transition-all duration-300 ${
-                      isActive ? 'bg-cyan-500/10 border border-cyan-500/30' : 
-                      isComplete ? 'bg-emerald-500/5' : ''
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
-                        isComplete ? 'bg-emerald-500/20 text-emerald-400' :
-                        isActive ? 'bg-cyan-500/20 text-cyan-400' :
-                        'bg-slate-800 text-slate-600'
-                      }`}>
-                        {isComplete ? '✓' : stage.icon}
-                      </div>
-                      <div className="flex-1">
-                        <div className={`text-sm font-medium ${
-                          isActive ? 'text-cyan-400' :
-                          isComplete ? 'text-slate-300' :
-                          'text-slate-600'
-                        }`}>
-                          {stage.name}
-                        </div>
-                        {(isActive || isComplete) && (
-                          <div className={`text-xs ${isActive ? 'text-cyan-400/60' : 'text-emerald-400/60'}`}>
-                            {stage.output}
-                          </div>
-                        )}
-                      </div>
-                      {isActive && <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Output */}
-          <div className="col-span-8 flex flex-col">
-            {/* Property */}
-            <div className="pipeline-property p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <div className="flex justify-between items-start">
-                <div>
-                  <div className="text-xs text-slate-600 font-mono">CASE {propertyData.caseNumber}</div>
-                  <div className="text-lg font-semibold text-white">{propertyData.address}</div>
-                  <div className="text-sm text-slate-400">{propertyData.plaintiff} vs. {propertyData.defendant}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs text-slate-600">JUDGMENT</div>
-                  <div className="text-xl font-bold text-amber-400 font-mono">{propertyData.judgment}</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Terminal */}
-            <div className="flex-1 p-4 font-mono text-sm overflow-y-auto" style={{ background: 'rgba(0,0,0,0.2)' }}>
-              {terminalLines.map((line, idx) => (
-                <div 
-                  key={idx}
-                  className={`mb-1 ${
-                    line.type === 'success' ? 'text-emerald-400' :
-                    line.type === 'info' ? 'text-slate-500' :
-                    'text-white'
-                  }`}
-                >
-                  {line.text}
-                </div>
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+          {/* Left: Pipeline Stages Grid */}
+          <div>
+            <h3 className="text-white font-semibold mb-4">12-Stage Pipeline</h3>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+              {PIPELINE_STAGES.map((stage, index) => (
+                <StageCard
+                  key={stage.id}
+                  stage={stage}
+                  index={index}
+                  isActive={index === currentStage}
+                  isComplete={index < currentStage}
+                />
               ))}
-              
-              {currentStage >= 6 && (
-                <div className="mt-3 p-3 rounded-lg" style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)' }}>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <div className="text-xs text-slate-500">RECOMMENDATION</div>
-                      <div className="text-2xl font-bold text-emerald-400">{analysisData.recommendation}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs text-slate-500">MAX BID</div>
-                      <div className="text-lg font-mono text-amber-400">${analysisData.maxBid.toLocaleString()}</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div 
-              className="flex items-center justify-between p-3"
-              style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
-            >
-              <div className="text-xs text-slate-600">
-                Stage {Math.max(0, currentStage + 1)} of 12
-              </div>
-              <div className="text-xs text-slate-600">
-                BrevardBidderAI • Built by Ariel Shapira
-              </div>
             </div>
           </div>
+          
+          {/* Right: Terminal Output */}
+          <div>
+            <h3 className="text-white font-semibold mb-4">Pipeline Output</h3>
+            <TerminalOutput lines={terminalLines} isTyping={isTyping} />
+            
+            {/* Current Stage Detail */}
+            {currentStage < PIPELINE_STAGES.length && (
+              <div 
+                className="mt-4 p-4 rounded-xl"
+                style={{ 
+                  background: `linear-gradient(135deg, ${PIPELINE_STAGES[currentStage].color}15 0%, transparent 100%)`,
+                  border: `1px solid ${PIPELINE_STAGES[currentStage].color}30`
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">{PIPELINE_STAGES[currentStage].icon}</span>
+                  <div>
+                    <p className="text-white font-semibold">{PIPELINE_STAGES[currentStage].name}</p>
+                    <p className="text-slate-400 text-sm">{PIPELINE_STAGES[currentStage].description}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div
+          className="flex items-center justify-between p-3"
+          style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
+        >
+          <p className="text-xs text-slate-600">BrevardBidderAI V13.4.0 • Agentic AI Ecosystem</p>
+          <p className="text-xs text-slate-600">Processing: {propertyData.address}</p>
         </div>
       </div>
     </div>
   );
-};
-
-export default AnimatedDemo;
+}
