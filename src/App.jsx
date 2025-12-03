@@ -1,38 +1,68 @@
-// BrevardBidderAI Landing Page V2.2.0 - December 3, 2025
+// BrevardBidderAI Landing Page V3.0.0 - "$1M Homepage" Edition
 // Built by Ariel Shapira - Real Estate Developer & Founder, Everest Capital USA
+// Design System: Luxury Data Terminal - Industrial Fintech Aesthetic
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useInView, useScroll, useTransform } from 'framer-motion';
+import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import AnimatedDemo from './AnimatedDemo';
 
 // ============ ANIMATION VARIANTS ============
 const fadeInUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }
+  hidden: { opacity: 0, y: 40 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } }
 };
 
 const fadeIn = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.8 } }
+  visible: { opacity: 1, transition: { duration: 1 } }
 };
 
 const staggerContainer = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+    transition: { staggerChildren: 0.12, delayChildren: 0.3 }
   }
 };
 
 const scaleIn = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }
+  hidden: { opacity: 0, scale: 0.85, y: 20 },
+  visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
 };
+
+const slideInLeft = {
+  hidden: { opacity: 0, x: -60 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } }
+};
+
+const slideInRight = {
+  hidden: { opacity: 0, x: 60 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } }
+};
+
+// ============ FLOATING PARTICLE COMPONENT ============
+const FloatingParticle = ({ delay = 0, size = 4, x = 0, y = 0 }) => (
+  <motion.div
+    className="absolute rounded-full bg-amber-400/30"
+    style={{ width: size, height: size, left: `${x}%`, top: `${y}%` }}
+    animate={{
+      y: [0, -30, 0],
+      opacity: [0.3, 0.8, 0.3],
+      scale: [1, 1.2, 1],
+    }}
+    transition={{
+      duration: 4,
+      delay,
+      repeat: Infinity,
+      ease: "easeInOut"
+    }}
+  />
+);
 
 // ============ WAITLIST FORM COMPONENT ============
 const WaitlistForm = ({ variant = 'default' }) => {
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState('idle'); // idle, loading, success, error
+  const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (e) => {
@@ -45,18 +75,13 @@ const WaitlistForm = ({ variant = 'default' }) => {
 
     setStatus('loading');
     
-    // Simulate API call - replace with actual endpoint later
-    // For now, we'll store in localStorage as a demo and show success
     try {
       const waitlist = JSON.parse(localStorage.getItem('brevard_waitlist') || '[]');
       if (!waitlist.includes(email)) {
         waitlist.push(email);
         localStorage.setItem('brevard_waitlist', JSON.stringify(waitlist));
       }
-      
-      // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 800));
-      
       setStatus('success');
       setMessage("You're on the list! We'll be in touch soon.");
       setEmail('');
@@ -69,78 +94,96 @@ const WaitlistForm = ({ variant = 'default' }) => {
   const isHero = variant === 'hero';
   
   return (
-    <form onSubmit={handleSubmit} className={`w-full ${isHero ? 'max-w-xl' : 'max-w-md'}`}>
-      <div className={`flex ${isHero ? 'flex-col sm:flex-row' : 'flex-col'} gap-3`}>
-        <div className="flex-1 relative">
+    <form onSubmit={handleSubmit} className={`w-full ${isHero ? 'max-w-2xl' : 'max-w-md'}`}>
+      <div className={`flex ${isHero ? 'flex-col sm:flex-row' : 'flex-col'} gap-4`}>
+        <div className="flex-1 relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/50 to-amber-600/50 rounded-2xl opacity-0 group-hover:opacity-100 blur transition-all duration-500" />
           <input
             type="email"
             value={email}
             onChange={(e) => { setEmail(e.target.value); setStatus('idle'); }}
             placeholder="Enter your email"
-            className={`w-full px-5 py-4 bg-slate-900/80 border rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-all ${
-              status === 'error' ? 'border-red-500' : 'border-slate-700'
+            className={`relative w-full px-6 py-5 bg-slate-950 border-2 rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:border-amber-500 transition-all font-medium tracking-wide ${
+              status === 'error' ? 'border-red-500' : 'border-slate-800'
             } ${isHero ? 'text-lg' : ''}`}
             disabled={status === 'loading' || status === 'success'}
           />
           {status === 'success' && (
             <motion.div 
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="absolute right-4 top-1/2 -translate-y-1/2"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              className="absolute right-5 top-1/2 -translate-y-1/2"
             >
-              <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
+                <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
             </motion.div>
           )}
         </div>
         <motion.button
           type="submit"
           disabled={status === 'loading' || status === 'success'}
-          whileHover={{ scale: status === 'idle' ? 1.02 : 1 }}
+          whileHover={{ scale: status === 'idle' ? 1.02 : 1, y: status === 'idle' ? -2 : 0 }}
           whileTap={{ scale: status === 'idle' ? 0.98 : 1 }}
-          className={`px-8 py-4 font-bold rounded-xl transition-all ${
+          className={`relative px-10 py-5 font-bold rounded-2xl transition-all overflow-hidden ${
             status === 'success' 
               ? 'bg-emerald-500 text-black cursor-default' 
               : status === 'loading'
               ? 'bg-amber-500/50 text-black/50 cursor-wait'
-              : 'bg-gradient-to-r from-amber-500 to-amber-600 text-black hover:shadow-lg hover:shadow-amber-500/30'
-          } ${isHero ? 'text-lg whitespace-nowrap' : ''}`}
+              : 'bg-amber-500 text-black hover:shadow-2xl hover:shadow-amber-500/40'
+          } ${isHero ? 'text-lg whitespace-nowrap tracking-wide' : ''}`}
         >
-          {status === 'loading' ? (
-            <span className="flex items-center gap-2">
-              <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              Joining...
-            </span>
-          ) : status === 'success' ? (
-            <span className="flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              You're In!
-            </span>
-          ) : (
-            'Join Waitlist'
+          {/* Shine effect */}
+          {status === 'idle' && (
+            <motion.div 
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+              animate={{ x: ['-200%', '200%'] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+            />
           )}
+          <span className="relative">
+            {status === 'loading' ? (
+              <span className="flex items-center gap-3">
+                <motion.div 
+                  className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+                />
+                Joining...
+              </span>
+            ) : status === 'success' ? (
+              <span className="flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                You're In!
+              </span>
+            ) : (
+              'Join Waitlist'
+            )}
+          </span>
         </motion.button>
       </div>
       
-      {message && (
-        <motion.p 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={`mt-3 text-sm ${status === 'error' ? 'text-red-400' : 'text-emerald-400'}`}
-        >
-          {message}
-        </motion.p>
-      )}
+      <AnimatePresence>
+        {message && (
+          <motion.p 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className={`mt-4 text-sm font-medium ${status === 'error' ? 'text-red-400' : 'text-emerald-400'}`}
+          >
+            {message}
+          </motion.p>
+        )}
+      </AnimatePresence>
       
       {status === 'idle' && (
-        <p className="mt-3 text-sm text-slate-500">
-          Join 50+ Florida investors on the waitlist. No spam, ever.
+        <p className="mt-4 text-sm text-slate-600 flex items-center gap-2">
+          <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+          Join 50+ Florida investors on the waitlist
         </p>
       )}
     </form>
@@ -166,15 +209,42 @@ const Section = ({ children, className = '', id }) => {
   );
 };
 
+// ============ STAT CARD COMPONENT ============
+const StatCard = ({ value, label, detail, delay = 0, accent = false }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 30 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
+    className={`relative group ${accent ? 'col-span-2 md:col-span-1' : ''}`}
+  >
+    {/* Glow effect */}
+    <div className={`absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm ${
+      accent ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' : 'bg-gradient-to-br from-amber-500 to-amber-600'
+    }`} />
+    
+    <div className="relative p-6 rounded-2xl bg-slate-950 border border-slate-800 group-hover:border-transparent transition-all h-full">
+      <div className={`text-5xl md:text-6xl font-black tracking-tighter mb-2 ${
+        accent ? 'text-emerald-400' : 'text-amber-400'
+      }`}>
+        {value}
+      </div>
+      <div className="text-white font-semibold text-lg mb-1">{label}</div>
+      <div className="text-sm text-slate-500">{detail}</div>
+    </div>
+  </motion.div>
+);
+
 // ============ MAIN APP ============
 const App = () => {
   const [activeStage, setActiveStage] = useState(0);
   const [showAnimatedDemo, setShowAnimatedDemo] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   
   const { scrollYProgress } = useScroll();
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.3], [1, 0.9]);
+  const heroY = useTransform(scrollYProgress, [0, 0.3], [0, 100]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -183,9 +253,17 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  useEffect(() => {
     const interval = setInterval(() => {
       setActiveStage((prev) => (prev + 1) % 12);
-    }, 2000);
+    }, 2500);
     return () => clearInterval(interval);
   }, []);
 
@@ -198,351 +276,344 @@ const App = () => {
     { id: 6, name: 'Demographics', icon: '📊', desc: 'Census API integration' },
     { id: 7, name: 'ML Score', icon: '🧠', desc: 'XGBoost prediction' },
     { id: 8, name: 'Max Bid', icon: '💰', desc: 'Formula calculation' },
-    { id: 9, name: 'Decision', icon: '✓', desc: 'BID/REVIEW/SKIP' },
-    { id: 10, name: 'Report', icon: '📄', desc: 'DOCX generation' },
-    { id: 11, name: 'Disposition', icon: '🔄', desc: 'Exit tracking' },
-    { id: 12, name: 'Archive', icon: '🗄️', desc: 'Historical storage' },
-  ];
-
-  const stats = [
-    { value: '100x', label: 'ROI', detail: '$3.3K cost → $300K+ value' },
-    { value: '64.4%', label: 'ML Accuracy', detail: 'Third-party prediction' },
-    { value: '40-55%', label: 'FREE Tier', detail: 'Smart Router savings' },
-    { value: '23 sec', label: 'Analysis', detail: 'vs 4+ hours manual' },
+    { id: 9, name: 'Decision', icon: '✅', desc: 'BID / REVIEW / SKIP' },
+    { id: 10, name: 'Report', icon: '📄', desc: 'One-page DOCX' },
+    { id: 11, name: 'Disposition', icon: '🏠', desc: 'Exit strategy tracking' },
+    { id: 12, name: 'Archive', icon: '📦', desc: 'Historical database' },
   ];
 
   const features = [
-    {
-      title: 'Smart Router',
-      desc: 'Multi-tier LLM routing with ULTRA_CHEAP DeepSeek V3.2 integration',
-      highlight: '25% cost savings',
-      icon: '🔀',
+    { 
+      icon: '🎯', 
+      title: 'BECA Scraper V2.0', 
+      desc: 'Proprietary document extraction with 12 regex patterns, anti-detection tech, and pdfplumber integration. Pulls what others miss.',
+      highlight: 'EXCLUSIVE'
     },
-    {
-      title: 'BECA Scraper V2.0',
-      desc: '12 regex patterns with anti-detection for RealForeclose, BCPAO, AcclaimWeb',
-      highlight: 'Zero blocks',
-      icon: '⚡',
+    { 
+      icon: '🧠', 
+      title: 'XGBoost ML Engine', 
+      desc: '64.4% accuracy predicting third-party purchases. Trained on 1,393+ historical Brevard auctions. Real data, real edge.',
+      highlight: '64.4% ACC'
     },
-    {
-      title: 'Lien Intelligence',
-      desc: 'Actual recorded document search—detects HOA foreclosures where mortgages survive',
-      highlight: 'No guesswork',
-      icon: '🔍',
+    { 
+      icon: '⚡', 
+      title: 'Smart Router', 
+      desc: 'Multi-tier LLM routing achieves 40-55% FREE processing. DeepSeek V3.2 for ultra-cheap operations. Maximum intelligence, minimum cost.',
+      highlight: '55% FREE'
     },
-    {
-      title: 'Layer 8 Protection',
-      desc: 'AES-256 encryption with business logic externalization',
-      highlight: 'IP secured',
-      icon: '🔒',
+    { 
+      icon: '🔐', 
+      title: 'Layer 8 Protection', 
+      desc: 'AES-256 encryption on ML models, externalized business logic, endpoint obfuscation. Your competitive advantage stays yours.',
+      highlight: 'VAULT'
     },
   ];
 
-  const problems = [
-    { problem: 'Spending hours on title research', solution: 'AI scans 38+ documents in seconds' },
-    { problem: 'Missing hidden liens that survive foreclosure', solution: 'Automated lien priority detection' },
-    { problem: 'Overbidding due to emotional decisions', solution: 'Data-driven max bid formula' },
-    { problem: 'Analyzing the wrong properties', solution: 'ML-powered BID/REVIEW/SKIP' },
+  const stats = [
+    { value: '23s', label: 'Per Property', detail: 'vs 4+ hours manual' },
+    { value: '100x', label: 'ROI', detail: '$300-400K annual value' },
+    { value: '12', label: 'Stage Pipeline', detail: 'Fully autonomous' },
+    { value: '64.4%', label: 'ML Accuracy', detail: 'XGBoost prediction', accent: true },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white overflow-x-hidden">
-      {/* Noise texture overlay */}
+    <div className="min-h-screen bg-slate-950 text-white overflow-x-hidden selection:bg-amber-500 selection:text-black">
+      {/* ============ CUSTOM CURSOR GLOW ============ */}
       <div 
-        className="fixed inset-0 opacity-[0.02] pointer-events-none z-50"
+        className="fixed w-96 h-96 rounded-full pointer-events-none z-0 opacity-20"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          background: 'radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%)',
+          left: mousePos.x - 192,
+          top: mousePos.y - 192,
+          transition: 'left 0.1s, top 0.1s',
         }}
       />
 
-      {/* Gradient orbs */}
-      <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[120px]" />
-      <div className="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[100px]" />
-      <div className="fixed top-1/2 right-0 w-[400px] h-[400px] bg-amber-600/3 rounded-full blur-[80px]" />
+      {/* ============ NOISE TEXTURE OVERLAY ============ */}
+      <div 
+        className="fixed inset-0 pointer-events-none z-50 opacity-[0.015]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
+      />
 
-      {/* Navigation */}
+      {/* ============ BACKGROUND EFFECTS ============ */}
+      <div className="fixed inset-0 z-0">
+        {/* Mesh gradient */}
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-[150px]" />
+          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-amber-600/8 rounded-full blur-[120px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-slate-900/50 rounded-full blur-[100px]" />
+        </div>
+        
+        {/* Grid pattern */}
+        <div 
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `linear-gradient(rgba(245,158,11,0.3) 1px, transparent 1px), 
+                             linear-gradient(90deg, rgba(245,158,11,0.3) 1px, transparent 1px)`,
+            backgroundSize: '60px 60px',
+          }}
+        />
+
+        {/* Floating particles */}
+        {[...Array(8)].map((_, i) => (
+          <FloatingParticle 
+            key={i} 
+            delay={i * 0.5} 
+            size={3 + Math.random() * 4}
+            x={10 + Math.random() * 80}
+            y={10 + Math.random() * 80}
+          />
+        ))}
+      </div>
+
+      {/* ============ NAVIGATION ============ */}
       <motion.nav 
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-40 px-6 py-4 transition-all duration-500 ${
           scrolled ? 'bg-slate-950/90 backdrop-blur-xl border-b border-slate-800/50' : ''
         }`}
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center font-bold text-slate-950 text-lg shadow-lg shadow-amber-500/20">
-              BB
-            </div>
-            <span className="text-xl tracking-tight font-semibold">
-              BrevardBidder<span className="text-amber-400">AI</span>
-            </span>
-          </div>
-          
-          <div className="hidden md:flex items-center gap-8 text-sm text-slate-400">
-            <a href="#problem" className="hover:text-amber-400 transition-colors">Why</a>
-            <a href="#demo" className="hover:text-amber-400 transition-colors">Demo</a>
-            <a href="#pipeline" className="hover:text-amber-400 transition-colors">Pipeline</a>
-            <a href="#founder" className="hover:text-amber-400 transition-colors">Founder</a>
-          </div>
-          
-          <motion.a 
-            href="#waitlist"
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <motion.div 
+            className="flex items-center gap-4"
             whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="px-5 py-2.5 bg-amber-500 text-slate-950 font-semibold text-sm rounded-lg hover:bg-amber-400 transition-all shadow-lg shadow-amber-500/20"
           >
-            Join Waitlist
-          </motion.a>
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl blur-sm opacity-70" />
+              <div className="relative w-11 h-11 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center font-black text-slate-950 text-lg tracking-tighter">
+                BB
+              </div>
+            </div>
+            <div className="hidden sm:block">
+              <span className="text-xl font-bold tracking-tight">
+                BrevardBidder<span className="text-amber-400">AI</span>
+              </span>
+              <span className="ml-3 px-2 py-0.5 bg-slate-800 rounded text-xs font-mono text-slate-400">V13.4.0</span>
+            </div>
+          </motion.div>
+          
+          <div className="flex items-center gap-4">
+            <a 
+              href="#demo" 
+              className="hidden md:block text-slate-400 hover:text-amber-400 transition-colors font-medium"
+            >
+              Demo
+            </a>
+            <a 
+              href="#pipeline" 
+              className="hidden md:block text-slate-400 hover:text-amber-400 transition-colors font-medium"
+            >
+              Pipeline
+            </a>
+            <motion.a 
+              href="#waitlist"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-5 py-2.5 bg-amber-500 text-black font-bold rounded-xl hover:shadow-lg hover:shadow-amber-500/30 transition-all"
+            >
+              Join Waitlist
+            </motion.a>
+          </div>
         </div>
       </motion.nav>
 
       {/* ============ HERO SECTION ============ */}
       <motion.section 
-        style={{ opacity: heroOpacity, scale: heroScale }}
-        className="relative z-10 min-h-screen flex items-center px-6 pt-24 pb-16"
+        className="relative min-h-screen flex items-center pt-24 pb-16 px-6"
+        style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
       >
         <div className="max-w-7xl mx-auto w-full">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left: Content */}
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left Column - Content */}
             <motion.div
               initial="hidden"
               animate="visible"
               variants={staggerContainer}
+              className="relative z-10"
             >
-              <motion.div variants={fadeInUp} className="mb-6">
-                <span className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-400 text-sm font-medium">
-                  <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
-                  Agentic AI Ecosystem — Not SaaS
+              <motion.div variants={fadeInUp}>
+                <span className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400 text-sm font-semibold mb-8 backdrop-blur-sm">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                  </span>
+                  Agentic AI Ecosystem • V13.4.0
                 </span>
               </motion.div>
-              
-              <motion.h1 variants={fadeInUp} className="text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1] mb-6 tracking-tight">
-                <span className="text-white">Stop Guessing at</span>
-                <br />
-                <span className="bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 bg-clip-text text-transparent">
-                  Foreclosure Auctions
+
+              <motion.h1 
+                variants={fadeInUp}
+                className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[0.95] mb-8"
+              >
+                <span className="block text-white">Stop Guessing</span>
+                <span className="block text-white">at Foreclosure</span>
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400">
+                  Auctions.
                 </span>
               </motion.h1>
-              
-              <motion.p variants={fadeInUp} className="text-xl text-slate-400 max-w-lg mb-4 leading-relaxed">
-                12-stage AI pipeline transforms 4-hour manual research into 23-second actionable intelligence.
+
+              <motion.p 
+                variants={fadeInUp}
+                className="text-xl md:text-2xl text-slate-400 mb-10 max-w-xl leading-relaxed"
+              >
+                12-stage AI pipeline transforms <span className="text-white font-semibold">4-hour research</span> into{' '}
+                <span className="text-amber-400 font-semibold">23-second intelligence</span>. 
+                BID, REVIEW, or SKIP with ML-powered confidence.
               </motion.p>
-              
-              <motion.p variants={fadeInUp} className="text-lg text-amber-400/80 font-medium mb-8">
-                Built by a developer & investor with 20+ years in Florida real estate. For investors everywhere.
-              </motion.p>
-              
+
               <motion.div variants={fadeInUp}>
                 <WaitlistForm variant="hero" />
               </motion.div>
-              
-              {/* Trust badges */}
-              <motion.div variants={fadeInUp} className="flex flex-wrap items-center gap-6 mt-10 text-sm text-slate-500">
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span>Brevard County, FL</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span>64.4% ML Accuracy</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  <span>100x ROI</span>
-                </div>
-              </motion.div>
             </motion.div>
-            
-            {/* Right: Terminal Preview */}
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="hidden lg:block"
-            >
-              <div 
-                className="relative rounded-2xl overflow-hidden border border-slate-800/80 shadow-2xl"
-                style={{ 
-                  background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(2, 6, 23, 0.9) 100%)',
-                }}
-              >
-                {/* Terminal header */}
-                <div className="flex items-center gap-2 px-4 py-3 bg-slate-900/80 border-b border-slate-800">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                    <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-                    <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                  </div>
-                  <span className="text-xs text-slate-500 ml-2 font-mono">brevard-bidder-ai / analysis</span>
-                </div>
-                
-                {/* Terminal content */}
-                <div className="p-6 font-mono text-sm space-y-2">
-                  <div className="text-slate-500">$ brevard analyze --auction dec-17-2025</div>
-                  <div className="text-emerald-400">✓ Discovery: 23 properties found</div>
-                  <div className="text-emerald-400">✓ Scraping: BECA V2.0 complete</div>
-                  <div className="text-emerald-400">✓ Title: 847 documents analyzed</div>
-                  <div className="text-cyan-400">→ Lien Analysis: Processing...</div>
-                  
-                  <div className="mt-4 p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-                    <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">Top Opportunity</div>
-                    <div className="text-white font-semibold">1639 Dittmer Cir SE, Palm Bay</div>
-                    <div className="flex items-center gap-4 mt-2">
-                      <span className="text-amber-400">Max Bid: $537,832</span>
-                      <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs rounded">BID</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-slate-500">
-                    <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
-                    <span>Pipeline running... 67% complete</span>
-                  </div>
-                </div>
+
+            {/* Right Column - Stats Grid */}
+            <div className="relative">
+              {/* Decorative elements */}
+              <div className="absolute -top-20 -right-20 w-40 h-40 border border-amber-500/20 rounded-full" />
+              <div className="absolute -bottom-10 -left-10 w-60 h-60 border border-slate-800 rounded-full" />
+              
+              <div className="grid grid-cols-2 gap-4">
+                {stats.map((stat, i) => (
+                  <StatCard key={i} {...stat} delay={0.2 + i * 0.1} />
+                ))}
               </div>
-              
-              {/* Floating badge */}
+
+              {/* Live indicator */}
               <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
+                className="mt-6 flex items-center justify-center gap-3 text-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{ delay: 1 }}
-                className="absolute -bottom-4 -right-4 px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg shadow-xl"
               >
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-xs font-bold text-slate-950">AS</div>
-                  <div className="text-xs">
-                    <div className="text-white font-medium">Ariel Shapira</div>
-                    <div className="text-slate-500">Solo Founder</div>
-                  </div>
+                <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <span className="text-emerald-400 font-medium">Live in Brevard County</span>
                 </div>
               </motion.div>
-            </motion.div>
+            </div>
           </div>
+
+          {/* Scroll indicator */}
+          <motion.div 
+            className="absolute bottom-8 left-1/2 -translate-x-1/2"
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <div className="w-6 h-10 border-2 border-slate-700 rounded-full flex justify-center">
+              <motion.div 
+                className="w-1.5 h-3 bg-amber-400 rounded-full mt-2"
+                animate={{ y: [0, 12, 0], opacity: [1, 0.3, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+            </div>
+          </motion.div>
         </div>
       </motion.section>
 
-      {/* ============ PROBLEM/SOLUTION SECTION ============ */}
-      <Section id="problem" className="relative z-10 px-6 py-24">
+      {/* ============ SOCIAL PROOF BAR ============ */}
+      <Section className="relative z-10 px-6 py-16 border-y border-slate-800/50 bg-slate-900/30 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto">
-          <motion.div variants={fadeInUp} className="text-center mb-16">
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-full text-red-400 text-sm font-medium mb-6">
-              The Problem
-            </span>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              <span className="text-white">Foreclosure Investing is</span>{' '}
-              <span className="text-red-400">Broken</span>
-            </h2>
-            <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-              Most investors lose money because they're making decisions with incomplete data.
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {problems.map((item, i) => (
-              <motion.div
-                key={i}
-                variants={fadeInUp}
-                className="group p-6 rounded-2xl border border-slate-800 bg-slate-900/30 hover:border-amber-500/30 transition-all duration-300"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
-                    <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-slate-400 line-through mb-2">{item.problem}</div>
-                    <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-emerald-400 font-medium">{item.solution}</span>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </Section>
-
-      {/* ============ STATS SECTION ============ */}
-      <Section className="relative z-10 px-6 py-16">
-        <div className="max-w-6xl mx-auto">
-          <motion.div variants={staggerContainer} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {stats.map((stat, i) => (
-              <motion.div 
-                key={i}
-                variants={scaleIn}
-                className="group p-6 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-900/50 border border-slate-800 hover:border-amber-500/30 transition-all"
-              >
-                <div className="text-4xl md:text-5xl font-bold text-amber-400 mb-1">{stat.value}</div>
-                <div className="text-white font-medium mb-1">{stat.label}</div>
-                <div className="text-sm text-slate-500">{stat.detail}</div>
-              </motion.div>
-            ))}
+          <motion.div 
+            variants={fadeIn}
+            className="flex flex-wrap items-center justify-center gap-8 md:gap-16"
+          >
+            <div className="text-center">
+              <div className="text-4xl font-black text-white mb-1">1,393+</div>
+              <div className="text-sm text-slate-500">Historical Auctions Analyzed</div>
+            </div>
+            <div className="hidden md:block w-px h-12 bg-slate-800" />
+            <div className="text-center">
+              <div className="text-4xl font-black text-white mb-1">20+</div>
+              <div className="text-sm text-slate-500">Years FL Experience</div>
+            </div>
+            <div className="hidden md:block w-px h-12 bg-slate-800" />
+            <div className="text-center">
+              <div className="text-4xl font-black text-white mb-1">200+</div>
+              <div className="text-sm text-slate-500">Auctions Attended</div>
+            </div>
+            <div className="hidden md:block w-px h-12 bg-slate-800" />
+            <div className="text-center">
+              <div className="text-4xl font-black text-amber-400 mb-1">$0</div>
+              <div className="text-sm text-slate-500">Guesswork Required</div>
+            </div>
           </motion.div>
         </div>
       </Section>
 
       {/* ============ DEMO SECTION ============ */}
-      <Section id="demo" className="relative z-10 px-6 py-24">
+      <Section id="demo" className="relative z-10 px-6 py-32">
         <div className="max-w-5xl mx-auto">
-          <motion.div variants={fadeInUp} className="text-center mb-12">
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-sm font-medium mb-6">
-              <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-              Live Demo
+          <motion.div variants={fadeInUp} className="text-center mb-16">
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-sm font-semibold mb-6">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              Live Demo Available
             </span>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              <span className="text-white">See the Pipeline</span>{' '}
-              <span className="text-amber-400">In Action</span>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6">
+              <span className="text-white">See the Pipeline</span>
+              <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">In Action</span>
             </h2>
             <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-              Watch autonomous agents analyze a real foreclosure property from Brevard County.
+              Watch autonomous agents analyze a real foreclosure property from Brevard County in real-time.
             </p>
           </motion.div>
 
-          <motion.div variants={scaleIn} className="relative">
+          <motion.div variants={scaleIn} className="relative group">
+            {/* Glow effect */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-amber-500/30 via-amber-600/30 to-amber-500/30 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            
             <div 
-              className="relative rounded-2xl overflow-hidden border border-slate-800 cursor-pointer group"
+              className="relative rounded-2xl overflow-hidden border-2 border-slate-800 group-hover:border-amber-500/50 cursor-pointer transition-all duration-500"
               onClick={() => setShowAnimatedDemo(true)}
               style={{ 
-                background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(2, 6, 23, 0.9) 100%)',
+                background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(2, 6, 23, 0.95) 100%)',
               }}
             >
-              {/* Preview header */}
+              {/* Terminal header */}
               <div className="flex items-center justify-between px-6 py-4 bg-slate-900/80 border-b border-slate-800">
-                <div className="flex items-center gap-3">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                    <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-                    <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
+                <div className="flex items-center gap-4">
+                  <div className="flex gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 transition-colors" />
+                    <div className="w-3 h-3 rounded-full bg-amber-500 hover:bg-amber-400 transition-colors" />
+                    <div className="w-3 h-3 rounded-full bg-emerald-500 hover:bg-emerald-400 transition-colors" />
                   </div>
-                  <span className="text-sm text-slate-400 font-mono">12-Stage Pipeline Demo</span>
+                  <span className="text-sm text-slate-400 font-mono tracking-wider">brevard-bidder-pipeline.exe</span>
                 </div>
-                <span className="text-xs text-emerald-400">● Ready</span>
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-mono rounded">● READY</span>
+                </div>
               </div>
               
               {/* Preview content */}
-              <div className="p-8 min-h-[300px] flex items-center justify-center">
+              <div className="p-12 min-h-[350px] flex items-center justify-center">
                 <div className="text-center">
                   <motion.div
-                    whileHover={{ scale: 1.1 }}
-                    className="w-20 h-20 mx-auto mb-4 rounded-full bg-amber-500/10 border-2 border-amber-500/30 flex items-center justify-center group-hover:bg-amber-500/20 transition-all"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border-2 border-amber-500/40 flex items-center justify-center group-hover:shadow-2xl group-hover:shadow-amber-500/20 transition-all duration-500"
                   >
-                    <svg className="w-8 h-8 text-amber-400 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-10 h-10 text-amber-400 ml-1" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M8 5v14l11-7z" />
                     </svg>
                   </motion.div>
-                  <div className="text-white font-semibold text-lg mb-2">Watch the Demo</div>
-                  <div className="text-slate-500">See real property analysis in 60 seconds</div>
+                  <div className="text-white font-bold text-2xl mb-3 tracking-tight">Launch Demo</div>
+                  <div className="text-slate-500">Experience real property analysis in 60 seconds</div>
                 </div>
+              </div>
+
+              {/* Bottom bar */}
+              <div className="px-6 py-3 bg-slate-900/50 border-t border-slate-800 flex items-center justify-between">
+                <span className="text-xs text-slate-600 font-mono">12 stages • 23 seconds • Real data</span>
+                <span className="text-xs text-amber-500 font-mono">Click to start →</span>
               </div>
             </div>
           </motion.div>
@@ -550,66 +621,73 @@ const App = () => {
       </Section>
 
       {/* ============ PIPELINE SECTION ============ */}
-      <Section id="pipeline" className="relative z-10 px-6 py-24 bg-slate-900/30">
-        <div className="max-w-6xl mx-auto">
-          <motion.div variants={fadeInUp} className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+      <Section id="pipeline" className="relative z-10 px-6 py-32 bg-slate-900/50">
+        <div className="max-w-7xl mx-auto">
+          <motion.div variants={fadeInUp} className="text-center mb-20">
+            <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6">
               <span className="text-white">12-Stage</span>{' '}
-              <span className="text-amber-400">Agentic Pipeline</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">Agentic Pipeline</span>
             </h2>
             <p className="text-xl text-slate-400 max-w-2xl mx-auto">
               From discovery to decision—fully autonomous intelligence at every step.
             </p>
           </motion.div>
 
-          <motion.div variants={staggerContainer} className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <motion.div variants={staggerContainer} className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             {pipeline.map((stage, index) => (
               <motion.div
                 key={stage.id}
                 variants={scaleIn}
-                className={`relative p-4 rounded-xl border transition-all duration-300 cursor-pointer ${
+                className={`relative p-5 rounded-2xl border-2 transition-all duration-500 cursor-pointer ${
                   activeStage === index
-                    ? 'bg-amber-500/10 border-amber-500/50 scale-105 shadow-lg shadow-amber-500/10'
-                    : 'bg-slate-900/50 border-slate-800 hover:border-slate-700'
+                    ? 'bg-amber-500/10 border-amber-500 scale-105 shadow-2xl shadow-amber-500/20'
+                    : 'bg-slate-900/50 border-slate-800 hover:border-slate-700 hover:bg-slate-800/50'
                 }`}
                 onMouseEnter={() => setActiveStage(index)}
               >
-                <div className="text-2xl mb-2">{stage.icon}</div>
-                <div className={`font-semibold text-sm mb-1 ${activeStage === index ? 'text-amber-400' : 'text-white'}`}>
+                <div className="text-3xl mb-3">{stage.icon}</div>
+                <div className={`font-bold text-sm mb-1 transition-colors ${
+                  activeStage === index ? 'text-amber-400' : 'text-white'
+                }`}>
                   {stage.id}. {stage.name}
                 </div>
                 <div className="text-xs text-slate-500">{stage.desc}</div>
+                
                 {activeStage === index && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full animate-ping" />
+                  <motion.div 
+                    className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 rounded-full"
+                    animate={{ scale: [1, 1.3, 1] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                  />
                 )}
               </motion.div>
             ))}
           </motion.div>
 
-          {/* Pipeline progress */}
-          <div className="mt-8 flex items-center justify-center gap-2">
-            <span className="text-slate-500 text-sm">Pipeline Progress</span>
-            <div className="flex gap-1">
-              {pipeline.map((_, i) => (
-                <div
-                  key={i}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    i <= activeStage ? 'bg-amber-400' : 'bg-slate-700'
-                  }`}
-                />
-              ))}
+          {/* Pipeline progress bar */}
+          <div className="mt-12 max-w-2xl mx-auto">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm text-slate-500">Pipeline Progress</span>
+              <span className="text-sm text-amber-400 font-mono">{activeStage + 1}/12</span>
+            </div>
+            <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+              <motion.div 
+                className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full"
+                animate={{ width: `${((activeStage + 1) / 12) * 100}%` }}
+                transition={{ duration: 0.5 }}
+              />
             </div>
           </div>
         </div>
       </Section>
 
       {/* ============ FEATURES SECTION ============ */}
-      <Section id="features" className="relative z-10 px-6 py-24">
+      <Section id="features" className="relative z-10 px-6 py-32">
         <div className="max-w-6xl mx-auto">
-          <motion.div variants={fadeInUp} className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <motion.div variants={fadeInUp} className="text-center mb-20">
+            <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6">
               <span className="text-white">Engineered for</span>{' '}
-              <span className="text-amber-400">Edge</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">Edge</span>
             </h2>
             <p className="text-xl text-slate-400">
               Proprietary systems that create unfair advantages.
@@ -620,21 +698,28 @@ const App = () => {
             {features.map((feature, i) => (
               <motion.div
                 key={i}
-                variants={fadeInUp}
-                className="group p-8 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-900/50 border border-slate-800 hover:border-amber-500/30 transition-all duration-300"
+                variants={i % 2 === 0 ? slideInLeft : slideInRight}
+                className="group relative"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl">{feature.icon}</span>
-                    <h3 className="text-xl font-bold text-white group-hover:text-amber-400 transition-colors">
-                      {feature.title}
-                    </h3>
+                {/* Hover glow */}
+                <div className="absolute -inset-px bg-gradient-to-br from-amber-500/50 to-amber-600/50 rounded-3xl opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500" />
+                
+                <div className="relative p-8 rounded-3xl bg-slate-900/80 border border-slate-800 group-hover:border-transparent transition-all duration-500 h-full backdrop-blur-sm">
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-slate-800 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+                        {feature.icon}
+                      </div>
+                      <h3 className="text-xl font-bold text-white group-hover:text-amber-400 transition-colors">
+                        {feature.title}
+                      </h3>
+                    </div>
+                    <span className="px-3 py-1.5 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-full border border-amber-500/30">
+                      {feature.highlight}
+                    </span>
                   </div>
-                  <span className="px-3 py-1 bg-amber-500/10 text-amber-400 text-xs font-semibold rounded-full">
-                    {feature.highlight}
-                  </span>
+                  <p className="text-slate-400 leading-relaxed text-lg">{feature.desc}</p>
                 </div>
-                <p className="text-slate-400 leading-relaxed">{feature.desc}</p>
               </motion.div>
             ))}
           </motion.div>
@@ -642,78 +727,75 @@ const App = () => {
       </Section>
 
       {/* ============ FOUNDER SECTION ============ */}
-      <Section id="founder" className="relative z-10 px-6 py-24 bg-slate-900/30">
+      <Section id="founder" className="relative z-10 px-6 py-32 bg-slate-900/50">
         <div className="max-w-4xl mx-auto">
-          <motion.div variants={fadeInUp} className="text-center">
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-400 text-sm font-medium mb-8">
+          <motion.div variants={staggerContainer} className="text-center">
+            <motion.span 
+              variants={fadeInUp}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-400 text-sm font-semibold mb-10"
+            >
               <span className="w-2 h-2 bg-amber-400 rounded-full" />
               Built by an Investor, for Investors
-            </span>
+            </motion.span>
             
-            <div className="w-28 h-28 mx-auto mb-6 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-4xl font-bold text-slate-950 shadow-xl shadow-amber-500/30 ring-4 ring-amber-500/20">
-              AS
-            </div>
+            <motion.div variants={scaleIn} className="relative inline-block mb-8">
+              <div className="absolute -inset-2 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full blur-lg opacity-50" />
+              <div className="relative w-32 h-32 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center text-5xl font-black text-slate-950 ring-4 ring-amber-500/30">
+                AS
+              </div>
+            </motion.div>
             
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Ariel Shapira</h2>
-            <p className="text-lg text-amber-400 mb-2">Real Estate Developer & Founder, Everest Capital USA</p>
-            <p className="text-slate-500 mb-6">Solo Founder of BrevardBidderAI & BidDeedAI</p>
+            <motion.h2 variants={fadeInUp} className="text-4xl md:text-5xl font-black text-white mb-3 tracking-tight">
+              Ariel Shapira
+            </motion.h2>
+            <motion.p variants={fadeInUp} className="text-xl text-amber-400 font-semibold mb-2">
+              Real Estate Developer & Founder, Everest Capital USA
+            </motion.p>
+            <motion.p variants={fadeInUp} className="text-slate-500 mb-10">
+              Solo Founder of BrevardBidderAI & BidDeedAI
+            </motion.p>
             
-            {/* Main Quote */}
-            <div className="relative max-w-2xl mx-auto mb-8">
-              <div className="absolute -top-4 -left-2 text-6xl text-amber-500/20 font-serif">"</div>
-              <p className="text-xl text-slate-300 leading-relaxed italic px-8">
+            {/* Quote */}
+            <motion.div variants={scaleIn} className="relative max-w-2xl mx-auto mb-12">
+              <div className="absolute -top-6 -left-4 text-8xl text-amber-500/10 font-serif leading-none">"</div>
+              <p className="text-2xl text-slate-300 leading-relaxed italic px-8">
                 I've been to 200+ foreclosure auctions in Florida. I built BrevardBidderAI because 
                 I was tired of losing deals to incomplete data—and winning deals I shouldn't have.
               </p>
-              <div className="absolute -bottom-4 -right-2 text-6xl text-amber-500/20 font-serif rotate-180">"</div>
-            </div>
-            
-            {/* Authenticity Message */}
-            <div className="mb-10">
-              <p className="text-slate-400 text-lg">
-                Professional-grade auction intelligence. <span className="text-emerald-400 font-semibold">For everyone. Everywhere.</span>
-              </p>
-            </div>
-            
-            {/* Credibility Badges */}
-            <div className="flex flex-wrap items-center justify-center gap-4 mb-10">
-              <div className="px-5 py-3 bg-slate-800/50 rounded-xl border border-slate-700 hover:border-amber-500/30 transition-colors">
-                <div className="text-2xl font-bold text-amber-400">20+</div>
-                <div className="text-xs text-slate-400">Years in Florida</div>
-                <div className="text-xs text-slate-600">Investing • Developing • Building</div>
-              </div>
-              <div className="px-5 py-3 bg-slate-800/50 rounded-xl border border-slate-700 hover:border-amber-500/30 transition-colors">
-                <div className="text-2xl font-bold text-amber-400">200+</div>
-                <div className="text-xs text-slate-400">Auctions Attended</div>
-                <div className="text-xs text-slate-600">Brevard County Courthouse</div>
-              </div>
-              <div className="px-5 py-3 bg-slate-800/50 rounded-xl border border-slate-700 hover:border-amber-500/30 transition-colors">
-                <div className="text-2xl font-bold text-emerald-400">2</div>
-                <div className="text-xs text-slate-400">AI Ecosystems</div>
-                <div className="text-xs text-slate-600">BrevardBidderAI • BidDeedAI</div>
-              </div>
-            </div>
+              <div className="absolute -bottom-6 -right-4 text-8xl text-amber-500/10 font-serif leading-none rotate-180">"</div>
+            </motion.div>
 
-            {/* Second Quote - Pain Point */}
-            <div className="bg-slate-800/30 rounded-xl p-6 mb-8 border border-slate-700/50 max-w-xl mx-auto">
-              <p className="text-slate-400 italic mb-3">
-                "This analysis used to take me 4+ hours per property. Now it takes 23 seconds. 
-                That's not a feature—that's my weekends back."
-              </p>
-              <p className="text-xs text-amber-400">— Why I built this</p>
-            </div>
-            
-            <a 
+            {/* Credibility badges */}
+            <motion.div variants={staggerContainer} className="flex flex-wrap items-center justify-center gap-4 mb-12">
+              {[
+                { value: '20+', label: 'Years FL Experience', sub: 'Investing • Developing' },
+                { value: '200+', label: 'Auctions Attended', sub: 'Brevard Courthouse' },
+                { value: '2', label: 'AI Ecosystems', sub: 'BrevardBidder • BidDeed' },
+              ].map((badge, i) => (
+                <motion.div 
+                  key={i}
+                  variants={scaleIn}
+                  className="px-6 py-4 bg-slate-800/50 rounded-2xl border border-slate-700 hover:border-amber-500/30 transition-all"
+                >
+                  <div className="text-3xl font-black text-amber-400 mb-1">{badge.value}</div>
+                  <div className="text-sm text-white font-medium">{badge.label}</div>
+                  <div className="text-xs text-slate-500">{badge.sub}</div>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            <motion.a 
+              variants={fadeInUp}
               href="https://linkedin.com/in/ariel-shapira-533a776" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-300 transition-all"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-cyan-500/10 border-2 border-cyan-500/30 rounded-2xl text-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-300 transition-all font-semibold"
             >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
               </svg>
               Connect with Ariel on LinkedIn
-            </a>
+            </motion.a>
           </motion.div>
         </div>
       </Section>
@@ -721,49 +803,61 @@ const App = () => {
       {/* ============ FINAL CTA SECTION ============ */}
       <Section id="waitlist" className="relative z-10 px-6 py-32">
         <div className="max-w-4xl mx-auto text-center">
-          <motion.div variants={fadeInUp}>
-            <h2 className="text-4xl md:text-6xl font-bold mb-6">
-              <span className="text-white">Stop Guessing.</span>
-              <br />
-              <span className="text-amber-400">Start Knowing.</span>
-            </h2>
-            <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto">
+          {/* Background accent */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[100px]" />
+          </div>
+          
+          <motion.div variants={staggerContainer} className="relative">
+            <motion.h2 variants={fadeInUp} className="text-5xl md:text-7xl font-black tracking-tight mb-8">
+              <span className="block text-white">Stop Guessing.</span>
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400">
+                Start Knowing.
+              </span>
+            </motion.h2>
+            <motion.p variants={fadeInUp} className="text-xl md:text-2xl text-slate-400 mb-12 max-w-2xl mx-auto">
               Join the waitlist for Brevard County's most sophisticated foreclosure intelligence platform.
-            </p>
+            </motion.p>
             
-            <div className="flex justify-center mb-8">
+            <motion.div variants={scaleIn} className="flex justify-center mb-10">
               <WaitlistForm />
-            </div>
+            </motion.div>
             
-            <p className="text-slate-600 text-sm">
+            <motion.p variants={fadeIn} className="text-slate-600 text-sm flex items-center justify-center gap-2">
+              <span className="w-2 h-2 bg-amber-500 rounded-full" />
               Currently onboarding select investors in Brevard County, FL
-            </p>
+            </motion.p>
           </motion.div>
         </div>
       </Section>
 
       {/* ============ FOOTER ============ */}
-      <footer className="relative z-10 px-6 py-12 border-t border-slate-800">
+      <footer className="relative z-10 px-6 py-16 border-t border-slate-800/50 bg-slate-950">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center font-bold text-slate-950 text-sm">
-                BB
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="absolute -inset-0.5 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl blur-sm opacity-50" />
+                <div className="relative w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center font-black text-slate-950">
+                  BB
+                </div>
               </div>
-              <span className="text-slate-400">
-                BrevardBidder<span className="text-amber-500">AI</span>
-                <span className="text-slate-600 ml-2">V13.4.0</span>
-              </span>
+              <div>
+                <span className="text-white font-bold">
+                  BrevardBidder<span className="text-amber-400">AI</span>
+                </span>
+                <span className="ml-2 text-slate-600 text-sm font-mono">V13.4.0</span>
+              </div>
             </div>
             
-            <div className="text-slate-600 text-sm text-center md:text-right">
-              <div>© 2025 Ariel Shapira | Real Estate Developer & Founder, Everest Capital USA</div>
-              <div className="text-slate-700">Solo Founder of BrevardBidderAI & BidDeedAI</div>
+            <div className="text-slate-500 text-sm text-center md:text-right">
+              <div>© 2025 Ariel Shapira | Real Estate Developer & Founder</div>
+              <div className="text-slate-700">Everest Capital USA</div>
             </div>
           </div>
           
-          <div className="mt-8 pt-8 border-t border-slate-800/50 text-center">
-            <p className="text-slate-700 text-xs">
+          <div className="mt-10 pt-8 border-t border-slate-800/50 text-center">
+            <p className="text-slate-700 text-sm">
               Built by a developer & investor. For investors everywhere. — Democratizing USA distressed asset auctions.
             </p>
           </div>
@@ -771,9 +865,11 @@ const App = () => {
       </footer>
 
       {/* Animated Demo Modal */}
-      {showAnimatedDemo && (
-        <AnimatedDemo onClose={() => setShowAnimatedDemo(false)} />
-      )}
+      <AnimatePresence>
+        {showAnimatedDemo && (
+          <AnimatedDemo onClose={() => setShowAnimatedDemo(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
