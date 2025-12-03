@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import AnimatedDemo from './AnimatedDemo';
 
 const App = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [activeStage, setActiveStage] = useState(0);
   const [showVideo, setShowVideo] = useState(false);
+  const [showAnimatedDemo, setShowAnimatedDemo] = useState(false);
 
-  // BrevardBidderAI Demo Video
-  // To add your own video: Upload to YouTube, get the video ID from the URL
-  // Example: https://youtube.com/watch?v=ABC123 → ID is "ABC123"
-  const DEMO_VIDEO_ID = 'dQw4w9WgXcQ'; // TODO: Replace with actual BrevardBidderAI demo video ID
+  // BrevardBidderAI Demo Video (optional - for when you have a real YouTube video)
+  const DEMO_VIDEO_ID = 'dQw4w9WgXcQ'; // Replace with actual video ID when available
   const DEMO_VIDEO_URL = `https://www.youtube.com/watch?v=${DEMO_VIDEO_ID}`;
   const YOUTUBE_EMBED_URL = `https://www.youtube.com/embed/${DEMO_VIDEO_ID}?autoplay=1&rel=0&modestbranding=1`;
 
@@ -194,59 +194,65 @@ const App = () => {
                     brevard-bidder.ai/demo
                   </div>
                 </div>
-                <div className="text-amber-400 text-xs font-semibold">LIVE DEMO</div>
+                <div className="text-amber-400 text-xs font-semibold">INTERACTIVE DEMO</div>
               </div>
 
-              {/* Video embed area */}
+              {/* Demo embed area */}
               <div className="relative aspect-video bg-black rounded-b-xl overflow-hidden">
-                {!showVideo ? (
-                  /* Placeholder overlay with clickable play button */
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 flex flex-col items-center justify-center">
-                    <div className="relative">
-                      {/* Play button */}
-                      <button 
-                        onClick={handlePlayVideo}
-                        className="group/play w-24 h-24 bg-amber-500 rounded-full flex items-center justify-center hover:bg-amber-400 transition-all hover:scale-110 shadow-2xl shadow-amber-500/30"
-                      >
-                        <svg className="w-10 h-10 text-black ml-1" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      </button>
-                      {/* Pulse rings */}
-                      <div className="absolute inset-0 rounded-full border-2 border-amber-500/50 animate-ping" />
-                    </div>
-                    <p className="mt-6 text-zinc-400 text-sm">Click to play demo</p>
-                    <p className="mt-2 text-blue-400 text-xs">4:32 • Full pipeline walkthrough</p>
+                {/* Demo placeholder with animated preview */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 flex flex-col items-center justify-center">
+                  {/* Animated preview elements */}
+                  <div className="absolute inset-0 overflow-hidden opacity-20">
+                    <div className="absolute top-1/4 left-1/4 w-32 h-32 border border-amber-500/50 rounded-lg animate-pulse" />
+                    <div className="absolute bottom-1/4 right-1/4 w-24 h-24 border border-blue-500/50 rounded-full animate-ping" style={{ animationDuration: '3s' }} />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-1 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent animate-pulse" />
+                  </div>
+                  
+                  <div className="relative z-10">
+                    {/* Play button - launches animated demo */}
+                    <button 
+                      onClick={() => setShowAnimatedDemo(true)}
+                      className="group/play w-24 h-24 bg-amber-500 rounded-full flex items-center justify-center hover:bg-amber-400 transition-all hover:scale-110 shadow-2xl shadow-amber-500/30"
+                    >
+                      <svg className="w-10 h-10 text-black ml-1" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </button>
+                    {/* Pulse rings */}
+                    <div className="absolute inset-0 rounded-full border-2 border-amber-500/50 animate-ping" />
+                  </div>
+                  
+                  <p className="mt-6 text-white text-lg font-semibold">Watch the 12-Stage Pipeline in Action</p>
+                  <p className="mt-2 text-amber-400 text-sm">Interactive Demo • ~47 seconds • Real Data</p>
+                  
+                  {/* Two button options */}
+                  <div className="mt-6 flex items-center gap-4">
+                    {/* Primary: Animated Demo */}
+                    <button
+                      onClick={() => setShowAnimatedDemo(true)}
+                      className="flex items-center gap-3 px-6 py-3 bg-amber-500 hover:bg-amber-400 rounded-lg transition-all shadow-lg shadow-amber-500/30 hover:scale-105"
+                    >
+                      <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="font-semibold text-black">Launch Interactive Demo</span>
+                    </button>
                     
-                    {/* Prominent YouTube Link Button */}
+                    {/* Secondary: YouTube (when available) */}
                     <a
                       href={DEMO_VIDEO_URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-6 flex items-center gap-3 px-8 py-4 bg-red-600 hover:bg-red-500 rounded-lg transition-all shadow-lg shadow-red-600/30 hover:shadow-red-500/40 hover:scale-105"
+                      className="flex items-center gap-2 px-5 py-3 bg-red-600/80 hover:bg-red-600 border border-red-500/50 rounded-lg transition-all hover:scale-105"
                     >
-                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M10 15l5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z"/>
                       </svg>
-                      <span className="text-base font-semibold text-white">
-                        Watch on YouTube
-                      </span>
-                      <svg className="w-4 h-4 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
+                      <span className="text-sm font-medium text-white">YouTube</span>
                     </a>
                   </div>
-                ) : (
-                  /* Embedded YouTube video */
-                  <iframe
-                    className="absolute inset-0 w-full h-full"
-                    src={YOUTUBE_EMBED_URL}
-                    title="BrevardBidderAI Demo"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                  />
-                )}
+                </div>
               </div>
             </div>
 
@@ -495,6 +501,11 @@ const App = () => {
           </div>
         </div>
       </footer>
+
+      {/* Animated Demo Modal */}
+      {showAnimatedDemo && (
+        <AnimatedDemo onClose={() => setShowAnimatedDemo(false)} />
+      )}
     </div>
   );
 };
