@@ -1,6 +1,8 @@
 // AnimatedDemo.jsx - V2.3.0 with Lottie + GSAP
 // BrevardBidderAI 12-Stage Pipeline Visualization
-// Built by Ariel Shapira - Real Estate Developer & Founder, Everest Capital USA
+// Built by Ariel Shapira - Solo Founder
+// Real Estate Developer & Founder, Everest Capital USA
+// © 2025 All Rights Reserved - Proprietary IP
 
 import { useState, useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
@@ -11,35 +13,66 @@ import { X, Play, CheckCircle2, Sparkles, ArrowRight, Linkedin, RotateCcw } from
 // Register GSAP plugin
 gsap.registerPlugin(useGSAP);
 
-// Lottie animation URLs from LottieFiles (free CDN)
-const LOTTIE_ANIMATIONS = {
-  // Intro animations
-  ai_brain: "https://lottie.host/4db68bbd-31f6-4cd8-84eb-189571294029/3Ybz8T4oif.json",
-  rocket: "https://lottie.host/e4c45f63-6596-4b89-a7f8-96f4a8bb89c7/qjhGRPi4GN.json",
-  success: "https://lottie.host/cc439b2d-1e73-4f21-b23e-e4e8e2e3e4e4/HMSbGqVW2K.json",
-  confetti: "https://lottie.host/3b0ef5e5-9a5e-4b8e-9a0e-5b5e5e5e5e5e/confetti.json",
+// Real Lottie CDN URLs from LottieFiles (Free animations)
+const LOTTIE_URLS = {
+  // Main animations
+  aiRobot: "https://lottie.host/4db68bbd-31f6-4cd8-84eb-189de081159a/IGmMCqhzpt.json",
+  success: "https://assets2.lottiefiles.com/packages/lf20_jbrw3hcz.json",
+  confetti: "https://assets4.lottiefiles.com/packages/lf20_u4yrau.json",
+  rocket: "https://assets9.lottiefiles.com/packages/lf20_lon7ltbv.json",
   
-  // Pipeline stage icons (using appropriate themed animations)
-  search: "https://lottie.host/c8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/search.json",
-  data: "https://lottie.host/d8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/data.json",
-  document: "https://lottie.host/e8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/document.json",
-  layers: "https://lottie.host/f8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/layers.json",
-  certificate: "https://lottie.host/g8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/certificate.json",
-  people: "https://lottie.host/h8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/people.json",
-  brain: "https://lottie.host/i8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/brain.json",
-  calculator: "https://lottie.host/j8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/calculator.json",
-  checklist: "https://lottie.host/k8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/checklist.json",
-  report: "https://lottie.host/l8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/report.json",
-  location: "https://lottie.host/m8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/location.json",
-  database: "https://lottie.host/n8e5b5b5-5e5e-5e5e-5e5e-5e5e5e5e5e5e/database.json",
+  // Pipeline stage animations
+  search: "https://assets9.lottiefiles.com/packages/lf20_jcikwtux.json",
+  download: "https://assets3.lottiefiles.com/packages/lf20_awdvxquo.json",
+  document: "https://assets5.lottiefiles.com/packages/lf20_1qtgf9x2.json",
+  legal: "https://assets7.lottiefiles.com/packages/lf20_5gkpblxh.json",
+  certificate: "https://assets8.lottiefiles.com/packages/lf20_ydo1amjm.json",
+  people: "https://assets3.lottiefiles.com/packages/lf20_v1yudlrx.json",
+  brain: "https://assets9.lottiefiles.com/packages/lf20_fcfjwiyb.json",
+  calculator: "https://assets1.lottiefiles.com/packages/lf20_rnfwc4vj.json",
+  checkmark: "https://assets2.lottiefiles.com/packages/lf20_y3z4lxos.json",
+  report: "https://assets7.lottiefiles.com/packages/lf20_vPnn3K.json",
+  location: "https://assets4.lottiefiles.com/packages/lf20_syqnfe7c.json",
+  database: "https://assets6.lottiefiles.com/packages/lf20_qp1q7mct.json",
+  
+  // Loading/processing
+  loading: "https://assets1.lottiefiles.com/packages/lf20_p8bfn5to.json",
+  processing: "https://assets4.lottiefiles.com/packages/lf20_kk62um5v.json",
 };
 
-// 12-Stage Pipeline Definition
+// Lottie Component with fallback
+const LottieIcon = ({ url, fallbackEmoji, size = 48, loop = true, autoplay = true }) => {
+  const [hasError, setHasError] = useState(false);
+  const [animationData, setAnimationData] = useState(null);
+
+  useEffect(() => {
+    fetch(url)
+      .then(res => res.json())
+      .then(data => setAnimationData(data))
+      .catch(() => setHasError(true));
+  }, [url]);
+
+  if (hasError || !animationData) {
+    return <span style={{ fontSize: size * 0.6 }}>{fallbackEmoji}</span>;
+  }
+
+  return (
+    <Lottie 
+      animationData={animationData}
+      loop={loop}
+      autoplay={autoplay}
+      style={{ width: size, height: size }}
+    />
+  );
+};
+
+// 12-Stage Pipeline Definition with Lottie URLs
 const PIPELINE_STAGES = [
   { 
     id: 1, 
     name: 'Discovery', 
-    icon: '🔍',
+    emoji: '🔍',
+    lottieUrl: LOTTIE_URLS.search,
     color: '#3b82f6',
     description: 'Scan auction calendars',
     detail: 'RealForeclose API integration',
@@ -48,7 +81,8 @@ const PIPELINE_STAGES = [
   { 
     id: 2, 
     name: 'Scraping', 
-    icon: '📥',
+    emoji: '📥',
+    lottieUrl: LOTTIE_URLS.download,
     color: '#8b5cf6',
     description: 'Extract property data',
     detail: 'BCPAO, AcclaimWeb, RealTDM',
@@ -57,7 +91,8 @@ const PIPELINE_STAGES = [
   { 
     id: 3, 
     name: 'Title Search', 
-    icon: '📋',
+    emoji: '📋',
+    lottieUrl: LOTTIE_URLS.document,
     color: '#06b6d4',
     description: 'Chain of title analysis',
     detail: 'Official Records search',
@@ -66,7 +101,8 @@ const PIPELINE_STAGES = [
   { 
     id: 4, 
     name: 'Lien Priority', 
-    icon: '⚖️',
+    emoji: '⚖️',
+    lottieUrl: LOTTIE_URLS.legal,
     color: '#f59e0b',
     description: 'Senior lien detection',
     detail: 'HOA vs Mortgage analysis',
@@ -75,7 +111,8 @@ const PIPELINE_STAGES = [
   { 
     id: 5, 
     name: 'Tax Certs', 
-    icon: '📜',
+    emoji: '📜',
+    lottieUrl: LOTTIE_URLS.certificate,
     color: '#ef4444',
     description: 'Tax certificate check',
     detail: 'RealTDM integration',
@@ -84,7 +121,8 @@ const PIPELINE_STAGES = [
   { 
     id: 6, 
     name: 'Demographics', 
-    icon: '👥',
+    emoji: '👥',
+    lottieUrl: LOTTIE_URLS.people,
     color: '#10b981',
     description: 'Neighborhood analysis',
     detail: 'Census API data',
@@ -93,7 +131,8 @@ const PIPELINE_STAGES = [
   { 
     id: 7, 
     name: 'ML Score', 
-    icon: '🧠',
+    emoji: '🧠',
+    lottieUrl: LOTTIE_URLS.brain,
     color: '#ec4899',
     description: 'AI prediction model',
     detail: '64.4% accuracy XGBoost',
@@ -102,7 +141,8 @@ const PIPELINE_STAGES = [
   { 
     id: 8, 
     name: 'Max Bid', 
-    icon: '💰',
+    emoji: '💰',
+    lottieUrl: LOTTIE_URLS.calculator,
     color: '#22c55e',
     description: 'Calculate optimal bid',
     detail: '(ARV×70%)-Repairs-$10K',
@@ -111,7 +151,8 @@ const PIPELINE_STAGES = [
   { 
     id: 9, 
     name: 'Decision', 
-    icon: '✅',
+    emoji: '✅',
+    lottieUrl: LOTTIE_URLS.checkmark,
     color: '#14b8a6',
     description: 'BID/REVIEW/SKIP',
     detail: 'Automated recommendation',
@@ -120,7 +161,8 @@ const PIPELINE_STAGES = [
   { 
     id: 10, 
     name: 'Report', 
-    icon: '📊',
+    emoji: '📊',
+    lottieUrl: LOTTIE_URLS.report,
     color: '#6366f1',
     description: 'Generate DOCX report',
     detail: 'One-page analysis',
@@ -129,7 +171,8 @@ const PIPELINE_STAGES = [
   { 
     id: 11, 
     name: 'Disposition', 
-    icon: '🎯',
+    emoji: '🎯',
+    lottieUrl: LOTTIE_URLS.location,
     color: '#f97316',
     description: 'Exit strategy mapping',
     detail: 'Flip, Hold, Wholesale',
@@ -138,7 +181,8 @@ const PIPELINE_STAGES = [
   { 
     id: 12, 
     name: 'Archive', 
-    icon: '🗄️',
+    emoji: '🗄️',
+    lottieUrl: LOTTIE_URLS.database,
     color: '#64748b',
     description: 'Store to database',
     detail: 'Supabase persistence',
@@ -192,15 +236,24 @@ const StageCard = ({ stage, isActive, isComplete, index }) => {
     >
       {/* Stage Number Badge */}
       <div 
-        className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
+        className="absolute -top-2 -left-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
         style={{ background: stage.color }}
       >
         {isComplete ? '✓' : stage.id}
       </div>
       
-      {/* Icon */}
-      <div className="text-3xl mb-2 text-center">
-        {stage.icon}
+      {/* Lottie Icon */}
+      <div className="flex justify-center mb-2">
+        {isActive ? (
+          <LottieIcon 
+            url={stage.lottieUrl} 
+            fallbackEmoji={stage.emoji}
+            size={48}
+            loop={true}
+          />
+        ) : (
+          <span className="text-3xl">{stage.emoji}</span>
+        )}
       </div>
       
       {/* Name */}
@@ -407,7 +460,7 @@ export default function AnimatedDemo({ isOpen, onClose }) {
     }
   }, { dependencies: [phase, currentStage] });
 
-  // Completion animation
+  // Completion animation with counter
   useGSAP(() => {
     if (phase === 'complete' && completionRef.current) {
       const tl = gsap.timeline();
@@ -452,14 +505,20 @@ export default function AnimatedDemo({ isOpen, onClose }) {
       });
 
       // Animate counters
-      gsap.to(stats, {
+      const counter = { properties: 0, time: 0, bid: 0, skip: 0 };
+      gsap.to(counter, {
         properties: 19,
         time: 23,
         bid: 4,
         skip: 12,
         duration: 2,
         ease: 'power2.out',
-        onUpdate: () => setStats({...stats})
+        onUpdate: () => setStats({
+          properties: Math.round(counter.properties),
+          time: Math.round(counter.time),
+          bid: Math.round(counter.bid),
+          skip: Math.round(counter.skip)
+        })
       });
     }
   }, { scope: completionRef, dependencies: [phase] });
@@ -522,17 +581,14 @@ export default function AnimatedDemo({ isOpen, onClose }) {
             12-Stage Foreclosure Analysis Pipeline
           </p>
           
-          {/* Lottie Animation */}
+          {/* Lottie Animation - AI Robot */}
           <div className="intro-lottie w-32 h-32 mx-auto mb-6">
-            <div 
-              className="w-full h-full rounded-2xl flex items-center justify-center"
-              style={{ 
-                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%)',
-                boxShadow: '0 0 40px rgba(34, 197, 94, 0.3)'
-              }}
-            >
-              <span className="text-6xl">🏠</span>
-            </div>
+            <LottieIcon 
+              url={LOTTIE_URLS.rocket}
+              fallbackEmoji="🏠"
+              size={128}
+              loop={true}
+            />
           </div>
 
           {/* Quote */}
@@ -561,9 +617,9 @@ export default function AnimatedDemo({ isOpen, onClose }) {
             <ArrowRight className="w-5 h-5" />
           </button>
 
-          {/* Footer */}
+          {/* Footer - ARIEL SHAPIRA ATTRIBUTION */}
           <p className="intro-footer mt-6 text-sm text-slate-600">
-            Built by a developer & investor. For investors everywhere.
+            Built by <span className="text-slate-400">Ariel Shapira</span> • Solo Founder • For investors everywhere
           </p>
         </div>
       </div>
@@ -595,16 +651,21 @@ export default function AnimatedDemo({ isOpen, onClose }) {
           {/* Background glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl" />
 
-          {/* Success Icon */}
-          <div className="complete-icon w-20 h-20 mx-auto mb-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
-            <CheckCircle2 className="w-12 h-12 text-emerald-400" />
+          {/* Success Lottie Animation */}
+          <div className="complete-icon w-24 h-24 mx-auto mb-6">
+            <LottieIcon 
+              url={LOTTIE_URLS.success}
+              fallbackEmoji="✅"
+              size={96}
+              loop={false}
+            />
           </div>
 
           {/* Title */}
           <h2 className="complete-title text-3xl font-bold text-white mb-2">
             Analysis Complete
           </h2>
-          <p className="text-slate-400 mb-6">Pipeline processed in 23 seconds</p>
+          <p className="text-slate-400 mb-6">Pipeline processed in {stats.time} seconds</p>
 
           {/* Property Info */}
           <div className="complete-property bg-slate-800/50 rounded-xl p-4 mb-6 text-left">
@@ -616,19 +677,19 @@ export default function AnimatedDemo({ isOpen, onClose }) {
           {/* Stats Grid */}
           <div className="complete-stats grid grid-cols-4 gap-4 mb-6">
             <div className="bg-slate-800/30 rounded-xl p-3">
-              <p className="text-2xl font-bold text-white">{Math.round(stats.properties)}</p>
+              <p className="text-2xl font-bold text-white">{stats.properties}</p>
               <p className="text-xs text-slate-500">Properties</p>
             </div>
             <div className="bg-slate-800/30 rounded-xl p-3">
-              <p className="text-2xl font-bold text-emerald-400">{Math.round(stats.time)}s</p>
+              <p className="text-2xl font-bold text-emerald-400">{stats.time}s</p>
               <p className="text-xs text-slate-500">Total Time</p>
             </div>
             <div className="bg-slate-800/30 rounded-xl p-3">
-              <p className="text-2xl font-bold text-cyan-400">{Math.round(stats.bid)}</p>
+              <p className="text-2xl font-bold text-cyan-400">{stats.bid}</p>
               <p className="text-xs text-slate-500">BID</p>
             </div>
             <div className="bg-slate-800/30 rounded-xl p-3">
-              <p className="text-2xl font-bold text-slate-400">{Math.round(stats.skip)}</p>
+              <p className="text-2xl font-bold text-slate-400">{stats.skip}</p>
               <p className="text-xs text-slate-500">SKIP</p>
             </div>
           </div>
@@ -638,19 +699,24 @@ export default function AnimatedDemo({ isOpen, onClose }) {
             className="complete-recommendation inline-flex items-center gap-3 px-6 py-3 rounded-xl mb-6"
             style={{ background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%)' }}
           >
-            <span className="text-3xl">✅</span>
+            <LottieIcon 
+              url={LOTTIE_URLS.checkmark}
+              fallbackEmoji="✅"
+              size={48}
+              loop={false}
+            />
             <div className="text-left">
               <p className="text-emerald-400 font-bold text-xl">{propertyData.recommendation}</p>
               <p className="text-slate-400 text-sm">Max Bid: {propertyData.maxBid}</p>
             </div>
           </div>
 
-          {/* Quote */}
+          {/* Quote - ARIEL SHAPIRA ATTRIBUTION */}
           <div className="complete-quote mb-8 p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.02)' }}>
             <p className="text-slate-300 italic">
               "This analysis used to take me 4+ hours. Now it takes 23 seconds."
             </p>
-            <p className="text-xs text-amber-400 mt-2">— Ariel Shapira, Solo Founder</p>
+            <p className="text-xs text-amber-400 mt-2">— Ariel Shapira, Solo Founder of BrevardBidderAI</p>
           </div>
 
           {/* CTAs */}
@@ -674,14 +740,14 @@ export default function AnimatedDemo({ isOpen, onClose }) {
               className="complete-cta px-6 py-3 rounded-xl font-semibold bg-slate-800 text-white transition-all hover:scale-105 hover:bg-slate-700 flex items-center gap-2"
             >
               <Linkedin className="w-4 h-4" />
-              Connect on LinkedIn
+              Connect with Ariel
             </a>
           </div>
 
-          {/* Footer */}
+          {/* Footer - ARIEL SHAPIRA ATTRIBUTION */}
           <div className="mt-8 pt-6" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
             <p className="text-xs text-slate-600">
-              BrevardBidderAI • For investors everywhere
+              © 2025 Ariel Shapira • BrevardBidderAI • Solo Founder
             </p>
           </div>
         </div>
@@ -741,7 +807,10 @@ export default function AnimatedDemo({ isOpen, onClose }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
           {/* Left: Pipeline Stages Grid */}
           <div>
-            <h3 className="text-white font-semibold mb-4">12-Stage Pipeline</h3>
+            <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+              <LottieIcon url={LOTTIE_URLS.processing} fallbackEmoji="⚡" size={24} />
+              12-Stage Pipeline
+            </h3>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
               {PIPELINE_STAGES.map((stage, index) => (
                 <StageCard
@@ -770,7 +839,11 @@ export default function AnimatedDemo({ isOpen, onClose }) {
                 }}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl">{PIPELINE_STAGES[currentStage].icon}</span>
+                  <LottieIcon 
+                    url={PIPELINE_STAGES[currentStage].lottieUrl}
+                    fallbackEmoji={PIPELINE_STAGES[currentStage].emoji}
+                    size={48}
+                  />
                   <div>
                     <p className="text-white font-semibold">{PIPELINE_STAGES[currentStage].name}</p>
                     <p className="text-slate-400 text-sm">{PIPELINE_STAGES[currentStage].description}</p>
@@ -781,12 +854,12 @@ export default function AnimatedDemo({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Footer */}
+        {/* Footer - ARIEL SHAPIRA ATTRIBUTION */}
         <div
           className="flex items-center justify-between p-3"
           style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}
         >
-          <p className="text-xs text-slate-600">BrevardBidderAI V13.4.0 • Agentic AI Ecosystem</p>
+          <p className="text-xs text-slate-600">© 2025 Ariel Shapira • BrevardBidderAI V13.4.0</p>
           <p className="text-xs text-slate-600">Processing: {propertyData.address}</p>
         </div>
       </div>
