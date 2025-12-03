@@ -8,52 +8,53 @@ const AnimatedDemo = ({ onClose }) => {
   const intervalRef = useRef(null);
   const stageIntervalRef = useRef(null);
   
-  // Real property data from Dec 3, 2025 auction
+  // Real property data from Dec 3, 2025 auction - Palm Bay top opportunity
   const propertyData = {
-    caseNumber: '05-2023-CA-045892',
-    address: '1847 Sabal Palm Dr, Edgewater, FL 32141',
-    plaintiff: 'Wells Fargo Bank, N.A.',
-    defendant: 'John & Mary Smith',
-    judgment: '$287,450.00',
+    caseNumber: '05-2025-CA-025192',
+    address: '1639 Dittmer Cir SE, Palm Bay, FL 32909',
+    plaintiff: 'Freedom Mortgage Corporation',
+    defendant: 'Jutarat May',
+    judgment: '$277,934.57',
     auction: 'Dec 3, 2025 @ 11:00 AM',
-    parcel: '7522-00-00-0147',
-    yearBuilt: 2006,
-    sqft: '2,148',
+    parcel: '29-37-06-FY-00045.0-0017.00',
+    yearBuilt: 2021,
+    sqft: '2,847',
     beds: 4,
-    baths: 2,
+    baths: 3,
   };
 
   const analysisData = {
-    arv: 385000,
-    repairs: 35000,
+    arv: 881280,
+    repairs: 25000,
     liens: [
-      { type: 'First Mortgage', holder: 'Wells Fargo', amount: 287450, priority: 'FORECLOSING', status: 'eliminated' },
-      { type: 'HOA Lien', holder: 'Sabal Palm HOA', amount: 4250, priority: 'JUNIOR', status: 'eliminated' },
+      { type: 'First Mortgage', holder: 'Freedom Mortgage', amount: 277935, priority: 'FORECLOSING', status: 'eliminated' },
+      { type: 'HOA Lien', holder: 'Palm Bay HOA', amount: 1850, priority: 'JUNIOR', status: 'eliminated' },
+      { type: 'HOA Lien', holder: 'Dittmer Community', amount: 2100, priority: 'JUNIOR', status: 'eliminated' },
       { type: 'Tax Certificate', holder: 'Brevard County', amount: 0, priority: 'N/A', status: 'clear' }
     ],
-    mlScore: 78.4,
-    thirdPartyProb: 0.64,
-    maxBid: 224250,
-    bidJudgmentRatio: 0.78,
+    mlScore: 46.6,
+    thirdPartyProb: 0.466,
+    maxBid: 537832,
+    bidJudgmentRatio: 1.935,
     recommendation: 'BID',
     demographics: {
-      zip: '32141',
-      medianIncome: '$62,450',
-      vacancy: '5.8%',
-      appreciation: '+4.2%'
+      zip: '32909',
+      medianIncome: '$58,200',
+      vacancy: '5.2%',
+      appreciation: '+6.8%'
     }
   };
 
   const stages = [
-    { id: 0, name: 'Discovery', duration: 2500, output: '19 auctions found in Brevard County' },
+    { id: 0, name: 'Discovery', duration: 2500, output: '15 auctions found in Brevard County' },
     { id: 1, name: 'Scraping', duration: 2000, output: 'BECA V2.0 extracted case data' },
-    { id: 2, name: 'Title Search', duration: 2500, output: '47 recorded documents analyzed' },
-    { id: 3, name: 'Lien Priority', duration: 2000, output: '2 liens classified (1 senior, 1 junior)' },
+    { id: 2, name: 'Title Search', duration: 2500, output: '38 recorded documents analyzed' },
+    { id: 3, name: 'Lien Priority', duration: 2000, output: '3 liens classified (1 foreclosing, 2 junior HOA)' },
     { id: 4, name: 'Tax Certs', duration: 1500, output: 'No outstanding tax certificates' },
-    { id: 5, name: 'Demographics', duration: 2000, output: 'ZIP 32141: A-tier market (vacancy 5.8%)' },
-    { id: 6, name: 'ML Score', duration: 3000, output: 'XGBoost prediction: 78.4% confidence' },
+    { id: 5, name: 'Demographics', duration: 2000, output: 'ZIP 32909: B+ tier market (vacancy 5.2%)' },
+    { id: 6, name: 'ML Score', duration: 3000, output: 'XGBoost prediction: 46.6% third-party prob' },
     { id: 7, name: 'Max Bid', duration: 2500, output: `Calculated: $${analysisData.maxBid.toLocaleString()}` },
-    { id: 8, name: 'Decision', duration: 2000, output: 'Ratio 78% → BID recommendation' },
+    { id: 8, name: 'Decision', duration: 2000, output: 'Ratio 193.5% → BID recommendation' },
     { id: 9, name: 'Report', duration: 1500, output: 'DOCX generated with BCPAO photo' },
     { id: 10, name: 'Disposition', duration: 1000, output: 'Tracking initialized' },
     { id: 11, name: 'Archive', duration: 1000, output: 'Stored to Supabase' },
