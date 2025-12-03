@@ -5,7 +5,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import AnimatedDemo from './AnimatedDemo';
-import PremiumHero from './PremiumHero';
 
 // ============ ANIMATION VARIANTS ============
 const fadeInUp = {
@@ -422,14 +421,109 @@ const App = () => {
         </div>
       </motion.nav>
 
-      {/* ============ HERO SECTION - PREMIUM OBSIDIAN VAULT ============ */}
-      <PremiumHero
-        heroOpacity={heroOpacity}
-        heroScale={heroScale}
-        heroY={heroY}
-        stats={stats}
-        WaitlistForm={WaitlistForm}
-      />
+      {/* ============ HERO SECTION ============ */}
+      <motion.section 
+        className="relative min-h-screen flex items-center pt-24 pb-16 px-6"
+        style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
+      >
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left Column - Content */}
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={staggerContainer}
+              className="relative z-10"
+            >
+              <motion.div variants={fadeInUp}>
+                <span className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full text-amber-400 text-sm font-semibold mb-8 backdrop-blur-sm">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                  </span>
+                  Agentic AI Ecosystem • V13.4.0
+                </span>
+              </motion.div>
+
+              <motion.h1 
+                variants={fadeInUp}
+                className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[0.95] mb-6"
+              >
+                <span className="block text-white">Distressed Assets.</span>
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400">
+                  Decoded.
+                </span>
+              </motion.h1>
+
+              <motion.div variants={fadeInUp} className="mb-6">
+                <p className="text-2xl md:text-3xl font-bold text-emerald-400 mb-2">
+                  For Everyone. Everywhere.
+                </p>
+                <p className="text-lg text-blue-300/80 italic">
+                  Democratizing USA distressed asset auctions
+                </p>
+              </motion.div>
+
+              <motion.p 
+                variants={fadeInUp}
+                className="text-xl md:text-2xl text-blue-200/70 mb-10 max-w-xl leading-relaxed"
+              >
+                12-stage AI pipeline transforms <span className="text-white font-semibold">4-hour research</span> into{' '}
+                <span className="text-amber-400 font-semibold">23-second intelligence</span>. 
+                BID, REVIEW, or SKIP with ML-powered confidence.
+              </motion.p>
+
+              <motion.div variants={fadeInUp}>
+                <WaitlistForm variant="hero" />
+              </motion.div>
+            </motion.div>
+
+            {/* Right Column - Stats Grid */}
+            <div className="relative">
+              {/* Decorative elements */}
+              <div className="absolute -top-20 -right-20 w-40 h-40 border border-amber-500/20 rounded-full" />
+              <div className="absolute -bottom-10 -left-10 w-60 h-60 border border-blue-800 rounded-full" />
+              
+              <div className="grid grid-cols-2 gap-4">
+                {stats.map((stat, i) => (
+                  <StatCard key={i} {...stat} delay={0.2 + i * 0.1} />
+                ))}
+              </div>
+
+              {/* Live indicator */}
+              <motion.div 
+                className="mt-6 flex items-center justify-center gap-3 text-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
+              >
+                <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <span className="text-emerald-400 font-medium">Live in Brevard County</span>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Scroll indicator */}
+          <motion.div 
+            className="absolute bottom-8 left-1/2 -translate-x-1/2"
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <div className="w-6 h-10 border-2 border-blue-700 rounded-full flex justify-center">
+              <motion.div 
+                className="w-1.5 h-3 bg-amber-400 rounded-full mt-2"
+                animate={{ y: [0, 12, 0], opacity: [1, 0.3, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+            </div>
+          </motion.div>
+        </div>
+      </motion.section>
 
       {/* ============ SOCIAL PROOF BAR ============ */}
       <Section className="relative z-10 px-6 py-16 border-y border-blue-800/50 bg-blue-900/30 backdrop-blur-sm">
