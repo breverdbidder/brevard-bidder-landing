@@ -643,46 +643,73 @@ const App = () => {
         <div className="max-w-4xl mx-auto">
           <motion.div variants={fadeInUp} className="text-center">
             <span className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-400 text-sm font-medium mb-8">
-              The Builder
+              <span className="w-2 h-2 bg-amber-400 rounded-full" />
+              Built by an Investor, for Investors
             </span>
             
-            <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-3xl font-bold text-slate-950 shadow-xl shadow-amber-500/20">
+            <div className="w-28 h-28 mx-auto mb-6 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-4xl font-bold text-slate-950 shadow-xl shadow-amber-500/30 ring-4 ring-amber-500/20">
               AS
             </div>
             
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">Ariel Shapira</h2>
-            <p className="text-lg text-amber-400 mb-4">Real Estate Developer & Founder, Everest Capital USA</p>
+            <p className="text-lg text-amber-400 mb-2">Real Estate Developer & Founder, Everest Capital USA</p>
+            <p className="text-slate-500 mb-6">Solo Founder of BrevardBidderAI & BidDeedAI</p>
             
-            <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-8 leading-relaxed">
-              "I've been to 200+ foreclosure auctions in Florida. I built BrevardBidderAI because 
-              I was tired of losing deals to incomplete data and winning deals I shouldn't have."
-            </p>
+            {/* Main Quote */}
+            <div className="relative max-w-2xl mx-auto mb-8">
+              <div className="absolute -top-4 -left-2 text-6xl text-amber-500/20 font-serif">"</div>
+              <p className="text-xl text-slate-300 leading-relaxed italic px-8">
+                I've been to 200+ foreclosure auctions in Florida. I built BrevardBidderAI because 
+                I was tired of losing deals to incomplete data—and winning deals I shouldn't have.
+              </p>
+              <div className="absolute -bottom-4 -right-2 text-6xl text-amber-500/20 font-serif rotate-180">"</div>
+            </div>
             
-            <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
-              <div className="px-4 py-2 bg-slate-800/50 rounded-lg border border-slate-700">
-                <div className="text-amber-400 font-bold">20+ Years</div>
-                <div className="text-xs text-slate-500">Florida Real Estate</div>
+            {/* Authenticity Message */}
+            <div className="mb-10">
+              <p className="text-slate-400 text-lg">
+                Not polished. Not perfect. <span className="text-emerald-400 font-semibold">Just real.</span>
+              </p>
+            </div>
+            
+            {/* Credibility Badges */}
+            <div className="flex flex-wrap items-center justify-center gap-4 mb-10">
+              <div className="px-5 py-3 bg-slate-800/50 rounded-xl border border-slate-700 hover:border-amber-500/30 transition-colors">
+                <div className="text-2xl font-bold text-amber-400">20+</div>
+                <div className="text-xs text-slate-400">Years in Florida</div>
+                <div className="text-xs text-slate-600">Investing • Developing • Building</div>
               </div>
-              <div className="px-4 py-2 bg-slate-800/50 rounded-lg border border-slate-700">
-                <div className="text-amber-400 font-bold">Solo Founder</div>
-                <div className="text-xs text-slate-500">BrevardBidderAI & BidDeedAI</div>
+              <div className="px-5 py-3 bg-slate-800/50 rounded-xl border border-slate-700 hover:border-amber-500/30 transition-colors">
+                <div className="text-2xl font-bold text-amber-400">200+</div>
+                <div className="text-xs text-slate-400">Auctions Attended</div>
+                <div className="text-xs text-slate-600">Brevard County Courthouse</div>
               </div>
-              <div className="px-4 py-2 bg-slate-800/50 rounded-lg border border-slate-700">
-                <div className="text-amber-400 font-bold">Brevard County</div>
-                <div className="text-xs text-slate-500">Local Expertise</div>
+              <div className="px-5 py-3 bg-slate-800/50 rounded-xl border border-slate-700 hover:border-amber-500/30 transition-colors">
+                <div className="text-2xl font-bold text-emerald-400">2</div>
+                <div className="text-xs text-slate-400">AI Ecosystems</div>
+                <div className="text-xs text-slate-600">BrevardBidderAI • BidDeedAI</div>
               </div>
+            </div>
+
+            {/* Second Quote - Pain Point */}
+            <div className="bg-slate-800/30 rounded-xl p-6 mb-8 border border-slate-700/50 max-w-xl mx-auto">
+              <p className="text-slate-400 italic mb-3">
+                "This analysis used to take me 4+ hours per property. Now it takes 23 seconds. 
+                That's not a feature—that's my weekends back."
+              </p>
+              <p className="text-xs text-amber-400">— Why I built this</p>
             </div>
             
             <a 
               href="https://linkedin.com/in/ariel-shapira-533a776" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-cyan-400 hover:text-cyan-300 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-300 transition-all"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
               </svg>
-              Connect on LinkedIn
+              Connect with Ariel on LinkedIn
             </a>
           </motion.div>
         </div>
