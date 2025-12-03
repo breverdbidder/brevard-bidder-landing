@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 const AnimatedDemo = ({ onClose }) => {
+  const [phase, setPhase] = useState('intro'); // 'intro', 'running', 'complete'
   const [currentStage, setCurrentStage] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [stageProgress, setStageProgress] = useState(0);
   const intervalRef = useRef(null);
@@ -60,8 +61,19 @@ const AnimatedDemo = ({ onClose }) => {
     { id: 11, name: 'Archive', duration: 1000, output: 'Stored to Supabase' },
   ];
 
+  // Auto-transition from intro after 4 seconds
   useEffect(() => {
-    if (isPlaying && currentStage < stages.length) {
+    if (phase === 'intro') {
+      const timer = setTimeout(() => {
+        setPhase('running');
+        setIsPlaying(true);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase === 'running' && isPlaying && currentStage < stages.length) {
       setStageProgress(0);
       const stageDuration = stages[currentStage].duration;
       const progressIncrement = 100 / (stageDuration / 50);
@@ -71,8 +83,13 @@ const AnimatedDemo = ({ onClose }) => {
       }, 50);
 
       intervalRef.current = setTimeout(() => {
-        setCurrentStage(prev => prev + 1);
-        setProgress(((currentStage + 1) / stages.length) * 100);
+        const nextStage = currentStage + 1;
+        setCurrentStage(nextStage);
+        setProgress(((nextStage) / stages.length) * 100);
+        
+        if (nextStage >= stages.length) {
+          setPhase('complete');
+        }
       }, stageDuration);
     }
 
@@ -80,11 +97,17 @@ const AnimatedDemo = ({ onClose }) => {
       clearTimeout(intervalRef.current);
       clearInterval(stageIntervalRef.current);
     };
-  }, [currentStage, isPlaying]);
+  }, [currentStage, isPlaying, phase]);
 
   const handleRestart = () => {
+    setPhase('intro');
     setCurrentStage(0);
     setProgress(0);
+    setIsPlaying(false);
+  };
+
+  const handleSkipIntro = () => {
+    setPhase('running');
     setIsPlaying(true);
   };
 
@@ -92,8 +115,239 @@ const AnimatedDemo = ({ onClose }) => {
     setIsPlaying(!isPlaying);
   };
 
-  const isComplete = currentStage >= stages.length;
+  // ============ INTRO SCREEN ============
+  if (phase === 'intro') {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.95)' }}>
+        <div className="absolute inset-0 backdrop-blur-sm" onClick={onClose} />
+        
+        <div 
+          className="relative w-full max-w-3xl rounded-2xl overflow-hidden p-12 text-center"
+          style={{ 
+            background: 'linear-gradient(135deg, rgba(22, 27, 34, 0.98) 0%, rgba(13, 17, 23, 0.98) 100%)',
+            border: '1px solid rgba(48, 54, 61, 0.8)',
+            boxShadow: '0 0 0 1px rgba(255,255,255,0.05), 0 25px 50px -12px rgba(0,0,0,0.8)'
+          }}
+        >
+          {/* Close button */}
+          <button 
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-700/50 transition-colors text-gray-400 hover:text-white"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
 
+          {/* Logo */}
+          <div className="mb-6">
+            <div 
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold"
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(56, 189, 248, 0.2) 100%)',
+                border: '1px solid rgba(34, 197, 94, 0.3)'
+              }}
+            >
+              <span className="text-emerald-400">●</span>
+              <span className="text-white">BrevardBidderAI</span>
+              <span className="text-gray-500">v13.4.0</span>
+            </div>
+          </div>
+
+          {/* Founder Introduction */}
+          <div className="mb-8">
+            <div className="text-gray-400 text-sm uppercase tracking-widest mb-3">Created by</div>
+            <h2 className="text-3xl font-bold text-white mb-2">Ariel Shapira</h2>
+            <div className="text-lg text-gray-300 mb-4">
+              Real Estate Developer & Founder, Everest Capital USA
+            </div>
+            <div 
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm"
+              style={{ background: 'rgba(251, 191, 36, 0.1)', border: '1px solid rgba(251, 191, 36, 0.3)' }}
+            >
+              <span className="text-amber-400">⚡</span>
+              <span className="text-amber-300">20+ Years Investing, Developing & Building in Florida</span>
+            </div>
+          </div>
+
+          {/* Tagline */}
+          <div className="mb-10">
+            <p className="text-xl text-gray-300 italic">
+              "I built this because I was tired of guessing at auctions."
+            </p>
+            <p className="text-gray-500 mt-2">
+              Not polished. Not perfect. <span className="text-emerald-400 font-semibold">Just real.</span>
+            </p>
+          </div>
+
+          {/* CTA */}
+          <button
+            onClick={handleSkipIntro}
+            className="px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105"
+            style={{
+              background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+              color: '#000',
+              boxShadow: '0 4px 20px rgba(34, 197, 94, 0.4)'
+            }}
+          >
+            Watch the 12-Stage Pipeline →
+          </button>
+
+          <div className="mt-6 text-sm text-gray-500">
+            Built by an investor, for investors
+          </div>
+
+          {/* Auto-skip indicator */}
+          <div className="mt-8 flex items-center justify-center gap-2 text-xs text-gray-600">
+            <div className="w-16 h-1 rounded-full overflow-hidden bg-gray-800">
+              <div 
+                className="h-full bg-emerald-500 animate-pulse"
+                style={{ animation: 'grow 4s linear forwards' }}
+              />
+            </div>
+            <span>Starting automatically...</span>
+          </div>
+        </div>
+
+        <style>{`
+          @keyframes grow {
+            from { width: 0%; }
+            to { width: 100%; }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  // ============ COMPLETION SCREEN ============
+  if (phase === 'complete') {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.95)' }}>
+        <div className="absolute inset-0 backdrop-blur-sm" onClick={onClose} />
+        
+        <div 
+          className="relative w-full max-w-3xl rounded-2xl overflow-hidden p-12 text-center"
+          style={{ 
+            background: 'linear-gradient(135deg, rgba(22, 27, 34, 0.98) 0%, rgba(13, 17, 23, 0.98) 100%)',
+            border: '1px solid rgba(34, 197, 94, 0.5)',
+            boxShadow: '0 0 40px rgba(34, 197, 94, 0.2), 0 25px 50px -12px rgba(0,0,0,0.8)'
+          }}
+        >
+          {/* Close button */}
+          <button 
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 rounded-lg hover:bg-gray-700/50 transition-colors text-gray-400 hover:text-white"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Success Icon */}
+          <div className="mb-6">
+            <div 
+              className="inline-flex items-center justify-center w-20 h-20 rounded-full"
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%)',
+                border: '2px solid rgba(34, 197, 94, 0.5)'
+              }}
+            >
+              <svg className="w-10 h-10 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Result Summary */}
+          <h2 className="text-3xl font-bold text-white mb-4">Analysis Complete</h2>
+          
+          <div 
+            className="inline-block px-6 py-3 rounded-xl mb-6"
+            style={{ background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.3)' }}
+          >
+            <div className="text-sm text-gray-400 uppercase tracking-wider">Recommendation</div>
+            <div className="text-4xl font-bold text-emerald-400">{analysisData.recommendation}</div>
+            <div className="text-gray-400 mt-1">Max Bid: <span className="text-amber-400 font-mono">${analysisData.maxBid.toLocaleString()}</span></div>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4 mb-8">
+            <div className="p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
+              <div className="text-2xl font-bold text-cyan-400">12</div>
+              <div className="text-xs text-gray-500">Stages Run</div>
+            </div>
+            <div className="p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
+              <div className="text-2xl font-bold text-amber-400">38</div>
+              <div className="text-xs text-gray-500">Docs Analyzed</div>
+            </div>
+            <div className="p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
+              <div className="text-2xl font-bold text-emerald-400">4</div>
+              <div className="text-xs text-gray-500">Liens Found</div>
+            </div>
+          </div>
+
+          {/* Quote */}
+          <div className="mb-8 p-4 rounded-lg" style={{ background: 'rgba(255,255,255,0.02)' }}>
+            <p className="text-gray-300 italic">
+              "This analysis used to take me 4+ hours. Now it takes 23 seconds."
+            </p>
+            <p className="text-sm text-gray-500 mt-2">— Ariel Shapira, Solo Founder</p>
+          </div>
+
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              onClick={handleRestart}
+              className="px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105"
+              style={{
+                background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                color: '#000',
+                boxShadow: '0 4px 20px rgba(34, 197, 94, 0.4)'
+              }}
+            >
+              <span className="flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Watch Again
+              </span>
+            </button>
+            
+            <button
+              onClick={onClose}
+              className="px-6 py-3 rounded-xl font-semibold transition-all"
+              style={{ border: '1px solid rgba(48, 54, 61, 0.8)', color: '#9ca3af' }}
+            >
+              Back to Site
+            </button>
+          </div>
+
+          {/* Final Tagline */}
+          <div className="mt-8 pt-6" style={{ borderTop: '1px solid rgba(48, 54, 61, 0.5)' }}>
+            <div className="text-sm text-gray-500 mb-2">Agentic AI Ecosystem for Foreclosure Auctions</div>
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-emerald-400 font-semibold">BrevardBidderAI</span>
+              <span className="text-gray-600">|</span>
+              <span className="text-gray-400">Built by an investor, for investors</span>
+            </div>
+            <a 
+              href="https://linkedin.com/in/ariel-shapira-533a776" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 mt-3 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+              Connect with Ariel
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ============ MAIN PIPELINE SCREEN ============
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.9)' }}>
       {/* Backdrop blur */}
@@ -142,8 +396,13 @@ const AnimatedDemo = ({ onClose }) => {
           </div>
           
           <div className="flex items-center gap-4">
+            {/* Founder Badge */}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full text-xs" style={{ background: 'rgba(251, 191, 36, 0.1)', border: '1px solid rgba(251, 191, 36, 0.2)' }}>
+              <span className="text-amber-400">⚡</span>
+              <span className="text-amber-300">Ariel Shapira</span>
+            </div>
             <span className="text-xs font-semibold text-emerald-400">
-              {isComplete ? '✓ COMPLETE' : isPlaying ? '● LIVE' : '❚❚ PAUSED'}
+              {isPlaying ? '● LIVE' : '❚❚ PAUSED'}
             </span>
             <span className="text-xs text-gray-500 font-mono">v13.4.0</span>
             <button 
@@ -181,13 +440,12 @@ const AnimatedDemo = ({ onClose }) => {
             }}
           >
             <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
-              Pipeline Stages
+              12-Stage Pipeline
             </div>
             <div className="space-y-1">
               {stages.map((stage, idx) => {
                 const isActive = idx === currentStage;
                 const isCompleted = idx < currentStage;
-                const isPending = idx > currentStage;
                 
                 return (
                   <div 
@@ -319,7 +577,7 @@ const AnimatedDemo = ({ onClose }) => {
                 {currentStage >= 6 && (
                   <>
                     <div className="text-cyan-400">→ ML Prediction: {analysisData.mlScore}% third-party probability</div>
-                    <div className="text-gray-500 pl-4">Model: XGBoost v3.2 | Accuracy: 64.4%</div>
+                    <div className="text-gray-500 pl-4">Model: BrevardBidderAI ML | Accuracy: 64.4%</div>
                   </>
                 )}
                 {currentStage >= 7 && (
@@ -349,11 +607,6 @@ const AnimatedDemo = ({ onClose }) => {
                     </div>
                   </div>
                 )}
-                {isComplete && (
-                  <div className="mt-4 text-emerald-400">
-                    ✓ Pipeline complete. Report generated. Archived to Supabase.
-                  </div>
-                )}
               </div>
             </div>
 
@@ -367,7 +620,7 @@ const AnimatedDemo = ({ onClose }) => {
             >
               <div className="flex items-center gap-3">
                 <button
-                  onClick={isComplete ? handleRestart : togglePlayPause}
+                  onClick={togglePlayPause}
                   className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
                   style={{
                     background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
@@ -375,14 +628,7 @@ const AnimatedDemo = ({ onClose }) => {
                     boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)'
                   }}
                 >
-                  {isComplete ? (
-                    <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                      Run Again
-                    </>
-                  ) : isPlaying ? (
+                  {isPlaying ? (
                     <>
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
@@ -415,6 +661,13 @@ const AnimatedDemo = ({ onClose }) => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Watermark */}
+        <div 
+          className="absolute bottom-4 right-4 text-xs text-gray-600 font-mono opacity-50"
+        >
+          BrevardBidderAI • Built by Ariel Shapira
         </div>
       </div>
     </div>
