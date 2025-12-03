@@ -14,35 +14,80 @@
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://brevard-bidder-site.vercel.app/" />
+    <meta property="og:url" content="https://brevard-bidder-landing-v2.vercel.app/" />
     <meta property="og:title" content="BrevardBidderAI | Stop Guessing at Foreclosure Auctions" />
     <meta property="og:description" content="12-stage AI pipeline transforms 4-hour research into 23-second intelligence. Built by an investor with 20+ years Florida experience." />
     <meta property="og:site_name" content="BrevardBidderAI" />
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://brevard-bidder-site.vercel.app/" />
+    <meta name="twitter:url" content="https://brevard-bidder-landing-v2.vercel.app/" />
     <meta name="twitter:title" content="BrevardBidderAI | Foreclosure Intelligence" />
     <meta name="twitter:description" content="Agentic AI ecosystem for foreclosure auctions. 100x ROI. Built by investors, for investors." />
     
-    <!-- Google Fonts - Satoshi for headings, Inter for body -->
+    <!-- Premium Fonts: Clash Display (headlines) + DM Sans (body) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Preload critical fonts -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style">
+    <!-- Fontshare Clash Display - Premium Display Font -->
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@200,300,400,500,600,700&display=swap" rel="stylesheet">
     
     <style>
-      /* Font loading optimization */
+      /* Premium Typography System */
+      :root {
+        --font-display: 'Clash Display', 'DM Sans', system-ui, sans-serif;
+        --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+      }
+      
       body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-family: var(--font-body);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-display);
+      }
+      
+      code, pre, .font-mono {
+        font-family: var(--font-mono);
+      }
+      
+      /* Smooth scrolling */
+      html {
+        scroll-behavior: smooth;
+      }
+      
+      /* Custom selection */
+      ::selection {
+        background: rgb(245, 158, 11);
+        color: black;
       }
       
       /* Prevent FOUC */
       html {
         visibility: visible;
         opacity: 1;
+      }
+      
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 10px;
+      }
+      
+      ::-webkit-scrollbar-track {
+        background: rgb(15, 23, 42);
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: rgb(51, 65, 85);
+        border-radius: 5px;
+      }
+      
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgb(245, 158, 11);
       }
     </style>
   </head>
