@@ -435,7 +435,7 @@ const App = () => {
             </span>
           </div>
           <div className="text-blue-600 text-sm">
-            © 2025 Everest Capital of Brevard LLC. All rights reserved.
+            © 2025 Ariel Shapira. All rights reserved.
           </div>
         </div>
       </footer>
