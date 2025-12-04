@@ -1,72 +1,99 @@
-# BrevardBidderAI Landing Page
+# BrevardBidderAI Landing Page - Version History
 
-## Version 3.0.0 - "$1M Homepage" Edition
-**Released:** December 3, 2025  
-**Built by:** Ariel Shapira - Real Estate Developer & Founder, Everest Capital USA
+## Current Version: V3.2.0 (December 3, 2025)
 
-### 🎨 Design Revolution
-This release implements the "frontend-design" skill methodology for a premium, production-grade aesthetic.
-
-### What's New
-
-#### Premium Typography
-- **Headlines:** Clash Display (Fontshare) - distinctive, bold display font
-- **Body:** DM Sans - clean, readable sans-serif
-- **Mono:** JetBrains Mono - technical elements
-- Removed generic fonts (Inter, Roboto, Arial)
-
-#### Visual Effects
-- Mesh gradient backgrounds with depth
-- Noise texture overlay for premium feel
-- Custom cursor glow effect (follows mouse)
-- Floating particle animations
-- Grid pattern underlays
-
-#### Animations
-- Staggered reveal animations (Framer Motion)
-- Glow effects on card hovers
-- Pulse indicators for live status
-- Smooth scroll progress indicators
-- Button shine animations
-
-#### Layout Improvements
-- Asymmetric hero section with floating stats
-- Grid-breaking elements for visual interest
-- Better mobile responsiveness
-- Premium card components with glow states
-
-#### UX Enhancements
-- Custom scrollbar styling (amber accent)
-- Enhanced selection colors
-- Smoother transitions (cubic-bezier easing)
-- Reduced motion support for accessibility
-
-### Technical Details
-- React 18 + Vite
-- Framer Motion for animations
-- Tailwind CSS for styling
-- Fontshare + Google Fonts for typography
-- Auto-deploy via Vercel + GitHub
-
-### Previous Versions
-
-#### V2.2.0 (December 2, 2025)
-- AnimatedDemo component
-- Waitlist form with localStorage
-- 12-stage pipeline visualization
-- Social proof stats
-
-#### V2.1.0 (December 1, 2025)
-- Initial Vercel deployment
-- Basic responsive layout
-- Founder section
-- Feature cards
+**Commit:** 6a44bd7  
+**Author:** Ariel Shapira - Solo Founder  
+**Live URL:** https://brevard-bidder-landing-v2.vercel.app
 
 ---
 
-**Live at:** https://brevard-bidder-landing-v2.vercel.app
+## V3.2.0 - "Obsidian Vault" Premium Hero (Dec 3, 2025)
 
-**Credits:**
-- Design System: Frontend Design Skill (Anthropic)
-- Implementation: Claude Code
-- Product Owner: Ariel Shapira
+### Hero Section Redesign
+- **Animated Gradient Orbs**: 3 breathing luminous spheres (amber & emerald) with organic movement
+- **Glass Morphism Stats Card**: Frosted glass effect with inner glow line and backdrop blur
+- **Light Beam Accents**: Subtle vertical atmospheric light beams
+- **Diagonal SVG Lines**: Gold diagonal accents for dynamic composition
+- **Floating Decorative Rings**: Slowly rotating ornamental circles around stats card
+
+### Typography Upgrades
+- **Editorial Weight Contrast**: "Distressed Assets." lighter, "Decoded." bold animated gradient
+- **Massive Headlines**: Scaled to 6-7rem for dramatic impact
+- **Gradient Mission Statement**: Emerald gradient text with left accent bar
+- **Animated Underline**: Pulsing gold underline on "23-second intelligence"
+
+### Stats Card Premium Features
+- **Individual Stat Cards**: Hover lift animation with glow effects
+- **Gradient Stat Values**: Gold/emerald gradients with drop shadows
+- **Pulsing Live Badge**: Animated glow on "Live in Brevard County"
+- **Floating "100x ROI" Badge**: Tilted accent badge with entrance animation
+
+### Trust Indicators Added
+- AES-256 Encrypted (shield icon)
+- 1,393+ Auctions Analyzed (star icon)
+- 50+ on waitlist (pulse indicator)
+
+---
+
+## V3.1.0 - AnimatedDemo Fixes (Dec 3, 2025)
+
+### Bug Fixes
+- **Fixed demo modal not opening**: Removed unused isOpen prop check
+- **Fixed pipeline not progressing**: Replaced useGSAP with useEffect
+- **Simplified AnimatedDemo**: Pure framer-motion, no GSAP/Lottie conflicts
+
+### AnimatedDemo Features
+- 12-stage pipeline visualization working
+- Terminal output with live updates
+- Progress bar animation
+- Completion screen with stats (~10s runtime)
+
+---
+
+## V3.0.1 - Navy Blue Restoration (Dec 3, 2025)
+
+- Restored navy blue background (blue-950)
+- Fixed 16 color references in App.jsx
+- Added "For Everyone. Everywhere." tagline prominently
+
+---
+
+## V3.0.0 - Premium Design Overhaul (Dec 3, 2025)
+
+- Clash Display + DM Sans typography
+- Mesh gradients, noise textures
+- Custom scrollbar, floating particles
+- WCAG reduced motion support
+
+---
+
+## Development Environment Setup (Dec 3, 2025)
+
+### Quick Install
+```powershell
+npm install -g @anthropic-ai/claude-code
+npx claude-plugins install @anthropics/claude-code-plugins/frontend-design
+```
+
+### Git Config
+- Email: Brevardbidderai@gmail.com
+- Name: Ariel Shapira
+
+### Aliases
+- bba, bba-landing, bba-scraper
+
+---
+
+## Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| Framework | React 18 + Vite |
+| Styling | Tailwind CSS 3.4 |
+| Animation | Framer Motion 11 |
+| Hosting | Vercel (auto-deploy) |
+
+---
+
+© 2025 Ariel Shapira, Solo Founder - Everest Capital USA
