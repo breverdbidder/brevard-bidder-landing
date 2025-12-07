@@ -1,30 +1,28 @@
 # BrevardBidderAI Landing Page
 
-## Version 3.4.0
-
-**Release Date:** December 7, 2025
+## Version 3.5.0
+**Date:** December 7, 2025
 
 ### What's New
+- **NextAuction Component**: Live countdown to Dec 10, 2025 auction
+- **Featured Properties**: Preview of 4 properties with recommendations
+- **Download Report CTA**: Direct link to DOCX report artifacts
 
-#### AI Live Demo Section
-- **NEW:** Live AI analysis demo powered by Fara V8
-- Real-time TinyLlama-1.1B inference on Tesla T4 GPU
-- Interactive property selector with 3 demo properties
-- Shows AI health status, risk levels, and analysis output
+### Components
+- `PremiumHero.jsx` - Hero section with value proposition
+- `AnimatedDemo.jsx` - Interactive demo animation
+- `AILiveDemo.jsx` - Live Fara V8 AI inference demo
+- `NextAuction.jsx` - Upcoming auction countdown (NEW)
 
-#### Fara V8 Integration
-- Modal endpoint: `brevardbidderai-fara-v8`
-- Features: Health check, GPU health, Generate, Analyze
-- ~15 second inference time on cold start
+### Deployment
+- **Live URL**: https://brevard-bidder-landing-v2.vercel.app
+- **Auto-deploy**: Push to main → Vercel builds automatically
 
-### Previous Versions
-
-- **V3.3.0** - Premium hero section, social proof bar
-- **V3.0.0** - "$1M Homepage" design system overhaul
-- **V2.0.0** - 12-stage pipeline visualization
-- **V1.0.0** - Initial launch
+### Stack
+- React + Vite
+- Tailwind CSS
+- Framer Motion
+- Lucide Icons
 
 ---
-
-**Author:** Ariel Shapira, Solo Founder  
-**Company:** Everest Capital of Brevard LLC
+**Built by Ariel Shapira - Real Estate Developer & Founder, Everest Capital USA**
