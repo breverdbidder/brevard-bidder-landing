@@ -1,4 +1,4 @@
-// BrevardBidderAI Landing Page V3.0.0 - "$1M Homepage" Edition
+// BrevardBidderAI Landing Page V3.4.0 - "$1M Homepage" Edition
 // Built by Ariel Shapira - Real Estate Developer & Founder, Everest Capital USA
 // Design System: Luxury Data Terminal - Industrial Fintech Aesthetic
 
@@ -6,6 +6,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import AnimatedDemo from './AnimatedDemo';
 import PremiumHero from './PremiumHero';
+import AILiveDemo from './AILiveDemo';
 
 // ============ ANIMATION VARIANTS ============
 const fadeInUp = {
@@ -393,7 +394,7 @@ const App = () => {
               <span className="text-xl font-bold tracking-tight">
                 BrevardBidder<span className="text-amber-400">AI</span>
               </span>
-              <span className="ml-3 px-2 py-0.5 bg-blue-800 rounded text-xs font-mono text-blue-200/70">V13.4.0</span>
+              <span className="ml-3 px-2 py-0.5 bg-blue-800 rounded text-xs font-mono text-blue-200/70">V14.4.0</span>
             </div>
           </motion.div>
           
@@ -538,6 +539,8 @@ const App = () => {
           </motion.div>
         </div>
       </Section>
+      {/* ============ AI LIVE DEMO SECTION ============ */}
+      <AILiveDemo />
 
       {/* ============ PIPELINE SECTION ============ */}
       <Section id="pipeline" className="relative z-10 px-6 py-32 bg-blue-900/50">
@@ -771,7 +774,7 @@ const App = () => {
                 <span className="text-white font-bold">
                   BrevardBidder<span className="text-amber-400">AI</span>
                 </span>
-                <span className="ml-2 text-blue-400/50 text-sm font-mono">V13.4.0</span>
+                <span className="ml-2 text-blue-400/50 text-sm font-mono">V14.4.0</span>
               </div>
             </div>
             
