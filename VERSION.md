@@ -1,58 +1,30 @@
-# BrevardBidderAI Landing Page - Version History
+# BrevardBidderAI Landing Page
 
-## Current Version: V3.4.0 (December 7, 2025)
+## Version 3.4.0
 
-**Commit:** Auto-deploy from main  
-**Author:** Ariel Shapira - Solo Founder  
-**Live URL:** https://brevard-bidder-landing-v2.vercel.app
+**Release Date:** December 7, 2025
 
----
+### What's New
 
-## V3.4.0 - Backend V8 FULLY OPERATIONAL (Dec 7, 2025)
+#### AI Live Demo Section
+- **NEW:** Live AI analysis demo powered by Fara V8
+- Real-time TinyLlama-1.1B inference on Tesla T4 GPU
+- Interactive property selector with 3 demo properties
+- Shows AI health status, risk levels, and analysis output
 
-### 🎉 ALL ENDPOINTS WORKING
+#### Fara V8 Integration
+- Modal endpoint: `brevardbidderai-fara-v8`
+- Features: Health check, GPU health, Generate, Analyze
+- ~15 second inference time on cold start
 
-| Endpoint | Status | URL |
-|----------|--------|-----|
-| Health | ✅ LIVE | `GET .../health.modal.run` |
-| GPU Health | ✅ LIVE | `GET .../gpu-health.modal.run` |
-| Generate | ✅ LIVE | `POST .../generate.modal.run` |
-| Analyze | ✅ LIVE | `POST .../analyze.modal.run` |
+### Previous Versions
 
-### Backend Specs
-- **Model:** TinyLlama-1.1B-Chat-v1.0
-- **GPU:** Tesla T4 (16GB VRAM)
-- **CUDA:** 12.8
-- **PyTorch:** 2.9.1
-- **Volume:** fara-model-cache (persistent)
-
-### What Fixed V8
-1. Added Modal Volume for model caching
-2. Comprehensive error handling with tracebacks
-3. Cleaned up old apps (freed endpoint slots)
+- **V3.3.0** - Premium hero section, social proof bar
+- **V3.0.0** - "$1M Homepage" design system overhaul
+- **V2.0.0** - 12-stage pipeline visualization
+- **V1.0.0** - Initial launch
 
 ---
 
-## V3.3.0 - Backend V14.2.1 Integration (Dec 7, 2025)
-- Initial V7 deployment with health endpoints working
-- Generate/Analyze debugging
-
-## V3.2.0 - "Obsidian Vault" Premium Hero (Dec 3, 2025)
-- Animated gradient orbs, glass morphism
-- Editorial typography, floating decorative rings
-
----
-
-## Tech Stack
-
-| Component | Technology |
-|-----------|------------|
-| Framework | React 18 + Vite |
-| Styling | Tailwind CSS 3.4 |
-| Animation | Framer Motion 11 |
-| Backend | Modal (TinyLlama T4) |
-| Hosting | Vercel (auto-deploy) |
-
----
-
-© 2025 Ariel Shapira, Solo Founder - Everest Capital USA
+**Author:** Ariel Shapira, Solo Founder  
+**Company:** Everest Capital of Brevard LLC
