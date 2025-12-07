@@ -1,4 +1,4 @@
-// BrevardBidderAI Landing Page V3.4.0 - "$1M Homepage" Edition
+// BrevardBidderAI Landing Page V3.5.0 - "$1M Homepage" Edition
 // Built by Ariel Shapira - Real Estate Developer & Founder, Everest Capital USA
 // Design System: Luxury Data Terminal - Industrial Fintech Aesthetic
 
@@ -7,6 +7,7 @@ import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'fra
 import AnimatedDemo from './AnimatedDemo';
 import PremiumHero from './PremiumHero';
 import AILiveDemo from './AILiveDemo';
+import NextAuction from './NextAuction';
 
 // ============ ANIMATION VARIANTS ============
 const fadeInUp = {
@@ -541,6 +542,7 @@ const App = () => {
       </Section>
       {/* ============ AI LIVE DEMO SECTION ============ */}
       <AILiveDemo />
+      <NextAuction />
 
       {/* ============ PIPELINE SECTION ============ */}
       <Section id="pipeline" className="relative z-10 px-6 py-32 bg-blue-900/50">
