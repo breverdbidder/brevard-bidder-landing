@@ -1,62 +1,147 @@
-// BrevardBidderAI - Auction Data API with Fallback
-export const config = { runtime: 'edge' };
+// BrevardBidderAI - Real Auction Data API
+// Connected to Supabase: mocerqjnksmhcjzxrewo.supabase.co
+// Author: Ariel Shapira, Solo Founder, Everest Capital USA
+
+export const config = {
+  runtime: 'edge',
+};
 
 const SUPABASE_URL = 'https://mocerqjnksmhcjzxrewo.supabase.co';
-
-// Real Dec 3, 2025 auction results (fallback data)
-const DEC3_FALLBACK = [
-  { id: 1, case_number: "05-2024-CA-030114", address: "110 CROWN AVE", city: "PALM BAY", zip: "32907", lat: 28.0345, lng: -80.5887, sqft: 2834, year_built: 2021, beds: 5, baths: 3, market_value: 388760, judgment: 217694, max_bid: 217694, ml_score: 84, recommendation: "BID", roi: 88.86, photo_url: "https://www.bcpao.us/photos/28/2840720011.jpg", plaintiff: "NATIONSTAR", result: "SOLD", sold_price: 245000, auction_date: "2025-12-03" },
-  { id: 2, case_number: "05-2024-CA-040857", address: "1505 WATROUS DR", city: "TITUSVILLE", zip: "32780", lat: 28.6122, lng: -80.8076, sqft: 1164, year_built: 1966, beds: 2, baths: 2, market_value: 171870, judgment: 42341, max_bid: 42341, ml_score: 92, recommendation: "BID", roi: 267.34, photo_url: "https://www.bcpao.us/photos/22/2208343011.jpg", plaintiff: "WRIGHT CAPITAL", result: "SOLD", sold_price: 48500, auction_date: "2025-12-03" },
-  { id: 3, case_number: "05-2025-CA-029370", address: "180 LEE RD", city: "WEST MELBOURNE", zip: "32904", lat: 28.0756, lng: -80.6531, sqft: 1226, year_built: 1959, beds: 3, baths: 2, market_value: 163650, judgment: 39095, max_bid: 39095, ml_score: 89, recommendation: "BID", roi: 293.66, photo_url: "https://www.bcpao.us/photos/28/2819983011.jpg", plaintiff: "B-MUSED", result: "SOLD", sold_price: 52000, auction_date: "2025-12-03" },
-  { id: 4, case_number: "05-2024-CA-029012", address: "2450 PALM BAY RD NE", city: "PALM BAY", zip: "32905", lat: 28.0442, lng: -80.5912, sqft: 1500, year_built: 2018, beds: 3, baths: 2, market_value: 274440, judgment: 185000, max_bid: 143386, ml_score: 73, recommendation: "BID", roi: 82.78, photo_url: "https://www.bcpao.us/photos/28/2815672011.jpg", plaintiff: "FREEDOM MORTGAGE", result: "BANK", auction_date: "2025-12-03" },
-  { id: 5, case_number: "05-2024-CA-038092", address: "3711 BRANTLEY CIR", city: "ROCKLEDGE", zip: "32955", lat: 28.3514, lng: -80.7273, sqft: 2089, year_built: 2014, beds: 4, baths: 2.5, market_value: 381510, judgment: 322244, max_bid: 193906, ml_score: 60, recommendation: "REVIEW", roi: 45.2, photo_url: "https://www.bcpao.us/photos/25/2537264011.jpg", plaintiff: "COMMUNITY", result: "CANCELLED", auction_date: "2025-12-03" },
-  { id: 6, case_number: "05-2024-CA-051000", address: "5600 GRAHAM ST", city: "COCOA", zip: "32927", lat: 28.4189, lng: -80.8012, sqft: 1379, year_built: 1986, beds: 3, baths: 2, market_value: 279230, judgment: 139612, max_bid: 104615, ml_score: 71, recommendation: "REVIEW", roi: 96.47, photo_url: "https://www.bcpao.us/photos/23/2304701011.jpg", plaintiff: "HALLMARK", result: "SOLD", sold_price: 165000, auction_date: "2025-12-03" },
-  { id: 7, case_number: "05-2024-CA-038977", address: "1060 ARON ST", city: "COCOA", zip: "32927", lat: 28.3867, lng: -80.7523, sqft: 1008, year_built: 1983, beds: 2, baths: 1.5, market_value: 198820, judgment: 159572, max_bid: 54469, ml_score: 34, recommendation: "SKIP", roi: 12.5, photo_url: "https://www.bcpao.us/photos/23/2310706011.jpg", plaintiff: "LAKEVIEW", result: "BANK", auction_date: "2025-12-03" },
-  { id: 8, case_number: "05-2024-CA-021494", address: "1160 TIGER ST", city: "PALM BAY", zip: "32909", lat: 27.9876, lng: -80.6234, sqft: 1698, year_built: 2009, beds: 3, baths: 2, market_value: 253150, judgment: 346321, max_bid: 116890, ml_score: 28, recommendation: "SKIP", roi: -15.2, photo_url: "https://www.bcpao.us/photos/29/2935858011.jpg", plaintiff: "US BANK", result: "BANK", auction_date: "2025-12-03" }
-];
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vY2VycWpua3NtaGNqenhyZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI1MzI1MjYsImV4cCI6MjA0ODEwODUyNn0.H9PVK06G5j_diedMHhPI-XOjRNgcMBq0r1BqZO5hZTc';
 
 export default async function handler(req) {
-  const url = new URL(req.url);
-  const date = url.searchParams.get('date');
-  const status = url.searchParams.get('status');
-  
-  const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
-  
-  // Try Supabase first
-  if (SUPABASE_KEY) {
-    try {
-      let query = SUPABASE_URL + '/rest/v1/auction_results?select=*';
-      if (date) query += '&auction_date=eq.' + date;
-      query += '&order=auction_date.desc&limit=50';
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    // Get URL params
+    const url = new URL(req.url);
+    const auctionDate = url.searchParams.get('date');
+    const limit = parseInt(url.searchParams.get('limit') || '50');
+    
+    // Try auction_results first (latest scraped data)
+    let query = `${SUPABASE_URL}/rest/v1/auction_results?select=*&order=auction_date.desc,judgment_amount.desc&limit=${limit}`;
+    
+    if (auctionDate) {
+      query += `&auction_date=eq.${auctionDate}`;
+    }
+
+    let response = await fetch(query, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    let auctions = [];
+    
+    if (response.ok) {
+      auctions = await response.json();
+    }
+
+    // If no auction_results, try historical_auctions
+    if (auctions.length === 0) {
+      const histQuery = `${SUPABASE_URL}/rest/v1/historical_auctions?select=*&order=auction_date.desc,judgment_amount.desc&limit=${limit}`;
       
-      const response = await fetch(query, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
+      response = await fetch(histQuery, {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
       });
-      
+
       if (response.ok) {
-        const data = await response.json();
-        if (data.length > 0) {
-          return new Response(JSON.stringify({ success: true, source: 'supabase', count: data.length, data }), {
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-          });
-        }
+        auctions = await response.json();
       }
-    } catch (e) { console.log('Supabase error, using fallback'); }
+    }
+
+    // Transform data to consistent format
+    const formattedAuctions = auctions.map(a => ({
+      case_number: a.case_number || a.case_id,
+      property_address: a.property_address || a.address || 'Address TBD',
+      auction_date: a.auction_date,
+      judgment_amount: parseFloat(a.judgment_amount) || 0,
+      opening_bid: parseFloat(a.opening_bid) || parseFloat(a.judgment_amount) * 0.75 || 0,
+      plaintiff: a.plaintiff || a.plaintiff_name || 'Unknown',
+      defendant: a.defendant || a.defendant_name || 'Unknown',
+      recommendation: calculateRecommendation(a),
+      ml_probability: a.ml_probability || a.third_party_probability || null,
+      bid_judgment_ratio: a.bid_judgment_ratio || null,
+      photo_url: a.photo_url || a.bcpao_photo || null,
+      property_type: a.property_type || 'SFR',
+      market_value: parseFloat(a.market_value) || null,
+      max_bid: a.max_bid || null,
+      status: a.status || 'scheduled',
+    }));
+
+    // Calculate summary stats
+    const stats = {
+      total: formattedAuctions.length,
+      bid: formattedAuctions.filter(a => a.recommendation === 'BID').length,
+      review: formattedAuctions.filter(a => a.recommendation === 'REVIEW').length,
+      skip: formattedAuctions.filter(a => a.recommendation === 'SKIP').length,
+      totalJudgment: formattedAuctions.reduce((sum, a) => sum + (a.judgment_amount || 0), 0),
+      avgJudgment: formattedAuctions.length > 0 
+        ? formattedAuctions.reduce((sum, a) => sum + (a.judgment_amount || 0), 0) / formattedAuctions.length 
+        : 0,
+    };
+
+    // Get unique auction dates
+    const auctionDates = [...new Set(formattedAuctions.map(a => a.auction_date).filter(Boolean))].sort().reverse();
+
+    return new Response(JSON.stringify({
+      success: true,
+      source: 'supabase',
+      timestamp: new Date().toISOString(),
+      stats,
+      auctionDates,
+      auctions: formattedAuctions,
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('Supabase error:', error);
+    
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      source: 'error',
+      auctions: [],
+      stats: { total: 0, bid: 0, review: 0, skip: 0 },
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
+}
+
+function calculateRecommendation(auction) {
+  // If already has recommendation, use it
+  if (auction.recommendation) return auction.recommendation;
   
-  // Fallback to embedded real data
-  let filteredData = DEC3_FALLBACK;
-  if (date && date !== '2025-12-03') {
-    filteredData = []; // Only have Dec 3 data in fallback
-  }
+  // Calculate based on bid/judgment ratio
+  const ratio = auction.bid_judgment_ratio || 
+    (auction.opening_bid && auction.judgment_amount 
+      ? (auction.opening_bid / auction.judgment_amount) * 100 
+      : null);
   
-  return new Response(JSON.stringify({
-    success: true,
-    source: 'fallback',
-    message: 'Real Dec 3, 2025 auction data',
-    count: filteredData.length,
-    data: filteredData
-  }), {
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
-  });
+  if (ratio === null) return 'REVIEW';
+  
+  // BrevardBidderAI formula:
+  // BID: ratio >= 75%
+  // REVIEW: ratio 60-74%
+  // SKIP: ratio < 60%
+  if (ratio >= 75) return 'BID';
+  if (ratio >= 60) return 'REVIEW';
+  return 'SKIP';
 }
