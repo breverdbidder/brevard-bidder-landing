@@ -8,6 +8,7 @@ import AnimatedDemo from './AnimatedDemo';
 import PremiumHero from './PremiumHero';
 import AILiveDemo from './AILiveDemo';
 import NextAuction from './NextAuction';
+import DemoButton from './DemoButton';
 
 // ============ ANIMATION VARIANTS ============
 const fadeInUp = {
@@ -793,6 +794,9 @@ const App = () => {
           </div>
         </div>
       </footer>
+
+      {/* Demo CTA Button */}
+      <DemoButton />
 
       {/* Animated Demo Modal */}
       <AnimatePresence>
