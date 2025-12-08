@@ -1,103 +1,92 @@
-# AI ARCHITECT RULES - PERMANENT INSTRUCTIONS
+# BrevardBidderAI - AI Architect Rules
+## Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
-## CRITICAL: SESSION CONTINUITY PROTOCOL
+## NEW SESSION PROTOCOL (MANDATORY)
 
-**NEVER REMOVE THESE RULES. They solve a critical bottleneck.**
-
-### On Every New Chat
-
-1. **FIRST ACTION:** Run `python skills/session-continuity/scripts/resume.py --prompt-only`
-2. If active checkpoint found → Load and continue WITHOUT asking permission
-3. If no checkpoint → Proceed normally
-
-### During Long Tasks (8+ Tool Calls)
-
-1. **AUTO-CHECKPOINT:** Save state to Supabase automatically
-2. No user trigger needed - this is Claude's responsibility
-3. Checkpoint after each major milestone
-
-### Credentials
-
-- Supabase credentials: Embedded in scripts (see skills/session-continuity/scripts/)
-- GitHub token: Available in Claude's memory
-- Never commit tokens to this file (GitHub will reject)
-
-### Storage
-
-- Table: `activities` (activity_type='session_checkpoint')
-- Status: `active` or `completed`
-- Data: JSON in `notes` field
-
-### Commands
+**At the START of every new Claude session:**
 
 ```bash
-# Checkpoint
-python skills/session-continuity/scripts/checkpoint.py \
-  --task "Task description" \
-  --completed '["step1"]' \
-  --current "Current step" \
-  --next '["next1"]'
-
-# Resume
-python skills/session-continuity/scripts/resume.py --prompt-only
-
-# List checkpoints
-python skills/session-continuity/scripts/resume.py --list
-
-# Mark completed
-python skills/session-continuity/scripts/resume.py --complete-id <ID>
+# Check for active checkpoints
+python src/checkpoint_manager.py check
 ```
 
-## Other Rules
+- If checkpoint found → **Load state and continue WITHOUT asking**
+- If no checkpoint → Start fresh session
 
-1. Make autonomous decisions - minimize human-in-the-loop
-2. Update PROJECT_STATE.json for persistence
-3. Use GitHub as single source of truth
-4. curl verify before marking COMPLETED
+## AUTO-CHECKPOINT TRIGGERS
 
----
+Save checkpoint automatically when:
+1. **8+ tool calls** in current session
+2. **Before complex multi-step operations**
+3. **Context window approaching limit**
+4. **Before switching major tasks**
 
-**THIS FILE MUST NEVER BE DELETED. It solves the context limit bottleneck.**
-
----
-
-## MANDATORY: IP PROTECTION
-
-**EVERY new file MUST include the appropriate copyright header.**
-
-### JavaScript/JSX/TypeScript Files
-```javascript
-// BrevardBidderAI - Agentic AI for Foreclosure Auctions
-// Built by Ariel Shapira - Solo Founder
-// Real Estate Developer & Founder, Everest Capital USA
-// © 2025 All Rights Reserved - Proprietary IP
+### Save Command:
+```bash
+python src/checkpoint_manager.py save \
+  --task "Description of current work" \
+  --state '{"step": 3, "files": ["a.py"]}'
 ```
 
-### Python Files
-```python
-# BrevardBidderAI - Agentic AI for Foreclosure Auctions
-# Built by Ariel Shapira - Solo Founder
-# Real Estate Developer & Founder, Everest Capital USA
-# © 2025 All Rights Reserved - Proprietary IP
+### Complete Command:
+```bash
+python src/checkpoint_manager.py complete
 ```
 
-### Markdown/Documentation Files
-```markdown
-<!-- 
-BrevardBidderAI - Built by Ariel Shapira, Solo Founder
-© 2025 All Rights Reserved - Proprietary IP
--->
+## EXECUTION RULES
+
+1. **NEVER ask Ariel execution questions** - Execute autonomously
+2. **Debug failures yourself** - Fix code, retry
+3. **Zero human-in-loop** - This is Agentic AI
+4. **Update PROJECT_STATE.json** after major changes
+
+## TECH STACK
+
+| Component | Platform |
+|-----------|----------|
+| Code | GitHub (breverdbidder/*) |
+| Database | Supabase (mocerqjnksmhcjzxrewo) |
+| Frontend | Vercel (brevard-bidder-landing-v2) |
+| CI/CD | GitHub Actions |
+| Compute | GitHub Actions runners |
+
+## SUPABASE CREDENTIALS (Fallback)
+
+```
+URL: https://mocerqjnksmhcjzxrewo.supabase.co
+KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vY2VycWpua3NtaGNqenhyZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ1MzI1MjYsImV4cCI6MjA4MDEwODUyNn0.ySFJIOngWWB0aqYra4PoGFuqcbdHOx1ZV6T9-klKQDw
 ```
 
-### DOCX Reports (Footer)
-```
-© 2025 Ariel Shapira | Solo Founder, BrevardBidderAI | Everest Capital USA
+## API ENDPOINTS
+
+| Endpoint | Purpose |
+|----------|---------|
+| /api/auctions | Auction data |
+| /api/analyze | Smart Router |
+| /api/calendar | Auction schedule |
+| /api/checkpoint | Session state |
+
+## CHECKPOINT TABLE SCHEMA
+
+```sql
+CREATE TABLE session_checkpoints (
+    id SERIAL PRIMARY KEY,
+    session_id VARCHAR(100) UNIQUE NOT NULL,
+    task_description TEXT NOT NULL,
+    state_json JSONB DEFAULT '{}',
+    tool_calls_count INTEGER DEFAULT 0,
+    priority VARCHAR(20) DEFAULT 'medium',
+    status VARCHAR(20) DEFAULT 'active',
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    completed_at TIMESTAMPTZ
+);
 ```
 
-### Rules
-1. **NEVER** create a file without the IP header
-2. **ALWAYS** include "Ariel Shapira, Solo Founder" in visible UI elements
-3. **ALWAYS** include copyright in report footers
-4. This applies to BOTH BrevardBidderAI and BidDeedAI ecosystems
+## MEMORY RULES
 
----
+Always remember:
+- BrevardBidderAI = foreclosure auctions (NOT SaaS)
+- BidDeedAI = tax deed auctions
+- Credit: "Ariel Shapira, Solo Founder, Everest Capital USA"
+- NEVER use Google Drive - GitHub only
