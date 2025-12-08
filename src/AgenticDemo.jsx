@@ -1,365 +1,320 @@
-// BrevardBidderAI Agentic UI - Real Mapbox + Supabase Integration
-// Split-screen interface with live auction data
+// BrevardBidderAI Agentic UI Demo - Working Version
+// Split-screen with visual map and interactive features
 // Author: Ariel Shapira, Everest Capital USA
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 
-// Supabase config
-const SUPABASE_URL = 'https://mocerqjnksmhcjzxrewo.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vY2VycWpua3NtaGNqenhyZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk0MTE1MjYsImV4cCI6MjA2NDk4NzUyNn0.8eoTOj1b6vxvJ7VdShTvT8RS6WLuUhP6jd1lPBqJRpI';
-
-// Mapbox config  
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiYnJldmFyZGJpZGRlciIsImEiOiJjbTRvOHNiY3IwaGdxMmtzOGd3MWRqbjFzIn0.K1vPto_LT1fVYfnvLe_wdg';
-
-const STATUS_COLORS = {
-  BID: '#10B981',
-  REVIEW: '#F59E0B', 
-  SKIP: '#EF4444',
-};
-
-const SUGGESTED_PROMPTS = [
-  "Show all BID properties",
-  "Filter ML score > 70",
-  "What liens survive?",
-  "Show Dec 17 auction",
+// Demo properties with Brevard County locations
+const DEMO_PROPERTIES = [
+  { id: 1, address: '123 Ocean Blvd', city: 'Melbourne', zip: '32901', lat: 28.08, lng: -80.61, case_number: '05-2024-CA-012345', recommendation: 'BID', ml_score: 87, max_bid: 142000, judgment_amount: 189000, arv: 285000, repairs: 35000, sale_date: 'Dec 17, 2024', photo: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400' },
+  { id: 2, address: '456 Palm Dr', city: 'Satellite Beach', zip: '32937', lat: 28.18, lng: -80.59, case_number: '05-2024-CA-012346', recommendation: 'REVIEW', ml_score: 65, max_bid: 98000, judgment_amount: 145000, arv: 220000, repairs: 50000, sale_date: 'Dec 17, 2024', photo: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400' },
+  { id: 3, address: '789 Riverside Ave', city: 'Cocoa', zip: '32922', lat: 28.39, lng: -80.74, case_number: '05-2024-CA-012347', recommendation: 'SKIP', ml_score: 34, max_bid: 45000, judgment_amount: 210000, arv: 180000, repairs: 85000, sale_date: 'Dec 17, 2024', senior_lien: true, photo: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=400' },
+  { id: 4, address: '321 Banana River Dr', city: 'Merritt Island', zip: '32953', lat: 28.36, lng: -80.68, case_number: '05-2024-CA-012348', recommendation: 'BID', ml_score: 91, max_bid: 178000, judgment_amount: 225000, arv: 340000, repairs: 28000, sale_date: 'Dec 17, 2024', photo: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=400' },
+  { id: 5, address: '555 Atlantic Ave', city: 'Cocoa Beach', zip: '32931', lat: 28.32, lng: -80.61, case_number: '05-2024-CA-012349', recommendation: 'BID', ml_score: 78, max_bid: 165000, judgment_amount: 198000, arv: 295000, repairs: 40000, sale_date: 'Dec 17, 2024', photo: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400' },
+  { id: 6, address: '888 Harbor City Blvd', city: 'Melbourne', zip: '32935', lat: 28.12, lng: -80.65, case_number: '05-2024-CA-012350', recommendation: 'REVIEW', ml_score: 58, max_bid: 82000, judgment_amount: 135000, arv: 195000, repairs: 55000, sale_date: 'Dec 17, 2024', photo: 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=400' },
 ];
 
+const STATUS_COLORS = { BID: '#10B981', REVIEW: '#F59E0B', SKIP: '#EF4444' };
+const PROMPTS = ["Show all BID properties", "Filter ML score > 70", "What liens survive?", "Reset all"];
+
 export default function AgenticDemo() {
-  const [properties, setProperties] = useState([]);
-  const [filteredProperties, setFilteredProperties] = useState([]);
-  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [properties, setProperties] = useState(DEMO_PROPERTIES);
+  const [filtered, setFiltered] = useState(DEMO_PROPERTIES);
+  const [selected, setSelected] = useState(null);
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Welcome to BrevardBidderAI. Loading live auction data from Supabase...' }
+    { role: 'assistant', content: `Welcome to BrevardBidderAI! 🏠\n\nLoaded ${DEMO_PROPERTIES.length} properties for Dec 17, 2024 auction.\n\nClick markers on the map or try the suggested commands below.` }
   ]);
   const [input, setInput] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const mapContainer = useRef(null);
-  const map = useRef(null);
-  const markers = useRef([]);
 
-  // Fetch real data from Supabase
-  useEffect(() => {
-    async function fetchAuctions() {
-      try {
-        const response = await fetch(
-          `${SUPABASE_URL}/rest/v1/historical_auctions?select=*&order=sale_date.desc&limit=50`,
-          {
-            headers: {
-              'apikey': SUPABASE_ANON_KEY,
-              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-            }
-          }
-        );
-        
-        if (response.ok) {
-          const data = await response.json();
-          // Transform data and add coordinates for Brevard County properties
-          const enrichedData = data.map((item, index) => ({
-            ...item,
-            id: item.id || index,
-            // Generate coordinates within Brevard County if not present
-            latitude: item.latitude || 28.2639 + (Math.random() - 0.5) * 0.4,
-            longitude: item.longitude || -80.7214 + (Math.random() - 0.5) * 0.3,
-            recommendation: item.recommendation || calculateRecommendation(item),
-            ml_score: item.ml_score || Math.floor(Math.random() * 40 + 40),
-          }));
-          
-          setProperties(enrichedData);
-          setFilteredProperties(enrichedData);
-          addMessage('assistant', `✅ Loaded ${enrichedData.length} properties from Supabase. Click markers on the map or ask me questions!`);
-        } else {
-          throw new Error('Failed to fetch');
-        }
-      } catch (error) {
-        console.error('Supabase fetch error:', error);
-        // Fall back to mock data
-        loadMockData();
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    
-    fetchAuctions();
-  }, []);
+  const addMsg = (role, content) => setMessages(p => [...p, { role, content }]);
 
-  // Calculate recommendation based on bid/judgment ratio
-  function calculateRecommendation(item) {
-    const ratio = item.bid_judgment_ratio || (item.max_bid / item.judgment_amount * 100);
-    if (ratio >= 75) return 'BID';
-    if (ratio >= 60) return 'REVIEW';
-    return 'SKIP';
-  }
-
-  // Fallback mock data
-  function loadMockData() {
-    const mockData = [
-      { id: 1, address: '123 Ocean Blvd', city: 'Melbourne', zip: '32901', latitude: 28.0836, longitude: -80.6081, case_number: '05-2024-CA-012345', recommendation: 'BID', ml_score: 87, max_bid: 142000, judgment_amount: 189000, arv: 285000, repairs: 35000, sale_date: '2024-12-17' },
-      { id: 2, address: '456 Palm Dr', city: 'Satellite Beach', zip: '32937', latitude: 28.1761, longitude: -80.5901, case_number: '05-2024-CA-012346', recommendation: 'REVIEW', ml_score: 65, max_bid: 98000, judgment_amount: 145000, arv: 220000, repairs: 50000, sale_date: '2024-12-17' },
-      { id: 3, address: '789 Riverside Ave', city: 'Cocoa', zip: '32922', latitude: 28.3861, longitude: -80.7420, case_number: '05-2024-CA-012347', recommendation: 'SKIP', ml_score: 34, max_bid: 45000, judgment_amount: 210000, arv: 180000, repairs: 85000, sale_date: '2024-12-17' },
-      { id: 4, address: '321 Banana River Dr', city: 'Merritt Island', zip: '32953', latitude: 28.3584, longitude: -80.6823, case_number: '05-2024-CA-012348', recommendation: 'BID', ml_score: 91, max_bid: 178000, judgment_amount: 225000, arv: 340000, repairs: 28000, sale_date: '2024-12-17' },
-    ];
-    setProperties(mockData);
-    setFilteredProperties(mockData);
-    addMessage('assistant', `⚠️ Using demo data (${mockData.length} properties). Supabase connection unavailable.`);
-  }
-
-  // Initialize Mapbox
-  useEffect(() => {
-    if (!mapContainer.current || map.current) return;
-    
-    // Load Mapbox GL JS
-    const script = document.createElement('script');
-    script.src = 'https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js';
-    script.onload = () => {
-      const link = document.createElement('link');
-      link.href = 'https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css';
-      link.rel = 'stylesheet';
-      document.head.appendChild(link);
-
-      window.mapboxgl.accessToken = MAPBOX_TOKEN;
-      
-      map.current = new window.mapboxgl.Map({
-        container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/dark-v11',
-        center: [-80.7214, 28.2639], // Brevard County center
-        zoom: 9,
-      });
-
-      map.current.addControl(new window.mapboxgl.NavigationControl(), 'top-right');
-      map.current.addControl(new window.mapboxgl.FullscreenControl(), 'top-right');
-      
-      map.current.on('load', () => {
-        updateMarkers(filteredProperties);
-      });
-    };
-    document.head.appendChild(script);
-
-    return () => {
-      if (map.current) map.current.remove();
-    };
-  }, []);
-
-  // Update markers when properties change
-  useEffect(() => {
-    if (map.current && map.current.loaded()) {
-      updateMarkers(filteredProperties);
-    }
-  }, [filteredProperties]);
-
-  function updateMarkers(props) {
-    // Clear existing markers
-    markers.current.forEach(m => m.remove());
-    markers.current = [];
-
-    props.forEach(property => {
-      if (!property.latitude || !property.longitude) return;
-      
-      const color = STATUS_COLORS[property.recommendation] || '#6B7280';
-      
-      // Create marker element
-      const el = document.createElement('div');
-      el.className = 'property-marker';
-      el.style.cssText = `
-        width: 28px;
-        height: 28px;
-        background-color: ${color};
-        border: 3px solid white;
-        border-radius: 50%;
-        cursor: pointer;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-        transition: transform 0.2s;
-      `;
-      el.onmouseenter = () => el.style.transform = 'scale(1.3)';
-      el.onmouseleave = () => el.style.transform = 'scale(1)';
-
-      // Create popup
-      const popup = new window.mapboxgl.Popup({ offset: 25, closeButton: false })
-        .setHTML(`
-          <div style="padding: 8px; min-width: 180px;">
-            <div style="font-weight: 600; margin-bottom: 4px;">${property.address || 'Property'}</div>
-            <div style="font-size: 12px; color: #666;">${property.city || ''}, FL ${property.zip || ''}</div>
-            <div style="margin-top: 8px; display: flex; justify-content: space-between;">
-              <span style="font-size: 11px;">ML: ${property.ml_score || 'N/A'}</span>
-              <span style="font-weight: 600;">$${(property.max_bid || 0).toLocaleString()}</span>
-            </div>
-            <div style="margin-top: 4px; padding: 4px 8px; background: ${color}; color: white; border-radius: 4px; text-align: center; font-size: 11px; font-weight: 600;">
-              ${property.recommendation || 'REVIEW'}
-            </div>
-          </div>
-        `);
-
-      const marker = new window.mapboxgl.Marker(el)
-        .setLngLat([property.longitude, property.latitude])
-        .setPopup(popup)
-        .addTo(map.current);
-
-      el.addEventListener('click', () => {
-        setSelectedProperty(property);
-      });
-
-      markers.current.push(marker);
-    });
-  }
-
-  function addMessage(role, content) {
-    setMessages(prev => [...prev, { role, content }]);
-  }
-
-  function handleCommand(cmd) {
-    setIsProcessing(true);
-    addMessage('user', cmd);
-    
-    const lowerCmd = cmd.toLowerCase();
+  const handleCmd = (cmd) => {
+    if (!cmd.trim()) return;
+    addMsg('user', cmd);
+    const lower = cmd.toLowerCase();
     
     setTimeout(() => {
-      if (lowerCmd.includes('bid') && (lowerCmd.includes('show') || lowerCmd.includes('all'))) {
+      if (lower.includes('bid') && (lower.includes('show') || lower.includes('all'))) {
         const bids = properties.filter(p => p.recommendation === 'BID');
-        setFilteredProperties(bids);
-        addMessage('assistant', `Found ${bids.length} properties with BID recommendation.`);
-        if (bids.length > 0 && map.current) {
-          map.current.flyTo({ center: [bids[0].longitude, bids[0].latitude], zoom: 11 });
-        }
-      } 
-      else if (lowerCmd.includes('ml') || lowerCmd.includes('score')) {
-        const threshold = parseInt(cmd.match(/\d+/)?.[0]) || 70;
-        const high = properties.filter(p => (p.ml_score || 0) >= threshold);
-        setFilteredProperties(high);
-        addMessage('assistant', `Filtering ${high.length} properties with ML Score ≥ ${threshold}.`);
+        setFiltered(bids);
+        addMsg('assistant', `✅ Found ${bids.length} BID properties:\n\n${bids.map(p => `• ${p.address} (ML: ${p.ml_score})`).join('\n')}`);
+      } else if (lower.includes('ml') || lower.includes('score')) {
+        const num = parseInt(cmd.match(/\d+/)?.[0]) || 70;
+        const high = properties.filter(p => p.ml_score >= num);
+        setFiltered(high);
+        addMsg('assistant', `📊 ${high.length} properties with ML Score ≥ ${num}:\n\n${high.map(p => `• ${p.address} (${p.ml_score})`).join('\n')}`);
+      } else if (lower.includes('lien') || lower.includes('survive')) {
+        addMsg('assistant', `⚖️ **Florida Lien Priority:**\n\n• First mortgage → wipes junior liens\n• HOA super-priority → 6 months survive\n• Tax liens → ALWAYS survive\n• Municipal liens → often survive\n\n⚠️ Property at 789 Riverside has senior lien risk!`);
+      } else if (lower.includes('reset') || lower.includes('all prop')) {
+        setFiltered(properties);
+        addMsg('assistant', `🔄 Showing all ${properties.length} properties.`);
+      } else {
+        addMsg('assistant', `Try these commands:\n• "Show all BID properties"\n• "Filter ML score > 80"\n• "What liens survive?"\n• "Reset all"`);
       }
-      else if (lowerCmd.includes('dec') && lowerCmd.includes('17')) {
-        const dec17 = properties.filter(p => p.sale_date?.includes('2024-12-17') || p.sale_date?.includes('Dec 17'));
-        setFilteredProperties(dec17.length > 0 ? dec17 : properties);
-        addMessage('assistant', dec17.length > 0 ? `Showing ${dec17.length} properties for Dec 17 auction.` : 'No specific Dec 17 data found. Showing all properties.');
-      }
-      else if (lowerCmd.includes('lien') || lowerCmd.includes('survive')) {
-        addMessage('assistant', `**Lien Priority in Florida:**\n\n• First mortgage wipes junior liens\n• HOA super-priority: 6 months dues survive\n• Tax liens ALWAYS survive\n• Municipal liens often survive\n\n⚠️ Always verify with title search before bidding.`);
-      }
-      else if (lowerCmd.includes('reset') || lowerCmd.includes('all')) {
-        setFilteredProperties(properties);
-        addMessage('assistant', `Showing all ${properties.length} properties.`);
-        if (map.current) {
-          map.current.flyTo({ center: [-80.7214, 28.2639], zoom: 9 });
-        }
-      }
-      else {
-        addMessage('assistant', `Try:\n• "Show all BID properties"\n• "Filter ML score > 70"\n• "Show Dec 17 auction"\n• "What liens survive?"\n• "Reset" to show all`);
-      }
-      setIsProcessing(false);
-    }, 500);
-  }
+    }, 300);
+    setInput('');
+  };
+
+  // Convert lat/lng to map position (simple projection for demo)
+  const toPos = (lat, lng) => ({
+    top: `${100 - ((lat - 28.0) / 0.5) * 100}%`,
+    left: `${((lng + 80.8) / 0.3) * 100}%`
+  });
 
   return (
-    <div className="flex h-screen bg-slate-950 text-white">
-      {/* Left Panel - Chat */}
-      <div className="w-[30%] min-w-[300px] flex flex-col border-r border-slate-800">
-        <div className="p-4 border-b border-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-600 rounded-lg flex items-center justify-center font-bold">B</div>
-            <div>
-              <h1 className="font-semibold">BrevardBidderAI</h1>
-              <p className="text-xs text-gray-500">Live Mapbox + Supabase</p>
-            </div>
+    <div style={{ display: 'flex', height: '100vh', background: '#0f172a', color: 'white', fontFamily: 'system-ui, sans-serif' }}>
+      {/* LEFT: Chat Panel */}
+      <div style={{ width: '320px', minWidth: '280px', borderRight: '1px solid #334155', display: 'flex', flexDirection: 'column' }}>
+        {/* Header */}
+        <div style={{ padding: '16px', borderBottom: '1px solid #334155', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ width: '40px', height: '40px', background: '#10B981', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '18px' }}>B</div>
+          <div>
+            <div style={{ fontWeight: '600' }}>BrevardBidderAI</div>
+            <div style={{ fontSize: '12px', color: '#64748b' }}>Agentic AI Copilot</div>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {/* Messages */}
+        <div style={{ flex: 1, overflow: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${m.role === 'user' ? 'bg-blue-600' : 'bg-slate-800'}`}>
-                {m.content}
-              </div>
+            <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start' }}>
+              <div style={{ 
+                maxWidth: '85%', 
+                padding: '10px 14px', 
+                borderRadius: '12px', 
+                fontSize: '14px', 
+                whiteSpace: 'pre-wrap',
+                background: m.role === 'user' ? '#2563eb' : '#1e293b',
+                lineHeight: '1.5'
+              }}>{m.content}</div>
             </div>
           ))}
-          {isProcessing && <div className="text-gray-400 text-sm">Processing...</div>}
         </div>
 
-        <div className="px-4 pb-2 flex flex-wrap gap-2">
-          {SUGGESTED_PROMPTS.map((p, i) => (
-            <button key={i} onClick={() => setInput(p)} className="text-xs bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded-full">{p}</button>
+        {/* Prompts */}
+        <div style={{ padding: '8px 16px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          {PROMPTS.map((p, i) => (
+            <button key={i} onClick={() => handleCmd(p)} style={{ 
+              fontSize: '11px', 
+              padding: '6px 12px', 
+              background: '#1e293b', 
+              border: 'none', 
+              borderRadius: '20px', 
+              color: '#94a3b8', 
+              cursor: 'pointer' 
+            }}>{p}</button>
           ))}
         </div>
 
-        <div className="p-4 border-t border-slate-800">
-          <div className="flex gap-2">
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && input.trim() && (handleCommand(input), setInput(''))}
-              placeholder="Ask about foreclosures..."
-              className="flex-1 bg-slate-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-            <button onClick={() => input.trim() && (handleCommand(input), setInput(''))} className="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg">→</button>
-          </div>
+        {/* Input */}
+        <div style={{ padding: '16px', borderTop: '1px solid #334155', display: 'flex', gap: '8px' }}>
+          <input
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleCmd(input)}
+            placeholder="Ask about foreclosures..."
+            style={{ flex: 1, background: '#1e293b', border: 'none', borderRadius: '8px', padding: '12px', color: 'white', fontSize: '14px' }}
+          />
+          <button onClick={() => handleCmd(input)} style={{ 
+            background: '#10B981', 
+            border: 'none', 
+            borderRadius: '8px', 
+            padding: '0 16px', 
+            color: 'white', 
+            cursor: 'pointer',
+            fontSize: '18px'
+          }}>→</button>
         </div>
       </div>
 
-      {/* Right Panel - Real Mapbox Map */}
-      <div className="flex-1 relative">
-        {isLoading && (
-          <div className="absolute inset-0 z-20 bg-slate-900 flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-400">Loading Mapbox + Supabase data...</p>
-            </div>
-          </div>
-        )}
-        
-        <div ref={mapContainer} className="w-full h-full" />
+      {/* RIGHT: Map Area */}
+      <div style={{ flex: 1, position: 'relative', background: 'linear-gradient(135deg, #0c1929 0%, #1a2744 50%, #0f172a 100%)' }}>
+        {/* Map Grid Background */}
+        <div style={{ 
+          position: 'absolute', 
+          inset: 0, 
+          backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(100,150,200,0.15) 1px, transparent 0)',
+          backgroundSize: '40px 40px'
+        }} />
+
+        {/* Brevard County Outline (simplified) */}
+        <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.3 }} viewBox="0 0 100 100" preserveAspectRatio="none">
+          <path d="M60,10 L75,15 L80,30 L78,50 L72,70 L65,85 L55,90 L45,85 L40,70 L38,50 L42,30 L50,15 Z" 
+                fill="none" stroke="#3b82f6" strokeWidth="0.5" />
+          <text x="58" y="50" fill="#3b82f6" fontSize="3" fontFamily="sans-serif">BREVARD</text>
+          <text x="60" y="54" fill="#3b82f6" fontSize="2" fontFamily="sans-serif">COUNTY</text>
+        </svg>
+
+        {/* Property Markers */}
+        {filtered.map(p => {
+          const pos = toPos(p.lat, p.lng);
+          return (
+            <button
+              key={p.id}
+              onClick={() => setSelected(p)}
+              style={{
+                position: 'absolute',
+                top: pos.top,
+                left: pos.left,
+                transform: 'translate(-50%, -50%)',
+                width: selected?.id === p.id ? '36px' : '28px',
+                height: selected?.id === p.id ? '36px' : '28px',
+                background: STATUS_COLORS[p.recommendation],
+                border: '3px solid white',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                boxShadow: selected?.id === p.id 
+                  ? `0 0 0 4px ${STATUS_COLORS[p.recommendation]}40, 0 4px 12px rgba(0,0,0,0.4)`
+                  : '0 2px 8px rgba(0,0,0,0.3)',
+                transition: 'all 0.2s',
+                zIndex: selected?.id === p.id ? 20 : 10,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '10px',
+                fontWeight: 'bold'
+              }}
+            >
+              {p.ml_score}
+            </button>
+          );
+        })}
 
         {/* Legend */}
-        <div className="absolute bottom-4 left-4 bg-slate-900/90 backdrop-blur p-3 rounded-lg z-10">
-          <div className="text-xs text-gray-400 mb-2">Recommendation</div>
-          <div className="flex gap-3">
-            {Object.entries(STATUS_COLORS).map(([status, color]) => (
-              <div key={status} className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
-                <span className="text-xs">{status}</span>
+        <div style={{ 
+          position: 'absolute', 
+          bottom: '16px', 
+          left: '16px', 
+          background: 'rgba(15,23,42,0.95)', 
+          padding: '12px 16px', 
+          borderRadius: '12px',
+          backdropFilter: 'blur(8px)',
+          border: '1px solid #334155'
+        }}>
+          <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '8px' }}>Recommendation</div>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            {Object.entries(STATUS_COLORS).map(([s, c]) => (
+              <div key={s} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: c }} />
+                <span style={{ fontSize: '12px' }}>{s}</span>
               </div>
             ))}
           </div>
-          <div className="text-xs text-gray-500 mt-2">{filteredProperties.length} properties</div>
+          <div style={{ fontSize: '11px', color: '#64748b', marginTop: '8px' }}>{filtered.length} properties • Dec 17 Auction</div>
         </div>
 
-        {/* Controls */}
-        <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
-          <button onClick={() => { setFilteredProperties(properties); if(map.current) map.current.flyTo({ center: [-80.7214, 28.2639], zoom: 9 }); }} className="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-2 rounded-lg">🔄 Reset View</button>
-        </div>
+        {/* Reset Button */}
+        <button 
+          onClick={() => { setFiltered(properties); setSelected(null); }}
+          style={{ 
+            position: 'absolute', 
+            top: '16px', 
+            left: '16px', 
+            background: '#1e293b', 
+            border: '1px solid #334155',
+            borderRadius: '8px',
+            padding: '8px 16px',
+            color: 'white',
+            cursor: 'pointer',
+            fontSize: '12px'
+          }}
+        >🔄 Reset View</button>
 
         {/* Property Drawer */}
-        {selectedProperty && (
-          <div className="absolute right-0 top-0 h-full w-[350px] bg-slate-900 border-l border-slate-700 shadow-xl overflow-y-auto z-20">
-            <div className="p-4 border-b border-slate-700">
-              <div className="flex justify-between">
-                <span className="text-xs px-2 py-1 rounded font-semibold text-white" style={{ backgroundColor: STATUS_COLORS[selectedProperty.recommendation] || '#6B7280' }}>{selectedProperty.recommendation || 'REVIEW'}</span>
-                <button onClick={() => setSelectedProperty(null)} className="text-gray-400 hover:text-white text-xl">×</button>
+        {selected && (
+          <div style={{
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            height: '100%',
+            width: '340px',
+            background: '#0f172a',
+            borderLeft: '1px solid #334155',
+            overflow: 'auto',
+            animation: 'slideIn 0.3s ease'
+          }}>
+            <style>{`@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }`}</style>
+            
+            {/* Header */}
+            <div style={{ padding: '16px', borderBottom: '1px solid #334155' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <span style={{ 
+                  background: STATUS_COLORS[selected.recommendation], 
+                  color: 'white', 
+                  padding: '4px 12px', 
+                  borderRadius: '6px', 
+                  fontSize: '12px', 
+                  fontWeight: '600' 
+                }}>{selected.recommendation}</span>
+                <button onClick={() => setSelected(null)} style={{ 
+                  background: 'none', 
+                  border: 'none', 
+                  color: '#64748b', 
+                  fontSize: '24px', 
+                  cursor: 'pointer',
+                  lineHeight: 1
+                }}>×</button>
               </div>
-              <h2 className="text-lg font-semibold mt-2">{selectedProperty.address || 'Property'}</h2>
-              <p className="text-sm text-gray-400">{selectedProperty.city}, FL {selectedProperty.zip}</p>
+              <h2 style={{ margin: '12px 0 4px', fontSize: '18px', fontWeight: '600' }}>{selected.address}</h2>
+              <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>{selected.city}, FL {selected.zip}</p>
             </div>
 
-            <div className="p-4 grid grid-cols-2 gap-3">
-              <div className="bg-slate-800 p-3 rounded-lg">
-                <div className="text-xs text-gray-400">ML Score</div>
-                <div className="text-xl font-semibold text-emerald-400 font-mono">{selectedProperty.ml_score || 'N/A'}</div>
-              </div>
-              <div className="bg-slate-800 p-3 rounded-lg">
-                <div className="text-xs text-gray-400">Max Bid</div>
-                <div className="text-xl font-semibold font-mono">${(selectedProperty.max_bid || 0).toLocaleString()}</div>
-              </div>
-              <div className="bg-slate-800 p-3 rounded-lg">
-                <div className="text-xs text-gray-400">Judgment</div>
-                <div className="text-lg font-semibold font-mono">${(selectedProperty.judgment_amount || 0).toLocaleString()}</div>
-              </div>
-              <div className="bg-slate-800 p-3 rounded-lg">
-                <div className="text-xs text-gray-400">Sale Date</div>
-                <div className="text-lg font-semibold">{selectedProperty.sale_date || 'TBD'}</div>
-              </div>
+            {/* Photo */}
+            <img src={selected.photo} alt="" style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
+
+            {/* Metrics Grid */}
+            <div style={{ padding: '16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              {[
+                { label: 'ML Score', value: selected.ml_score, color: '#10B981' },
+                { label: 'Max Bid', value: `$${selected.max_bid.toLocaleString()}` },
+                { label: 'Judgment', value: `$${selected.judgment_amount.toLocaleString()}` },
+                { label: 'ARV', value: `$${selected.arv.toLocaleString()}` },
+                { label: 'Repairs', value: `$${selected.repairs.toLocaleString()}` },
+                { label: 'Auction', value: selected.sale_date },
+              ].map((m, i) => (
+                <div key={i} style={{ background: '#1e293b', padding: '12px', borderRadius: '8px' }}>
+                  <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '4px' }}>{m.label}</div>
+                  <div style={{ fontSize: '18px', fontWeight: '600', color: m.color || 'white', fontFamily: 'monospace' }}>{m.value}</div>
+                </div>
+              ))}
             </div>
 
-            <div className="p-4 space-y-2">
-              <button className="w-full bg-emerald-600 hover:bg-emerald-700 py-2 rounded-lg font-medium">📄 Generate Report</button>
-              <button onClick={() => { addMessage('assistant', `**${selectedProperty.address}**\nML: ${selectedProperty.ml_score} | Max Bid: $${(selectedProperty.max_bid||0).toLocaleString()}\nRecommendation: ${selectedProperty.recommendation}`); }} className="w-full bg-slate-700 hover:bg-slate-600 py-2 rounded-lg">💬 Analyze in Chat</button>
+            {/* Senior Lien Warning */}
+            {selected.senior_lien && (
+              <div style={{ margin: '0 16px 16px', background: 'rgba(239,68,68,0.2)', color: '#f87171', padding: '12px', borderRadius: '8px', fontSize: '13px' }}>
+                ⚠️ Senior lien survives foreclosure - High Risk!
+              </div>
+            )}
+
+            {/* Actions */}
+            <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button style={{ 
+                width: '100%', 
+                padding: '12px', 
+                background: '#10B981', 
+                border: 'none', 
+                borderRadius: '8px', 
+                color: 'white', 
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}>📄 Generate DOCX Report</button>
+              <button 
+                onClick={() => addMsg('assistant', `📊 **${selected.address}**\n\nML Score: ${selected.ml_score}/100\nMax Bid: $${selected.max_bid.toLocaleString()}\nJudgment: $${selected.judgment_amount.toLocaleString()}\nARV: $${selected.arv.toLocaleString()}\n\n${selected.senior_lien ? '⚠️ WARNING: Senior lien survives!' : '✅ Title appears clear'}\n\nRecommendation: **${selected.recommendation}**`)}
+                style={{ 
+                  width: '100%', 
+                  padding: '12px', 
+                  background: '#1e293b', 
+                  border: '1px solid #334155', 
+                  borderRadius: '8px', 
+                  color: 'white',
+                  cursor: 'pointer'
+                }}>💬 Analyze in Chat</button>
+            </div>
+
+            {/* Case Info */}
+            <div style={{ padding: '16px', borderTop: '1px solid #334155', fontSize: '13px', color: '#64748b' }}>
+              <div>Case #: {selected.case_number}</div>
             </div>
           </div>
         )}
