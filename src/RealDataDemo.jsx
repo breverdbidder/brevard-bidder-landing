@@ -347,15 +347,13 @@ The scraper may still be populating results. Try again in a moment!`;
         
         response = `🔜 **Upcoming Foreclosure Auctions**
 
-**${data.length} properties** loaded from Supabase!
-
-**Dec 10, 2025** (IN 2 DAYS)
+**${data.length} properties** for Dec 10, 2025
 📍 Titusville Courthouse @ 11:00 AM
 
-**Dec 17, 2025** (SCHEDULED)
-📍 Titusville Courthouse @ 11:00 AM
+📋 **Property List:**
+${data.slice(0, 12).map((p, i) => `${i+1}. ${p.address || 'TBD'}, ${p.city || 'Brevard'} - ${p.plaintiff || 'Plaintiff TBD'}`).join('\n')}
 
-Map updated with upcoming properties!`;
+⚡ Data: Supabase historical_auctions`;
       } else {
         response = `🔜 **Upcoming Auctions**
 
