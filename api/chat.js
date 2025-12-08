@@ -1,87 +1,256 @@
-// Vercel Serverless Function - Smart Router Chat API
-// Routes queries to appropriate LLM tier based on complexity
+// BrevardBidderAI - Smart Router Chat API
+// ACTUALLY fetches and returns auction data
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
-const SMART_ROUTER_TIERS = {
-  FREE: { models: ['gemini-1.5-flash'], maxTokens: 1000 },
-  ULTRA_CHEAP: { models: ['deepseek-v3'], maxTokens: 2000, cost: 0.28 },
-  BUDGET: { models: ['claude-3-haiku'], maxTokens: 4000, cost: 0.25 },
-  PRODUCTION: { models: ['claude-sonnet-4'], maxTokens: 8000, cost: 3.0 },
-  CRITICAL: { models: ['claude-opus-4.5'], maxTokens: 16000, cost: 15.0 }
+export const config = {
+  runtime: 'edge',
 };
 
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+const SUPABASE_URL = 'https://mocerqjnksmhcjzxrewo.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vY2VycWpua3NtaGNqenhyZXdvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDUzMjUyNiwiZXhwIjoyMDgwMTA4NTI2fQ.fL255mO0V8-rrU0Il3L41cIdQXUau-HRQXiamTqp9nE';
 
-  const { message, context } = req.body;
-  
-  // Determine complexity and select tier
-  const tier = selectTier(message);
-  const tierConfig = SMART_ROUTER_TIERS[tier];
-  
-  // For now, return intent analysis (can be expanded to call actual LLMs)
-  const intent = analyzeIntent(message);
-  
-  return res.status(200).json({
-    success: true,
-    tier,
-    model: tierConfig.models[0],
-    intent,
-    response: generateResponse(intent, context),
-    timestamp: new Date().toISOString()
-  });
-}
+const GEMINI_API_KEY = 'AIzaSyCbLGRTT8cXE26X7q8x3pLYI3FcMQDXQg8';
 
-function selectTier(message) {
-  const lower = message.toLowerCase();
-  
-  // Simple queries = FREE
-  if (/^(hi|hello|help|calendar|show|list)/.test(lower)) return 'FREE';
-  
-  // Filter/search = ULTRA_CHEAP
-  if (/bid|review|skip|filter|search/.test(lower)) return 'ULTRA_CHEAP';
-  
-  // Analysis = BUDGET
-  if (/analyze|compare|summary/.test(lower)) return 'BUDGET';
-  
-  // Complex reasoning = PRODUCTION
-  if (/strategy|recommend|should i|which/.test(lower)) return 'PRODUCTION';
-  
-  // Critical decisions = CRITICAL
-  if (/max bid|final|invest|purchase/.test(lower)) return 'CRITICAL';
-  
-  return 'FREE';
+export default async function handler(req) {
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { message } = await req.json();
+    const intent = analyzeIntent(message);
+    
+    // ACTUALLY FETCH DATA based on intent
+    let data = null;
+    let responseText = '';
+    
+    if (intent.isPastResults) {
+      // Get Dec 3 auction results
+      data = await fetchAuctionResults('2025-12-03');
+      responseText = formatPastResults(data);
+    } else if (intent.isUpcoming) {
+      // Get upcoming auctions
+      data = await fetchUpcomingAuctions();
+      responseText = formatUpcomingAuctions(data);
+    } else if (intent.isCalendar) {
+      responseText = formatCalendar();
+    } else if (intent.isTaxDeed) {
+      responseText = '📋 **Tax Deed Auctions**\n\nNext tax deed auction: December 18, 2025\nLocation: Online at brevard.realforeclose.com\n\nTax deeds are separate from foreclosures. Use BidDeedAI for tax deed analysis.';
+    } else {
+      // Default - show quick stats
+      data = await fetchQuickStats();
+      responseText = formatQuickStats(data);
+    }
+
+    // Select tier for logging
+    const tier = selectTier(message);
+
+    return new Response(JSON.stringify({
+      success: true,
+      tier,
+      model: tier === 'FREE' ? 'gemini-1.5-flash' : 'deepseek-v3',
+      response: responseText,
+      data: data,
+      timestamp: new Date().toISOString()
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+
+  } catch (error) {
+    console.error('Chat API error:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      response: '❌ Error loading data. Please try again.',
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
 }
 
 function analyzeIntent(message) {
   const lower = message.toLowerCase();
   return {
-    isTaxDeed: /tax\s*deed|tax\s*sale|tax\s*lien/.test(lower),
-    isForeclosure: /foreclosure|mortgage|bank/.test(lower),
-    isPast: /last|previous|results|dec\s*3/.test(lower),
-    isUpcoming: /upcoming|next|dec\s*10|dec\s*17|dec\s*18/.test(lower),
-    wantsList: /show|list|all|properties/.test(lower),
-    wantsAnalysis: /analyze|pipeline|detail/.test(lower),
-    wantsCalendar: /calendar|schedule|when/.test(lower),
-    needsClarification: false
+    isPastResults: /dec\s*3|december\s*3|past|results|last\s*auction|completed/.test(lower),
+    isUpcoming: /upcoming|next|dec\s*10|dec\s*17|preview|scheduled/.test(lower),
+    isCalendar: /calendar|schedule|when|dates/.test(lower),
+    isTaxDeed: /tax\s*deed|tax\s*sale/.test(lower),
   };
 }
 
-function generateResponse(intent, context) {
-  // This would be replaced with actual LLM calls in production
-  if (intent.wantsCalendar) {
-    return 'Fetching auction calendar from Supabase...';
+async function fetchAuctionResults(date) {
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/historical_auctions?auction_date=eq.${date}&select=*&order=final_judgment.desc`,
+    {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+      },
+    }
+  );
+  
+  if (!response.ok) {
+    // Try auction_results table
+    const altResponse = await fetch(
+      `${SUPABASE_URL}/rest/v1/auction_results?auction_date=eq.${date}&select=*`,
+      {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+        },
+      }
+    );
+    if (altResponse.ok) return altResponse.json();
   }
-  if (intent.isPast) {
-    return 'Loading December 3, 2025 auction results...';
+  
+  return response.json();
+}
+
+async function fetchUpcomingAuctions() {
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/historical_auctions?auction_date=gt.2025-12-08&select=*&order=auction_date.asc,final_judgment.desc&limit=20`,
+    {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+      },
+    }
+  );
+  return response.json();
+}
+
+async function fetchQuickStats() {
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/historical_auctions?select=*&order=auction_date.desc&limit=100`,
+    {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+      },
+    }
+  );
+  return response.json();
+}
+
+function formatPastResults(auctions) {
+  if (!auctions || auctions.length === 0) {
+    return '📭 No auction results found for December 3, 2025.';
   }
-  if (intent.isUpcoming) {
-    return 'Loading upcoming auction preview...';
+
+  let text = `🏛️ **December 3, 2025 Auction Results**\n\n`;
+  text += `Found **${auctions.length}** completed auctions:\n\n`;
+
+  auctions.forEach((a, i) => {
+    const judgment = parseFloat(a.final_judgment) || 0;
+    const status = a.status || 'Unknown';
+    const winner = a.winning_bidder || 'Plaintiff';
+    const winBid = parseFloat(a.winning_bid) || judgment;
+    
+    // Determine outcome emoji
+    let emoji = '🏦'; // Plaintiff
+    if (status === 'THIRD_PARTY' || a.num_bidders > 0) emoji = '🎯'; // Third party
+    if (status === 'CANCELLED') emoji = '❌';
+    
+    text += `${emoji} **${a.address || 'Address TBD'}**\n`;
+    text += `   Case: ${a.case_number}\n`;
+    text += `   Judgment: $${judgment.toLocaleString()}\n`;
+    text += `   Result: ${status} ${a.num_bidders ? `(${a.num_bidders} bidders)` : ''}\n`;
+    if (winBid && winBid !== judgment) {
+      text += `   Sold for: $${winBid.toLocaleString()}\n`;
+    }
+    text += '\n';
+  });
+
+  // Summary
+  const thirdParty = auctions.filter(a => a.status === 'THIRD_PARTY' || a.num_bidders > 0).length;
+  const plaintiff = auctions.filter(a => a.status !== 'THIRD_PARTY' && a.status !== 'CANCELLED' && !a.num_bidders).length;
+  const cancelled = auctions.filter(a => a.status === 'CANCELLED').length;
+
+  text += `---\n`;
+  text += `📊 **Summary:**\n`;
+  text += `• Third Party Sales: ${thirdParty}\n`;
+  text += `• Back to Plaintiff: ${plaintiff}\n`;
+  text += `• Cancelled: ${cancelled}\n`;
+
+  return text;
+}
+
+function formatUpcomingAuctions(auctions) {
+  if (!auctions || auctions.length === 0) {
+    return '📭 No upcoming auctions found.';
   }
-  return 'Processing your request...';
+
+  let text = `📅 **Upcoming Foreclosure Auctions**\n\n`;
+
+  // Group by date
+  const byDate = {};
+  auctions.forEach(a => {
+    const date = a.auction_date || 'TBD';
+    if (!byDate[date]) byDate[date] = [];
+    byDate[date].push(a);
+  });
+
+  Object.keys(byDate).sort().forEach(date => {
+    const props = byDate[date];
+    text += `**${date}** (${props.length} properties)\n`;
+    props.slice(0, 5).forEach(a => {
+      const judgment = parseFloat(a.final_judgment) || 0;
+      text += `• ${a.address || 'TBD'} - $${judgment.toLocaleString()}\n`;
+    });
+    if (props.length > 5) {
+      text += `  ...and ${props.length - 5} more\n`;
+    }
+    text += '\n';
+  });
+
+  return text;
+}
+
+function formatCalendar() {
+  return `📅 **Brevard County Auction Calendar**
+
+**December 2025:**
+• Dec 3 ✅ COMPLETED - 8 properties
+• Dec 10 - Foreclosure Auction @ Titusville 11AM
+• Dec 17 - Foreclosure Auction @ Titusville 11AM
+• Dec 18 - Tax Deed Auction @ brevard.realforeclose.com
+
+**January 2026:**
+• Jan 7 - Foreclosure Auction @ Titusville 11AM
+• Jan 21 - Foreclosure Auction @ Titusville 11AM
+
+All foreclosure auctions are IN-PERSON at Brevard County Courthouse in Titusville.
+Tax deed auctions are ONLINE only.`;
+}
+
+function formatQuickStats(auctions) {
+  const total = auctions?.length || 0;
+  const totalJudgment = auctions?.reduce((sum, a) => sum + (parseFloat(a.final_judgment) || 0), 0) || 0;
+
+  return `🏠 **BrevardBidderAI Quick Stats**
+
+• Properties tracked: ${total}
+• Total judgment value: $${totalJudgment.toLocaleString()}
+• Next auction: Dec 10, 2025
+
+**Quick Commands:**
+• "Dec 3 results" - Past auction results
+• "Upcoming" - Preview next auctions
+• "Calendar" - Full schedule
+• "Tax deed" - Tax deed info`;
+}
+
+function selectTier(message) {
+  const lower = message.toLowerCase();
+  if (/results|calendar|show|list/.test(lower)) return 'FREE';
+  if (/analyze|compare/.test(lower)) return 'BUDGET';
+  if (/strategy|recommend/.test(lower)) return 'PRODUCTION';
+  return 'FREE';
 }
