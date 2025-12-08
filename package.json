@@ -19,6 +19,7 @@
     "react-dom": "18.2.0",
     "recharts": "^2.10.3",
     "framer-motion": "^10.18.0",
+    "lucide-react": "^0.263.1",
     "@supabase/supabase-js": "^2.39.0"
   },
   "devDependencies": {
