@@ -283,7 +283,7 @@ Loaded **${taxData.length} properties** from Supabase!
 • Liens: Wipes most liens (not just mortgage)
 • Redemption: Owner can redeem before sale
 
-Map updated with tax deed properties!`;
+`;
       } else {
         response = `🏛️ **Tax Deed Auctions**
 
@@ -338,7 +338,7 @@ The scraper may still be populating results. Try again in a moment!`;
     // Upcoming (Dec 10, 17)
     else if (intent.isUpcoming) {
       setLoading(true);
-      const data = await fetchFromSupabase('auction_results', { status: 'upcoming', limit: 50 });
+      const data = await fetchFromSupabase('historical_auctions', { date: '2025-12-10', limit: 50 });
       setLoading(false);
       
       if (data && data.length > 0) {
@@ -355,7 +355,7 @@ The scraper may still be populating results. Try again in a moment!`;
 **Dec 17, 2025** (SCHEDULED)
 📍 Titusville Courthouse @ 11:00 AM
 
-Map updated with upcoming properties!`;
+`;
       } else {
         response = `🔜 **Upcoming Auctions**
 
@@ -667,3 +667,4 @@ What would you like to know?`;
     </div>
   );
 }
+
