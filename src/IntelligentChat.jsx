@@ -109,10 +109,11 @@ const IntelligentChat = ({ onPropertySelect }) => {
 Type: All
 Found: **${props.length} properties**
 
-${withAddress.length > 0 ? 'Properties shown on map!' : ''}
+${withAddress.length > 0 ? '📋 Property List:' : ''}
 
 🏛️ **Dec 10, 2025** @ Titusville 11AM
-${props.map((p, i) => `${i+1}. ${p.address || 'No address'}, ${p.city || ''} - ${p.plaintiff}`).join('\n')}
+${props.map((p, i) => `${i+1}. ${p.address || 'No address'}, ${p.city || ''} - ${p.plaintiff}`).join('
+')}
 
 ⚡ ${SMART_ROUTER.FREE.models[0]}`,
         properties: props
@@ -126,10 +127,12 @@ ${props.map((p, i) => `${i+1}. ${p.address || 'No address'}, ${p.city || ''} - $
         text: `📅 **Auction Calendar**
 
 🏛️ **Foreclosure (IN-PERSON @ Titusville)**
-${AUCTION_CALENDAR.foreclosure.map(a => `• ${a.date} - ${a.time}`).join('\n')}
+${AUCTION_CALENDAR.foreclosure.map(a => `• ${a.date} - ${a.time}`).join('
+')}
 
 📋 **Tax Deed (ONLINE @ realforeclose.com)**
-${AUCTION_CALENDAR.taxDeed.map(a => `• ${a.date} - ${a.time}`).join('\n')}
+${AUCTION_CALENDAR.taxDeed.map(a => `• ${a.date} - ${a.time}`).join('
+')}
 
 ⚠️ Next auction: **${next.date}** (${getDaysUntil(next.date)} days)
 
