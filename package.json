@@ -1,29 +1,69 @@
 {
   "name": "brevard-bidder-landing",
+  "version": "13.4.0",
+  "description": "BrevardBidderAI - Agentic AI Foreclosure Intelligence Platform",
+  "author": "Ariel Shapira, Solo Founder, Everest Capital USA",
   "private": true,
-  "version": "2.3.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "next": "14.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    
+    "// UI LIBRARIES (Vibe Coding Recommended)": "",
+    "@radix-ui/react-accordion": "^1.2.0",
+    "@radix-ui/react-alert-dialog": "^1.1.0",
+    "@radix-ui/react-dialog": "^1.1.0",
+    "@radix-ui/react-dropdown-menu": "^2.1.0",
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-popover": "^1.1.0",
+    "@radix-ui/react-select": "^2.1.0",
+    "@radix-ui/react-separator": "^1.1.0",
+    "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-tabs": "^1.1.0",
+    "@radix-ui/react-tooltip": "^1.1.0",
+    
+    "// SHADCN UI UTILITIES": "",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "tailwind-merge": "^2.2.0",
+    "lucide-react": "^0.400.0",
+    
+    "// DATA VISUALIZATION": "",
+    "recharts": "^2.12.0",
+    
+    "// ANIMATIONS": "",
     "framer-motion": "^11.0.0",
-    "lucide-react": "^0.263.1",
-    "gsap": "^3.12.5",
-    "@gsap/react": "^2.1.0",
-    "lottie-react": "^2.4.0",
-    "@lottiefiles/react-lottie-player": "^3.5.4"
+    
+    "// UTILITIES": "",
+    "date-fns": "^3.6.0",
+    "zod": "^3.23.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.2.1",
-    "autoprefixer": "^10.4.18",
-    "postcss": "^8.4.35",
-    "tailwindcss": "^3.4.1",
-    "vite": "^5.1.4"
+    "// TYPESCRIPT (Vibe Coding Recommended)": "",
+    "typescript": "^5.4.0",
+    "@types/react": "^18.3.0",
+    "@types/node": "^20.12.0",
+    
+    "// TAILWIND V4": "",
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0",
+    
+    "// TESTING (Vibe Coding Recommended)": "",
+    "vitest": "^1.6.0",
+    "@testing-library/react": "^15.0.0",
+    "@playwright/test": "^1.44.0",
+    
+    "// LINTING": "",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "14.2.0"
   }
 }
-
