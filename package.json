@@ -1,7 +1,7 @@
 {
   "name": "brevard-bidder-landing",
   "version": "13.4.0",
-  "description": "BrevardBidderAI - Agentic AI Foreclosure Intelligence Platform",
+  "description": "BrevardBidderAI - Agentic AI Ecosystem for Foreclosure Auctions",
   "author": "Ariel Shapira, Solo Founder, Everest Capital USA",
   "private": true,
   "scripts": {
@@ -9,61 +9,35 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest",
-    "test:e2e": "playwright test"
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "14.2.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    
-    "// UI LIBRARIES (Vibe Coding Recommended)": "",
-    "@radix-ui/react-accordion": "^1.2.0",
-    "@radix-ui/react-alert-dialog": "^1.1.0",
-    "@radix-ui/react-dialog": "^1.1.0",
-    "@radix-ui/react-dropdown-menu": "^2.1.0",
-    "@radix-ui/react-label": "^2.1.0",
-    "@radix-ui/react-popover": "^1.1.0",
-    "@radix-ui/react-select": "^2.1.0",
-    "@radix-ui/react-separator": "^1.1.0",
-    "@radix-ui/react-slot": "^1.1.0",
-    "@radix-ui/react-tabs": "^1.1.0",
-    "@radix-ui/react-tooltip": "^1.1.0",
-    
-    "// SHADCN UI UTILITIES": "",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.1.0",
-    "tailwind-merge": "^2.2.0",
-    "lucide-react": "^0.400.0",
-    
-    "// DATA VISUALIZATION": "",
-    "recharts": "^2.12.0",
-    
-    "// ANIMATIONS": "",
-    "framer-motion": "^11.0.0",
-    
-    "// UTILITIES": "",
-    "date-fns": "^3.6.0",
-    "zod": "^3.23.0"
+    "next": "14.0.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "recharts": "^2.10.3",
+    "framer-motion": "^10.18.0",
+    "@supabase/supabase-js": "^2.39.0"
   },
   "devDependencies": {
-    "// TYPESCRIPT (Vibe Coding Recommended)": "",
-    "typescript": "^5.4.0",
-    "@types/react": "^18.3.0",
-    "@types/node": "^20.12.0",
-    
-    "// TAILWIND V4": "",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "typescript": "^5.3.3",
     "tailwindcss": "^3.4.0",
-    "postcss": "^8.4.0",
-    "autoprefixer": "^10.4.0",
-    
-    "// TESTING (Vibe Coding Recommended)": "",
-    "vitest": "^1.6.0",
-    "@testing-library/react": "^15.0.0",
-    "@playwright/test": "^1.44.0",
-    
-    "// LINTING": "",
-    "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.0"
+    "postcss": "^8.4.32",
+    "autoprefixer": "^10.4.16",
+    "@storybook/addon-essentials": "^7.6.6",
+    "@storybook/addon-interactions": "^7.6.6",
+    "@storybook/addon-links": "^7.6.6",
+    "@storybook/addon-a11y": "^7.6.6",
+    "@storybook/addon-themes": "^7.6.6",
+    "@storybook/nextjs": "^7.6.6",
+    "@storybook/react": "^7.6.6",
+    "storybook": "^7.6.6",
+    "eslint": "^8.55.0",
+    "eslint-config-next": "14.0.4"
   }
 }
