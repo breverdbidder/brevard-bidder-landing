@@ -1,3 +1,4 @@
+// Deployed: 2025-12-08T17:15:32Z
 // BrevardBidderAI - Smart Router Chat API
 // ACTUALLY fetches and returns auction data
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
@@ -41,7 +42,12 @@ export default async function handler(req) {
     } else if (intent.isCalendar) {
       responseText = formatCalendar();
     } else if (intent.isTaxDeed) {
-      responseText = '📋 **Tax Deed Auctions**\n\nNext tax deed auction: December 18, 2025\nLocation: Online at brevard.realforeclose.com\n\nTax deeds are separate from foreclosures. Use BidDeedAI for tax deed analysis.';
+      responseText = '📋 **Tax Deed Auctions**
+
+Next tax deed auction: December 18, 2025
+Location: Online at brevard.realforeclose.com
+
+Tax deeds are separate from foreclosures. Use BidDeedAI for tax deed analysis.';
     } else {
       // Default - show quick stats
       data = await fetchQuickStats();
@@ -144,8 +150,12 @@ function formatPastResults(auctions) {
     return '📭 No auction results found for December 3, 2025.';
   }
 
-  let text = `🏛️ **December 3, 2025 Auction Results**\n\n`;
-  text += `Found **${auctions.length}** completed auctions:\n\n`;
+  let text = `🏛️ **December 3, 2025 Auction Results**
+
+`;
+  text += `Found **${auctions.length}** completed auctions:
+
+`;
 
   auctions.forEach((a, i) => {
     const judgment = parseFloat(a.final_judgment) || 0;
@@ -158,14 +168,20 @@ function formatPastResults(auctions) {
     if (status === 'THIRD_PARTY' || a.num_bidders > 0) emoji = '🎯'; // Third party
     if (status === 'CANCELLED') emoji = '❌';
     
-    text += `${emoji} **${a.address || 'Address TBD'}**\n`;
-    text += `   Case: ${a.case_number}\n`;
-    text += `   Judgment: $${judgment.toLocaleString()}\n`;
-    text += `   Result: ${status} ${a.num_bidders ? `(${a.num_bidders} bidders)` : ''}\n`;
+    text += `${emoji} **${a.address || 'Address TBD'}**
+`;
+    text += `   Case: ${a.case_number}
+`;
+    text += `   Judgment: $${judgment.toLocaleString()}
+`;
+    text += `   Result: ${status} ${a.num_bidders ? `(${a.num_bidders} bidders)` : ''}
+`;
     if (winBid && winBid !== judgment) {
-      text += `   Sold for: $${winBid.toLocaleString()}\n`;
+      text += `   Sold for: $${winBid.toLocaleString()}
+`;
     }
-    text += '\n';
+    text += '
+';
   });
 
   // Summary
@@ -173,11 +189,16 @@ function formatPastResults(auctions) {
   const plaintiff = auctions.filter(a => a.status !== 'THIRD_PARTY' && a.status !== 'CANCELLED' && !a.num_bidders).length;
   const cancelled = auctions.filter(a => a.status === 'CANCELLED').length;
 
-  text += `---\n`;
-  text += `📊 **Summary:**\n`;
-  text += `• Third Party Sales: ${thirdParty}\n`;
-  text += `• Back to Plaintiff: ${plaintiff}\n`;
-  text += `• Cancelled: ${cancelled}\n`;
+  text += `---
+`;
+  text += `📊 **Summary:**
+`;
+  text += `• Third Party Sales: ${thirdParty}
+`;
+  text += `• Back to Plaintiff: ${plaintiff}
+`;
+  text += `• Cancelled: ${cancelled}
+`;
 
   return text;
 }
@@ -187,7 +208,9 @@ function formatUpcomingAuctions(auctions) {
     return '📭 No upcoming auctions found.';
   }
 
-  let text = `📅 **Upcoming Foreclosure Auctions**\n\n`;
+  let text = `📅 **Upcoming Foreclosure Auctions**
+
+`;
 
   // Group by date
   const byDate = {};
@@ -199,15 +222,19 @@ function formatUpcomingAuctions(auctions) {
 
   Object.keys(byDate).sort().forEach(date => {
     const props = byDate[date];
-    text += `**${date}** (${props.length} properties)\n`;
+    text += `**${date}** (${props.length} properties)
+`;
     props.slice(0, 5).forEach(a => {
       const judgment = parseFloat(a.final_judgment) || 0;
-      text += `• ${a.address || 'TBD'} - $${judgment.toLocaleString()}\n`;
+      text += `• ${a.address || 'TBD'} - $${judgment.toLocaleString()}
+`;
     });
     if (props.length > 5) {
-      text += `  ...and ${props.length - 5} more\n`;
+      text += `  ...and ${props.length - 5} more
+`;
     }
-    text += '\n';
+    text += '
+';
   });
 
   return text;
