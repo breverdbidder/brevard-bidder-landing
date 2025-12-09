@@ -1,6 +1,4 @@
-// BrevardBidderAI Chat API - Cloudflare Pages Function
-// Foreclosure intelligence with tool access
-
+// BrevardBidderAI Chat API v2 - Improved timeout handling
 export async function onRequest(context) {
   const { request, env } = context;
   
@@ -40,97 +38,81 @@ export async function onRequest(context) {
     const flTime = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit' });
     const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
 
-    const systemPrompt = `You are BrevardBidderAI Assistant - an intelligent foreclosure auction analysis system for Brevard County, FL.
+    const systemPrompt = `You are BrevardBidderAI Assistant - foreclosure auction intelligence for Brevard County, FL.
 
-CURRENT TIME: ${dateStr} | ${flTime} EST
+CURRENT: ${dateStr} | ${flTime} EST
 
-PLATFORM OVERVIEW:
-BrevardBidderAI is an Agentic AI ecosystem (NOT SaaS) that automates foreclosure auction intelligence through a 12-stage pipeline:
-1. Discovery → 2. Scraping → 3. Title Search → 4. Lien Priority Analysis → 5. Tax Certificates → 6. Demographics → 7. ML Score → 8. Max Bid Calculation → 9. Decision Log → 10. Report → 11. Disposition → 12. Archive
+CRITICAL RULES:
+1. KEEP RESPONSES CONCISE - avoid timeouts on complex queries
+2. For multi-property requests: summarize key data, don't generate full reports
+3. Use MAX 2 tool calls per response to stay within time limits
+4. If asked for "full 12-stage pipeline" or complex reports: explain you'll provide key highlights and suggest they request one property at a time for full details
 
-TOOLS AVAILABLE:
-1. github_list_files - Browse repository code
-2. github_read_file - Read specific files  
-3. supabase_query - Query auction data, insights, metrics
-4. web_search - Search for current property/market info
-5. memory_search - Search BrevardBidderAI knowledge base
+12-STAGE PIPELINE OVERVIEW (reference only):
+1. Discovery → 2. Scraping → 3. Title Search → 4. Lien Priority → 5. Tax Certs → 6. Demographics → 7. ML Score → 8. Max Bid → 9. Decision Log → 10. Report → 11. Disposition → 12. Archive
 
-KEY DATA SOURCES:
-- historical_auctions: 1,393+ foreclosure records with judgment amounts, bid history, outcomes
-- insights (mcp_reference): Architecture documentation, pipeline details
-- BCPAO: Property values, photos, ownership
-- RealForeclose: Live auction listings
+MAX BID FORMULA: (ARV×70%) - Repairs - $10K - MIN($25K, 15%×ARV)
 
-DECISION FRAMEWORK:
-- BID (≥75% bid/judgment): Strong opportunity
-- REVIEW (60-74%): Needs manual evaluation  
-- SKIP (<60%): Not recommended
+DECISION THRESHOLDS:
+- BID: Judgment/Value ratio ≥75%
+- REVIEW: 60-74%  
+- SKIP: <60%
 
-Max Bid Formula: (ARV×70%) - Repairs - $10K - MIN($25K, 15%×ARV)
+TOOLS (use sparingly):
+- supabase_query: Query historical_auctions, insights, auction_results
+- github_list_files/read_file: Browse code
+- web_search: Current property info
+- memory_search: Knowledge base
 
-CREATOR: Ariel Shapira, Solo Founder | Real Estate Developer & Founder, Everest Capital USA
-
-USE TOOLS proactively for any questions about auction data, property values, code, or market conditions.`;
+CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
 
     const tools = [
       {
-        name: "github_list_files",
-        description: "List files in BrevardBidderAI repository",
+        name: "supabase_query",
+        description: "Query auction database. Tables: historical_auctions, insights, auction_results. Keep queries focused.",
         input_schema: {
           type: "object",
           properties: {
-            repo: { type: "string", description: "Repository: breverdbidder/brevard-bidder-scraper or breverdbidder/brevard-bidder-landing" },
-            path: { type: "string", description: "Directory path, empty for root" }
+            table: { type: "string" },
+            select: { type: "string", description: "Columns (default: *)" },
+            filter: { type: "string", description: "Filter like: address=ilike.*Melbourne*" },
+            order: { type: "string" },
+            limit: { type: "number", description: "Max 10 recommended" }
+          },
+          required: ["table"]
+        }
+      },
+      {
+        name: "github_list_files",
+        description: "List files in repository",
+        input_schema: {
+          type: "object",
+          properties: {
+            repo: { type: "string" },
+            path: { type: "string" }
           },
           required: ["repo"]
         }
       },
       {
         name: "github_read_file",
-        description: "Read file contents from repository",
+        description: "Read file contents",
         input_schema: {
           type: "object",
           properties: {
-            repo: { type: "string", description: "Repository in format owner/repo" },
-            path: { type: "string", description: "File path" }
+            repo: { type: "string" },
+            path: { type: "string" }
           },
           required: ["repo", "path"]
         }
       },
       {
-        name: "supabase_query",
-        description: "Query auction database. Tables: historical_auctions (1393 records), insights, daily_metrics, auction_results",
-        input_schema: {
-          type: "object",
-          properties: {
-            table: { type: "string", description: "Table name" },
-            select: { type: "string", description: "Columns (default: *)" },
-            filter: { type: "string", description: "Filter like: insight_type=eq.mcp_reference" },
-            order: { type: "string", description: "Order: created_at.desc" },
-            limit: { type: "number", description: "Max rows (default: 10)" }
-          },
-          required: ["table"]
-        }
-      },
-      {
         name: "web_search",
-        description: "Search web for property info, market data, news",
+        description: "Search web for property/market info",
         input_schema: {
           type: "object",
           properties: {
-            query: { type: "string", description: "Search query" }
-          },
-          required: ["query"]
-        }
-      },
-      {
-        name: "memory_search",
-        description: "Search BrevardBidderAI knowledge: architecture, past analyses, pipeline docs",
-        input_schema: {
-          type: "object",
-          properties: {
-            query: { type: "string", description: "What to search for" },
-            type: { type: "string", description: "Optional: mcp_reference, auction_analysis, pipeline" }
+            query: { type: "string" }
           },
           required: ["query"]
         }
@@ -139,6 +121,23 @@ USE TOOLS proactively for any questions about auction data, property values, cod
 
     async function executeTool(name, input) {
       try {
+        if (name === "supabase_query") {
+          const { table, select = "*", filter, order, limit = 10 } = input;
+          let url = `${env.SUPABASE_URL}/rest/v1/${table}?select=${select}&limit=${Math.min(limit, 20)}`;
+          if (filter) url += `&${filter}`;
+          if (order) url += `&order=${order}`;
+          
+          const resp = await fetch(url, {
+            headers: {
+              'apikey': env.SUPABASE_SERVICE_KEY,
+              'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`
+            }
+          });
+          if (!resp.ok) return { error: `Query failed: ${resp.status}` };
+          const rows = await resp.json();
+          return { rows: rows.slice(0, 10), count: rows.length };
+        }
+
         if (name === "github_list_files") {
           const { repo, path = "" } = input;
           const url = `https://api.github.com/repos/${repo}/contents/${path}`;
@@ -152,7 +151,7 @@ USE TOOLS proactively for any questions about auction data, property values, cod
           if (!resp.ok) return { error: `Failed: ${resp.status}` };
           const files = await resp.json();
           if (Array.isArray(files)) {
-            return { files: files.map(f => ({ name: f.name, type: f.type, path: f.path })) };
+            return { files: files.slice(0, 15).map(f => ({ name: f.name, type: f.type })) };
           }
           return { error: "Not a directory" };
         }
@@ -165,24 +164,7 @@ USE TOOLS proactively for any questions about auction data, property values, cod
           });
           if (!resp.ok) return { error: `File not found: ${path}` };
           const content = await resp.text();
-          return { content: content.substring(0, 8000) };
-        }
-        
-        if (name === "supabase_query") {
-          const { table, select = "*", filter, order, limit = 10 } = input;
-          let url = `${env.SUPABASE_URL}/rest/v1/${table}?select=${select}&limit=${limit}`;
-          if (filter) url += `&${filter}`;
-          if (order) url += `&order=${order}`;
-          
-          const resp = await fetch(url, {
-            headers: {
-              'apikey': env.SUPABASE_SERVICE_KEY,
-              'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`
-            }
-          });
-          if (!resp.ok) return { error: `Query failed: ${resp.status}` };
-          const rows = await resp.json();
-          return { rows, count: rows.length };
+          return { content: content.substring(0, 4000) };
         }
 
         if (name === "web_search") {
@@ -191,46 +173,15 @@ USE TOOLS proactively for any questions about auction data, property values, cod
           const resp = await fetch(searchUrl, {
             headers: { 'User-Agent': 'Mozilla/5.0 (compatible; BrevardBidderAI/1.0)' }
           });
-          if (!resp.ok) return { error: `Search failed: ${resp.status}` };
+          if (!resp.ok) return { error: `Search failed` };
           const html = await resp.text();
-          
           const results = [];
           const regex = /<a[^>]+class="result__a"[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/gi;
           let match;
-          while ((match = regex.exec(html)) !== null && results.length < 5) {
+          while ((match = regex.exec(html)) !== null && results.length < 3) {
             results.push({ url: match[1], title: match[2].trim() });
           }
-          
-          if (results.length === 0) return { message: "No results found", query };
-          return { results, query };
-        }
-
-        if (name === "memory_search") {
-          const { query, type } = input;
-          let url = `${env.SUPABASE_URL}/rest/v1/insights?select=*&order=created_at.desc&limit=5`;
-          if (type) url += `&insight_type=eq.${type}`;
-          url += `&or=(title.ilike.*${encodeURIComponent(query)}*,description.ilike.*${encodeURIComponent(query)}*)`;
-          
-          const resp = await fetch(url, {
-            headers: {
-              'apikey': env.SUPABASE_SERVICE_KEY,
-              'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`
-            }
-          });
-          if (!resp.ok) {
-            const fallbackUrl = `${env.SUPABASE_URL}/rest/v1/insights?select=*&order=created_at.desc&limit=5${type ? `&insight_type=eq.${type}` : ''}`;
-            const fallbackResp = await fetch(fallbackUrl, {
-              headers: {
-                'apikey': env.SUPABASE_SERVICE_KEY,
-                'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`
-              }
-            });
-            if (!fallbackResp.ok) return { error: `Search failed` };
-            const rows = await fallbackResp.json();
-            return { results: rows, query };
-          }
-          const rows = await resp.json();
-          return { results: rows, query };
+          return { results };
         }
         
         return { error: "Unknown tool" };
@@ -249,7 +200,7 @@ USE TOOLS proactively for any questions about auction data, property values, cod
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
-          max_tokens: 4096,
+          max_tokens: 2048,
           system: systemPrompt,
           tools: tools,
           messages: msgs
@@ -260,14 +211,14 @@ USE TOOLS proactively for any questions about auction data, property values, cod
         const err = await response.json();
         throw new Error(err.error?.message || `API error ${response.status}`);
       }
-
       return response.json();
     }
 
     let conversationMessages = [...messages];
     let data;
     
-    for (let i = 0; i < 6; i++) {
+    // Reduced to 3 iterations to prevent timeout
+    for (let i = 0; i < 3; i++) {
       data = await callAnthropic(conversationMessages);
       
       if (data.stop_reason !== 'tool_use') break;
@@ -276,7 +227,7 @@ USE TOOLS proactively for any questions about auction data, property values, cod
       if (toolCalls.length === 0) break;
       
       const toolResults = [];
-      for (const tc of toolCalls) {
+      for (const tc of toolCalls.slice(0, 2)) { // Max 2 tools per iteration
         const result = await executeTool(tc.name, tc.input);
         toolResults.push({
           type: 'tool_result',
@@ -289,13 +240,25 @@ USE TOOLS proactively for any questions about auction data, property values, cod
       conversationMessages.push({ role: 'user', content: toolResults });
     }
 
+    // Ensure we have text content
+    const hasText = data.content?.some(b => b.type === 'text');
+    if (!hasText && data.stop_reason === 'tool_use') {
+      data.content.push({
+        type: 'text',
+        text: '⏱️ This query requires more processing time. Please try a simpler request, like asking about one property at a time.'
+      });
+    }
+
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message || 'Internal error' }), {
+    return new Response(JSON.stringify({ 
+      error: error.message || 'Internal error',
+      content: [{ type: 'text', text: `⚠️ Error: ${error.message}. Try a simpler query.` }]
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
