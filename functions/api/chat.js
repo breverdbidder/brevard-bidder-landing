@@ -6,6 +6,9 @@ export async function onRequest(context) {
   const startTime = Date.now();
   const MAX_EXECUTION_TIME = 25000;
   
+  // Hardcoded Supabase URL (not sensitive)
+  const SUPABASE_URL = 'https://mocerqjnksmhcjzxrewo.supabase.co';
+  
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
@@ -54,7 +57,8 @@ export async function onRequest(context) {
       const needsClaude = [
         'search', 'web', 'query', 'database', 'supabase', 'github',
         'auction', 'property', 'forecast', 'analyze', 'report',
-        'calculate', 'max bid', 'investment', 'scrape', 'fetch'
+        'calculate', 'max bid', 'investment', 'scrape', 'fetch',
+        'december', 'upcoming', 'recent', 'sold', 'results'
       ];
       
       if (needsClaude.some(kw => q.includes(kw))) {
@@ -79,8 +83,12 @@ You help with foreclosure auction analysis. Key info:
 For database queries or web searches, tell user to ask specifically.
 Creator: Ariel Shapira, Solo Founder | Everest Capital USA`;
 
-    // Gemini FREE tier - no tool use, fast responses
+    // Gemini FREE tier
     async function callGemini(msgs) {
+      if (!env.GEMINI_API_KEY) {
+        throw new Error('Gemini not configured');
+      }
+      
       const geminiMessages = msgs.map(m => ({
         role: m.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: m.content }]
@@ -94,25 +102,19 @@ Creator: Ariel Shapira, Solo Founder | Everest Capital USA`;
           body: JSON.stringify({
             contents: geminiMessages,
             systemInstruction: { parts: [{ text: systemPrompt }] },
-            generationConfig: {
-              maxOutputTokens: 2048,
-              temperature: 0.7
-            }
+            generationConfig: { maxOutputTokens: 2048, temperature: 0.7 }
           })
         }
       );
 
-      if (!response.ok) {
-        throw new Error(`Gemini error: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`Gemini error: ${response.status}`);
       const data = await response.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
       
       return {
         content: [{ type: 'text', text }],
         model: 'gemini-1.5-flash',
-        usage: { input_tokens: 0, output_tokens: 0 } // Gemini doesn't return this easily
+        usage: { input_tokens: 0, output_tokens: 0 }
       };
     }
 
@@ -120,34 +122,22 @@ Creator: Ariel Shapira, Solo Founder | Everest Capital USA`;
     const tools = [
       {
         name: "supabase_query",
-        description: "Query database - FAST. Tables: historical_auctions, insights, auction_results",
+        description: "Query database. Tables: historical_auctions (auction_id, case_number, address, city, final_judgment, opening_bid, status, auction_date), insights, auction_results",
         input_schema: {
           type: "object",
           properties: {
-            table: { type: "string" },
-            select: { type: "string" },
-            filter: { type: "string" },
-            order: { type: "string" },
-            limit: { type: "number" }
+            table: { type: "string", description: "Table name" },
+            select: { type: "string", description: "Columns to select (default: *)" },
+            filter: { type: "string", description: "Filter like: status=eq.SOLD" },
+            order: { type: "string", description: "Order like: auction_date.desc" },
+            limit: { type: "number", description: "Max rows (default 10)" }
           },
           required: ["table"]
         }
       },
       {
-        name: "github_read_file",
-        description: "Read file from repo",
-        input_schema: {
-          type: "object",
-          properties: {
-            repo: { type: "string" },
-            path: { type: "string" }
-          },
-          required: ["repo", "path"]
-        }
-      },
-      {
         name: "web_search",
-        description: "Search internet",
+        description: "Search internet for current info",
         input_schema: {
           type: "object",
           properties: { query: { type: "string" } },
@@ -175,7 +165,7 @@ Creator: Ariel Shapira, Solo Founder | Everest Capital USA`;
       try {
         if (name === "supabase_query") {
           const { table, select = "*", filter, order, limit = 10 } = input;
-          let url = `${env.SUPABASE_URL}/rest/v1/${table}?select=${select}&limit=${limit}`;
+          let url = `${SUPABASE_URL}/rest/v1/${table}?select=${encodeURIComponent(select)}&limit=${limit}`;
           if (filter) url += `&${filter}`;
           if (order) url += `&order=${order}`;
           
@@ -186,21 +176,12 @@ Creator: Ariel Shapira, Solo Founder | Everest Capital USA`;
             }
           }, 5000);
           
-          if (!resp.ok) return { error: `DB error: ${resp.status}` };
+          if (!resp.ok) {
+            const errText = await resp.text();
+            return { error: `DB error ${resp.status}: ${errText.substring(0, 100)}` };
+          }
           const rows = await resp.json();
-          return { rows: rows.slice(0, limit), count: rows.length };
-        }
-        
-        if (name === "github_read_file") {
-          const { repo, path } = input;
-          const resp = await fetchWithTimeout(
-            `https://raw.githubusercontent.com/${repo}/main/${path}`,
-            { headers: { 'Authorization': `token ${env.GITHUB_TOKEN}` } },
-            5000
-          );
-          if (!resp.ok) return { error: `File not found` };
-          const content = await resp.text();
-          return { content: content.substring(0, 4000) };
+          return { rows: rows.slice(0, limit), count: rows.length, table };
         }
 
         if (name === "web_search") {
@@ -218,7 +199,7 @@ Creator: Ariel Shapira, Solo Founder | Everest Capital USA`;
           while ((match = regex.exec(html)) !== null && results.length < 5) {
             results.push({ title: match[1].trim() });
           }
-          return results.length ? { results } : { message: "No results" };
+          return results.length ? { results, query } : { message: "No results", query };
         }
         
         return { error: "Unknown tool" };
@@ -240,7 +221,7 @@ Creator: Ariel Shapira, Solo Founder | Everest Capital USA`;
           body: JSON.stringify({
             model: 'claude-sonnet-4-20250514',
             max_tokens: 2048,
-            system: systemPrompt + '\n\nUse tools when needed. Complete response after tool results.',
+            system: systemPrompt + '\n\nYou have tools. Use supabase_query for database. After getting results, provide analysis. Do NOT leave responses incomplete.',
             tools: tools,
             messages: msgs
           })
@@ -255,15 +236,15 @@ Creator: Ariel Shapira, Solo Founder | Everest Capital USA`;
     let data;
     let totalTokens = 0;
     let toolsUsed = [];
+    let actualTier = tier;
 
     if (tier === 'FREE') {
-      // Use Gemini - fast, no tools
       try {
         data = await callGemini(messages);
-        totalTokens = 0; // FREE!
+        totalTokens = 0;
       } catch (geminiError) {
-        // Fallback to Claude if Gemini fails
-        console.log('Gemini failed, falling back to Claude:', geminiError.message);
+        // Fallback to Claude
+        actualTier = 'PRODUCTION (fallback)';
         data = await callClaude(messages);
         totalTokens = (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0);
       }
@@ -274,8 +255,8 @@ Creator: Ariel Shapira, Solo Founder | Everest Capital USA`;
       for (let i = 0; i < 3; i++) {
         if (isTimeUp()) {
           return new Response(JSON.stringify({
-            content: [{ type: 'text', text: `⏱️ Time limit. Tools used: ${toolsUsed.join(', ') || 'none'}` }],
-            _meta: { timeout: true, tier, tools_used: toolsUsed }
+            content: [{ type: 'text', text: `⏱️ Time limit reached. Tools: ${toolsUsed.join(', ') || 'none'}` }],
+            _meta: { timeout: true, tier: actualTier, tools_used: toolsUsed }
           }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
         }
 
@@ -309,7 +290,7 @@ Creator: Ariel Shapira, Solo Founder | Everest Capital USA`;
           if (data?.content) {
             return new Response(JSON.stringify({
               ...data,
-              _meta: { error: loopError.message, tier, tools_used: toolsUsed }
+              _meta: { error: loopError.message, tier: actualTier, tools_used: toolsUsed }
             }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
           }
           throw loopError;
@@ -317,13 +298,12 @@ Creator: Ariel Shapira, Solo Founder | Everest Capital USA`;
       }
     }
 
-    // Calculate cost savings
-    const savings = tier === 'FREE' ? 'FREE (Gemini)' : `${totalTokens} tokens (Claude)`;
+    const savings = actualTier === 'FREE' ? 'FREE (Gemini)' : `${totalTokens} tokens`;
 
     return new Response(JSON.stringify({
       ...data,
       _meta: {
-        tier,
+        tier: actualTier,
         session_tokens: totalTokens,
         tools_used: toolsUsed,
         elapsed_ms: Date.now() - startTime,
