@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
     <title>BrevardBidderAI Chat</title>
     <style>
@@ -13,653 +12,446 @@
         :root {
             --bg-primary: #0f172a;
             --bg-secondary: #1e293b;
-            --bg-chat: #252538;
             --accent: #3b82f6;
-            --accent-dim: #2563eb;
             --text-primary: #f0f0f5;
             --text-secondary: #a0a0b0;
             --user-bubble: #3b82f6;
             --claude-bubble: #334155;
-            --border: rgba(59, 130, 246, 0.2);
         }
         
         html, body {
             height: 100%;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-            color: var(--text-primary);
-            overflow: hidden;
-        }
-        
-        /* Login Screen */
-        #login-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            padding: 20px;
-        }
-        
-        .login-card {
-            background: var(--bg-chat);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 40px 30px;
-            width: 100%;
-            max-width: 360px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-        }
-        
-        .login-logo {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-        
-        .login-title {
-            font-size: 22px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--accent), #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
-        }
-        
-        .login-subtitle {
-            color: var(--text-secondary);
-            font-size: 14px;
-            margin-bottom: 30px;
-        }
-        
-        .login-input {
-            width: 100%;
-            padding: 16px 20px;
-            font-size: 18px;
             background: var(--bg-primary);
-            border: 2px solid var(--border);
-            border-radius: 12px;
             color: var(--text-primary);
-            text-align: center;
-            letter-spacing: 2px;
-            margin-bottom: 20px;
-            transition: border-color 0.2s;
         }
         
-        .login-input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-        
-        .login-input::placeholder {
-            letter-spacing: normal;
-            color: var(--text-secondary);
-        }
-        
-        .login-btn {
-            width: 100%;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 600;
-            background: linear-gradient(135deg, var(--accent), var(--accent-dim));
-            border: none;
-            border-radius: 12px;
-            color: white;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .login-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
-        }
-        
-        .login-btn:active {
-            transform: scale(0.98);
-        }
-        
-        .login-error {
-            color: #ef4444;
-            font-size: 14px;
-            margin-top: 16px;
-            display: none;
-        }
-        
-        /* Chat Screen */
-        #chat-screen {
-            display: none;
+        .app {
+            display: flex;
             flex-direction: column;
             height: 100%;
-            height: 100dvh;
+            max-width: 800px;
+            margin: 0 auto;
         }
         
-        /* Header */
-        .chat-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        header {
             padding: 12px 16px;
-            background: var(--bg-chat);
-            border-bottom: 1px solid var(--border);
-            flex-shrink: 0;
-        }
-        
-        .header-left {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid rgba(59,130,246,0.2);
             display: flex;
             align-items: center;
             gap: 12px;
+            flex-shrink: 0;
         }
         
-        .header-avatar {
+        .logo {
             width: 40px;
             height: 40px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 20px;
         }
         
-        .header-info h1 {
-            font-size: 16px;
-            font-weight: 600;
-        }
-        
-        .header-info p {
-            font-size: 12px;
+        .title-area h1 { font-size: 1.1rem; }
+        .title-area .status { 
+            font-size: 0.75rem; 
             color: var(--text-secondary);
-        }
-        
-        .header-actions {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .header-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-            font-size: 18px;
-            cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
+            gap: 6px;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+        }
+        .status-dot.working {
+            background: #f59e0b;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
-        .header-btn:hover {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-        }
-        
-        /* Messages Area */
-        .messages-container {
+        .messages {
             flex: 1;
             overflow-y: auto;
             padding: 16px;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
         
         .message {
             max-width: 85%;
-            margin-bottom: 16px;
-            animation: slideIn 0.3s ease;
-        }
-        
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.5;
+            font-size: 0.95rem;
         }
         
         .message.user {
-            margin-left: auto;
-        }
-        
-        .message-bubble {
-            padding: 12px 16px;
-            border-radius: 18px;
-            font-size: 15px;
-            line-height: 1.5;
-            word-wrap: break-word;
-        }
-        
-        .message.user .message-bubble {
             background: var(--user-bubble);
+            color: white;
+            margin-left: auto;
             border-bottom-right-radius: 4px;
         }
         
-        .message.claude .message-bubble {
+        .message.assistant {
             background: var(--claude-bubble);
+            margin-right: auto;
             border-bottom-left-radius: 4px;
         }
         
-        .message-time {
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-top: 4px;
-            padding: 0 4px;
+        .message pre {
+            background: #1a1a2e;
+            padding: 10px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 8px 0;
+            font-size: 0.8rem;
         }
         
-        .message.user .message-time {
-            text-align: right;
+        .message code {
+            font-family: 'SF Mono', Monaco, monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.85em;
         }
         
-        /* Typing indicator */
-        .typing-indicator {
-            display: none;
-            padding: 12px 16px;
+        .progress-indicator {
             background: var(--claude-bubble);
+            padding: 12px 16px;
             border-radius: 18px;
             border-bottom-left-radius: 4px;
-            width: fit-content;
-            margin-bottom: 16px;
+            max-width: 85%;
+            display: none;
         }
         
-        .typing-indicator.visible {
-            display: block;
+        .progress-indicator.visible { display: block; }
+        
+        .progress-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
         }
         
-        .typing-dots {
+        .progress-dots {
             display: flex;
             gap: 4px;
         }
         
-        .typing-dots span {
+        .progress-dots span {
             width: 8px;
             height: 8px;
-            background: var(--text-secondary);
+            background: var(--accent);
             border-radius: 50%;
-            animation: typing 1.4s infinite;
+            animation: bounce 1.4s ease-in-out infinite;
+        }
+        .progress-dots span:nth-child(2) { animation-delay: 0.16s; }
+        .progress-dots span:nth-child(3) { animation-delay: 0.32s; }
+        
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-6px); }
         }
         
-        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-        
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-            30% { transform: translateY(-6px); opacity: 1; }
-        }
-        
-        /* Input Area */
-        .input-container {
+        .input-area {
             padding: 12px 16px;
-            padding-bottom: max(12px, env(safe-area-inset-bottom));
-            background: var(--bg-chat);
-            border-top: 1px solid var(--border);
+            background: var(--bg-secondary);
+            border-top: 1px solid rgba(59,130,246,0.2);
             flex-shrink: 0;
         }
         
-        .input-wrapper {
+        .quick-btns {
             display: flex;
-            align-items: flex-end;
-            gap: 10px;
-            background: var(--bg-primary);
-            border: 2px solid var(--border);
-            border-radius: 24px;
-            padding: 8px 8px 8px 16px;
-            transition: border-color 0.2s;
+            gap: 8px;
+            margin-bottom: 10px;
+            overflow-x: auto;
+            padding-bottom: 4px;
         }
         
-        .input-wrapper:focus-within {
+        .quick-btn {
+            padding: 8px 14px;
+            background: rgba(59,130,246,0.2);
+            border: 1px solid rgba(59,130,246,0.3);
+            border-radius: 20px;
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        
+        .quick-btn:active { background: rgba(59,130,246,0.4); }
+        
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        
+        #messageInput {
+            flex: 1;
+            padding: 12px 16px;
+            background: var(--bg-primary);
+            border: 1px solid rgba(59,130,246,0.3);
+            border-radius: 24px;
+            color: var(--text-primary);
+            font-size: 16px;
+            resize: none;
+            max-height: 120px;
+            line-height: 1.4;
+        }
+        
+        #messageInput:focus {
+            outline: none;
             border-color: var(--accent);
         }
         
-        #message-input {
-            flex: 1;
-            background: transparent;
+        #sendBtn {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             border: none;
-            color: var(--text-primary);
-            font-size: 16px;
-            line-height: 1.4;
-            resize: none;
-            max-height: 120px;
-            min-height: 24px;
-            padding: 6px 0;
-        }
-        
-        #message-input:focus {
-            outline: none;
-        }
-        
-        #message-input::placeholder {
-            color: var(--text-secondary);
-        }
-        
-        .send-btn {
-            width: 44px;
-            height: 44px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent), var(--accent-dim));
-            border: none;
             color: white;
-            font-size: 20px;
+            font-size: 1.2rem;
             cursor: pointer;
+            flex-shrink: 0;
+        }
+        
+        #sendBtn:disabled { opacity: 0.5; }
+        
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.2s, opacity 0.2s;
-            flex-shrink: 0;
+            z-index: 100;
         }
         
-        .send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .send-btn:not(:disabled):hover {
-            transform: scale(1.05);
-        }
-        
-        .send-btn:not(:disabled):active {
-            transform: scale(0.95);
-        }
-        
-        /* Quick Actions */
-        .quick-actions {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .quick-action {
-            padding: 8px 14px;
+        .login-box {
             background: var(--bg-secondary);
-            border: 1px solid var(--border);
+            padding: 32px;
             border-radius: 20px;
-            color: var(--text-secondary);
-            font-size: 13px;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-        
-        .quick-action:hover {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-        }
-        
-        /* Markdown rendering */
-        .message-bubble code {
-            background: rgba(0,0,0,0.3);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'SF Mono', Monaco, monospace;
-            font-size: 13px;
-        }
-        
-        .message-bubble pre {
-            background: rgba(0,0,0,0.3);
-            padding: 12px;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin: 8px 0;
-        }
-        
-        .message-bubble pre code {
-            background: none;
-            padding: 0;
-        }
-        
-        .message-bubble strong {
-            color: #60a5fa;
-        }
-        
-        .message-bubble ul, .message-bubble ol {
-            margin: 8px 0;
-            padding-left: 20px;
-        }
-        
-        .message-bubble li {
-            margin: 4px 0;
-        }
-        
-        /* Session info */
-        .session-info {
+            width: 90%;
+            max-width: 360px;
             text-align: center;
-            padding: 20px;
-            color: var(--text-secondary);
-            font-size: 12px;
         }
         
-        .session-info .date {
-            background: var(--bg-secondary);
-            padding: 6px 16px;
+        .login-box h2 { margin-bottom: 8px; }
+        .login-box p { color: var(--text-secondary); margin-bottom: 24px; font-size: 0.9rem; }
+        
+        .login-box input {
+            width: 100%;
+            padding: 14px;
+            background: var(--bg-primary);
+            border: 1px solid rgba(59,130,246,0.3);
             border-radius: 12px;
-            display: inline-block;
+            color: var(--text-primary);
+            font-size: 16px;
+            margin-bottom: 16px;
         }
         
-        /* Responsive */
-        @media (max-width: 480px) {
-            .message {
-                max-width: 90%;
-            }
-            
-            .header-info h1 {
-                font-size: 15px;
-            }
+        .login-box button {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .hidden { display: none !important; }
+        
+        .timeout-warning {
+            background: rgba(245,158,11,0.2);
+            border: 1px solid rgba(245,158,11,0.5);
+            color: #fbbf24;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            margin-top: 8px;
         }
     </style>
 </head>
 <body>
-    <!-- Login Screen -->
-    <div id="login-screen">
-        <div class="login-card">
-            <div class="login-logo">🏠</div>
-            <h1 class="login-title">BrevardBidderAI</h1>
-            <p class="login-subtitle">Foreclosure Intelligence • Brevard County</p>
-            <input 
-                type="password" 
-                id="password-input" 
-                class="login-input" 
-                placeholder="Enter password"
-                autocomplete="current-password"
-            >
-            <button class="login-btn" onclick="attemptLogin()">
-                Access Chat
-            </button>
-            <p class="login-error" id="login-error">Invalid password</p>
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-box">
+            <h2>🏠 BrevardBidderAI</h2>
+            <p>Foreclosure Intelligence Assistant</p>
+            <input type="password" id="pwdInput" placeholder="Enter password">
+            <button onclick="login()">Access</button>
         </div>
     </div>
     
-    <!-- Chat Screen -->
-    <div id="chat-screen">
-        <!-- Header -->
-        <div class="chat-header">
-            <div class="header-left">
-                <div class="header-avatar">🏠</div>
-                <div class="header-info">
-                    <h1>BrevardBidderAI</h1>
-                    <p id="status-text">Ready</p>
+    <div id="app" class="app hidden">
+        <header>
+            <div class="logo">🏠</div>
+            <div class="title-area">
+                <h1>BrevardBidderAI</h1>
+                <div class="status">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="statusText">Ready</span>
                 </div>
             </div>
-            <div class="header-actions">
-                <button class="header-btn" onclick="clearChat()" title="New Chat">🗑️</button>
-                <button class="header-btn" onclick="goToLanding()" title="Landing Page">📊</button>
-                <button class="header-btn" onclick="logout()" title="Lock">🔒</button>
+        </header>
+        
+        <div class="messages" id="messages">
+            <div class="message assistant">
+                Welcome! I can analyze foreclosures, query auction data, search the web, and browse code repositories.<br><br>
+                <strong>Tip:</strong> Complex queries may take 30-60 seconds as I search multiple sources.
+            </div>
+            
+            <div class="progress-indicator" id="progress">
+                <div class="progress-text" id="progressText">Thinking...</div>
+                <div class="progress-dots">
+                    <span></span><span></span><span></span>
+                </div>
             </div>
         </div>
         
-        <!-- Messages -->
-        <div class="messages-container" id="messages">
-            <div class="session-info">
-                <span class="date" id="session-date"></span>
+        <div class="input-area">
+            <div class="quick-btns">
+                <button class="quick-btn" onclick="sendQuick('Show 5 recent auction results')">📊 Auctions</button>
+                <button class="quick-btn" onclick="sendQuick('Explain max bid formula')">💰 Max Bid</button>
+                <button class="quick-btn" onclick="sendQuick('List src in brevard-bidder-scraper')">💻 Code</button>
             </div>
-        </div>
-        
-        <!-- Typing Indicator -->
-        <div class="typing-indicator" id="typing">
-            <div class="typing-dots">
-                <span></span><span></span><span></span>
+            <div class="input-row">
+                <textarea id="messageInput" rows="1" placeholder="Ask about foreclosures..." onkeydown="handleKey(event)"></textarea>
+                <button id="sendBtn" onclick="sendMessage()">➤</button>
             </div>
-        </div>
-        
-        <!-- Input -->
-        <div class="input-container">
-            <div class="quick-actions">
-                <button class="quick-action" onclick="sendQuick('Show 5 recent auction results')">📊 Auctions</button>
-                <button class="quick-action" onclick="sendQuick('Explain max bid formula')">💰 Max Bid</button>
-                <button class="quick-action" onclick="sendQuick('Query historical_auctions for Titusville')">🔍 Search</button>
-                <button class="quick-action" onclick="sendQuick('List src folder in brevard-bidder-scraper')">💻 Code</button>
-            </div>
-            <div class="input-wrapper">
-                <textarea 
-                    id="message-input" 
-                    placeholder="Ask about foreclosures..."
-                    rows="1"
-                    onkeydown="handleKeydown(event)"
-                    oninput="autoResize(this)"
-                ></textarea>
-                <button class="send-btn" id="send-btn" onclick="sendMessage()">
-                    ➤
-                </button>
+            <div id="timeoutWarning" class="timeout-warning hidden">
+                ⏱️ Taking longer than expected. Complex queries may need 60+ seconds...
             </div>
         </div>
     </div>
 
     <script>
-        // Config
         const API_URL = '/api/chat';
-        let sessionId = localStorage.getItem('brevard_session_id') || generateSessionId();
         let messages = [];
-        let password = '';
+        let sessionId = 'bb_' + Date.now();
         
-        // Store session ID
-        localStorage.setItem('brevard_session_id', sessionId);
-        
-        function generateSessionId() {
-            return 'bb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        // Auto-login
+        const savedPwd = localStorage.getItem('brevard_pwd');
+        if (savedPwd) {
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
         }
         
-        // Login
-        function attemptLogin() {
-            password = document.getElementById('password-input').value;
-            
-            if (!password) {
-                showLoginError('Please enter password');
-                return;
-            }
-            
-            // Store password (persists across sessions)
-            localStorage.setItem('brevard_pwd', password);
-            
-            // Show chat screen
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('chat-screen').style.display = 'flex';
-            
-            // Set session date
-            document.getElementById('session-date').textContent = 
-                new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-            
-            // Focus input
-            document.getElementById('message-input').focus();
-            
-            // Load any cached messages
-            loadCachedMessages();
-        }
-        
-        function showLoginError(msg) {
-            const errorEl = document.getElementById('login-error');
-            errorEl.textContent = msg;
-            errorEl.style.display = 'block';
-            setTimeout(() => errorEl.style.display = 'none', 3000);
-        }
-        
-        function logout() {
-            localStorage.removeItem('brevard_pwd');
-            password = '';
-            document.getElementById('chat-screen').style.display = 'none';
-            document.getElementById('login-screen').style.display = 'flex';
-            document.getElementById('password-input').value = '';
-        }
-        
-        // Check for existing session
-        window.addEventListener('load', () => {
-            const savedPwd = localStorage.getItem('brevard_pwd');
-            if (savedPwd) {
-                password = savedPwd;
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('chat-screen').style.display = 'flex';
-                document.getElementById('session-date').textContent = 
-                    new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-                loadCachedMessages();
-            }
-            
-            // Handle Enter on password field
-            document.getElementById('password-input').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') attemptLogin();
-            });
+        document.getElementById('pwdInput').addEventListener('keypress', e => {
+            if (e.key === 'Enter') login();
         });
         
-        // Messages
-        function loadCachedMessages() {
-            const cached = localStorage.getItem('brevard_messages_' + sessionId);
-            if (cached) {
-                messages = JSON.parse(cached);
-                messages.forEach(m => renderMessage(m.role, m.content, false));
+        function login() {
+            const pwd = document.getElementById('pwdInput').value;
+            if (pwd) {
+                localStorage.setItem('brevard_pwd', pwd);
+                document.getElementById('loginOverlay').classList.add('hidden');
+                document.getElementById('app').classList.remove('hidden');
             }
         }
         
-        function saveMessages() {
-            localStorage.setItem('brevard_messages_' + sessionId, JSON.stringify(messages));
+        function setStatus(text, working = false) {
+            document.getElementById('statusText').textContent = text;
+            document.getElementById('statusDot').classList.toggle('working', working);
         }
         
-        function renderMessage(role, content, animate = true) {
-            const container = document.getElementById('messages');
+        function showProgress(text) {
+            document.getElementById('progressText').textContent = text;
+            document.getElementById('progress').classList.add('visible');
+            scrollToBottom();
+        }
+        
+        function hideProgress() {
+            document.getElementById('progress').classList.remove('visible');
+        }
+        
+        function scrollToBottom() {
+            const msgs = document.getElementById('messages');
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+        
+        function addMessage(role, content) {
+            const msgs = document.getElementById('messages');
             const div = document.createElement('div');
-            div.className = `message ${role === 'user' ? 'user' : 'claude'}`;
-            if (!animate) div.style.animation = 'none';
+            div.className = `message ${role}`;
             
-            const time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-            
-            // Simple markdown rendering
+            // Simple markdown
             let html = content
                 .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
                 .replace(/`([^`]+)`/g, '<code>$1</code>')
                 .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                .replace(/##\s+(.+)/g, '<strong style="font-size:1.1em">$1</strong><br>')
+                .replace(/##\s+(.+)/g, '<strong>$1</strong><br>')
+                .replace(/###\s+(.+)/g, '<strong>$1</strong><br>')
                 .replace(/\n/g, '<br>');
             
-            div.innerHTML = `
-                <div class="message-bubble">${html}</div>
-                <div class="message-time">${time}</div>
-            `;
-            
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
+            div.innerHTML = html;
+            msgs.insertBefore(div, document.getElementById('progress'));
+            scrollToBottom();
+        }
+        
+        function sendQuick(text) {
+            document.getElementById('messageInput').value = text;
+            sendMessage();
+        }
+        
+        function handleKey(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
         }
         
         async function sendMessage() {
-            const input = document.getElementById('message-input');
+            const input = document.getElementById('messageInput');
             const content = input.value.trim();
-            
             if (!content) return;
             
-            // Add user message
-            messages.push({ role: 'user', content });
-            renderMessage('user', content);
-            saveMessages();
-            
-            // Clear input
             input.value = '';
-            autoResize(input);
+            addMessage('user', content);
+            messages.push({ role: 'user', content });
             
-            // Show typing
-            setStatus('Thinking...');
-            document.getElementById('typing').classList.add('visible');
-            document.getElementById('send-btn').disabled = true;
+            document.getElementById('sendBtn').disabled = true;
+            setStatus('Working...', true);
+            showProgress('🔍 Analyzing your request...');
+            document.getElementById('timeoutWarning').classList.add('hidden');
+            
+            // Show timeout warning after 15 seconds
+            const timeoutTimer = setTimeout(() => {
+                showProgress('🔧 Using tools to find data...');
+                document.getElementById('timeoutWarning').classList.remove('hidden');
+            }, 15000);
+            
+            // Update progress messages
+            const progressMessages = [
+                '📊 Querying database...',
+                '🌐 Searching web...',
+                '📝 Generating report...'
+            ];
+            let progressIndex = 0;
+            const progressTimer = setInterval(() => {
+                if (progressIndex < progressMessages.length) {
+                    showProgress(progressMessages[progressIndex]);
+                    progressIndex++;
+                }
+            }, 8000);
             
             try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 120000); // 2 min timeout
+                
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -667,76 +459,45 @@
                         password: localStorage.getItem('brevard_pwd'),
                         messages: messages,
                         session_id: sessionId
-                    })
+                    }),
+                    signal: controller.signal
                 });
                 
+                clearTimeout(timeout);
+                clearTimeout(timeoutTimer);
+                clearInterval(progressTimer);
+                
                 if (response.status === 401) {
-                    renderMessage('assistant', '⚠️ Authentication error. Please refresh and re-enter password.');
+                    localStorage.removeItem('brevard_pwd');
+                    location.reload();
                     return;
                 }
                 
-                if (!response.ok) {
-                    throw new Error('API error');
+                const data = await response.json();
+                
+                if (data.error) {
+                    addMessage('assistant', '⚠️ Error: ' + data.error);
+                } else {
+                    const textContent = data.content?.filter(b => b.type === 'text').map(b => b.text).join('\n\n') || 'No response received.';
+                    addMessage('assistant', textContent);
+                    messages.push({ role: 'assistant', content: textContent });
                 }
                 
-                const data = await response.json();
-                const assistantContent = data.content?.filter(b => b.type === 'text').map(b => b.text).join('\n\n') || 'No response';
-                
-                // Add assistant message
-                messages.push({ role: 'assistant', content: assistantContent });
-                renderMessage('assistant', assistantContent);
-                saveMessages();
-                
             } catch (error) {
-                console.error('Error:', error);
-                renderMessage('assistant', '⚠️ Connection error. Please try again.');
-            } finally {
-                document.getElementById('typing').classList.remove('visible');
-                document.getElementById('send-btn').disabled = false;
-                setStatus('Ready');
-            }
-        }
-        
-        function sendQuick(text) {
-            document.getElementById('message-input').value = text;
-            sendMessage();
-        }
-        
-        function clearChat() {
-            if (confirm('Start a new chat? Current messages will be cleared.')) {
-                messages = [];
-                sessionId = generateSessionId();
-                localStorage.setItem('brevard_session_id', sessionId);
-                localStorage.removeItem('brevard_messages_' + sessionId);
+                clearTimeout(timeoutTimer);
+                clearInterval(progressTimer);
                 
-                const container = document.getElementById('messages');
-                container.innerHTML = `
-                    <div class="session-info">
-                        <span class="date">${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</span>
-                    </div>
-                `;
+                if (error.name === 'AbortError') {
+                    addMessage('assistant', '⏱️ Request timed out. Try a simpler query or break it into steps.');
+                } else {
+                    addMessage('assistant', '⚠️ Connection error: ' + error.message);
+                }
             }
-        }
-        
-        function goToLanding() {
-            window.location.href = '/';
-        }
-        
-        function setStatus(text) {
-            document.getElementById('status-text').textContent = text;
-        }
-        
-        // Input handling
-        function handleKeydown(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        }
-        
-        function autoResize(el) {
-            el.style.height = 'auto';
-            el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+            
+            hideProgress();
+            document.getElementById('timeoutWarning').classList.add('hidden');
+            document.getElementById('sendBtn').disabled = false;
+            setStatus('Ready', false);
         }
     </script>
 </body>
