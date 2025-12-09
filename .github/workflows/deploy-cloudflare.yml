@@ -29,3 +29,23 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: 83ab3f2fbbabd1a9b01a018fb4efe219
           command: pages deploy dist --project-name=brevard-bidder-landing --branch=main
+
+      - name: Set Env Vars
+        run: |
+          curl -X PATCH \
+            "https://api.cloudflare.com/client/v4/accounts/83ab3f2fbbabd1a9b01a018fb4efe219/pages/projects/brevard-bidder-landing" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "deployment_configs": {
+                "production": {
+                  "env_vars": {
+                    "BIDDER_PASSWORD": {"type": "plain_text", "value": "BrevardBidder2025!"},
+                    "ANTHROPIC_API_KEY": {"type": "secret_text", "value": "${{ secrets.ANTHROPIC_API_KEY }}"},
+                    "SUPABASE_URL": {"type": "plain_text", "value": "https://mocerqjnksmhcjzxrewo.supabase.co"},
+                    "SUPABASE_SERVICE_KEY": {"type": "secret_text", "value": "${{ secrets.SUPABASE_SERVICE_KEY }}"},
+                    "GITHUB_TOKEN": {"type": "secret_text", "value": "${{ secrets.GH_PAT }}"}
+                  }
+                }
+              }
+            }'
