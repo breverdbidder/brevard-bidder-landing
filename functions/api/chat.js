@@ -1,4 +1,6 @@
-// BrevardBidderAI Chat API v2 - Improved timeout handling
+// BrevardBidderAI Chat API V2 - Context Management + Checkpoints
+// Overcomes Claude context limits via automatic summarization
+
 export async function onRequest(context) {
   const { request, env } = context;
   
@@ -34,110 +36,135 @@ export async function onRequest(context) {
       });
     }
 
+    // === CONTEXT MANAGEMENT ===
+    const TOKEN_THRESHOLD = 150000; // Trigger summarization at 150K
+    const MAX_MESSAGES = 50; // Max messages before summarizing
+    
+    // Load session state from Supabase
+    let sessionState = await loadSessionState(env, session_id);
+    
+    // Estimate current token count (rough: 4 chars = 1 token)
+    const estimatedTokens = JSON.stringify(messages).length / 4;
+    
+    // If approaching limit, summarize older messages
+    let processedMessages = messages;
+    if (estimatedTokens > TOKEN_THRESHOLD || messages.length > MAX_MESSAGES) {
+      processedMessages = await summarizeConversation(env, messages, sessionState);
+    }
+
     const now = new Date();
     const flTime = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit' });
     const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
 
-    const systemPrompt = `You are BrevardBidderAI Assistant - foreclosure auction intelligence for Brevard County, FL.
+    // Include context from previous checkpoints
+    const contextPrefix = sessionState?.summary 
+      ? `[CONTEXT FROM PREVIOUS SESSION: ${sessionState.summary}]\n\n` 
+      : '';
 
-CURRENT: ${dateStr} | ${flTime} EST
+    const systemPrompt = `You are BrevardBidderAI Assistant - Foreclosure auction intelligence for Brevard County, FL.
 
-CRITICAL RULES:
-1. KEEP RESPONSES CONCISE - avoid timeouts on complex queries
-2. For multi-property requests: summarize key data, don't generate full reports
-3. Use MAX 2 tool calls per response to stay within time limits
-4. If asked for "full 12-stage pipeline" or complex reports: explain you'll provide key highlights and suggest they request one property at a time for full details
+CURRENT TIME: ${dateStr} | ${flTime} EST
 
-12-STAGE PIPELINE OVERVIEW (reference only):
-1. Discovery → 2. Scraping → 3. Title Search → 4. Lien Priority → 5. Tax Certs → 6. Demographics → 7. ML Score → 8. Max Bid → 9. Decision Log → 10. Report → 11. Disposition → 12. Archive
+${contextPrefix}PLATFORM: Agentic AI ecosystem with 12-stage pipeline for foreclosure analysis.
 
-MAX BID FORMULA: (ARV×70%) - Repairs - $10K - MIN($25K, 15%×ARV)
+TOOLS AVAILABLE:
+1. github_list_files - Browse repository code
+2. github_read_file - Read file contents  
+3. supabase_query - Query auction database (historical_auctions: 1,393+ records)
+4. web_search - Search the internet
+5. memory_search - Search knowledge base
 
-DECISION THRESHOLDS:
-- BID: Judgment/Value ratio ≥75%
-- REVIEW: 60-74%  
-- SKIP: <60%
+DECISION FRAMEWORK:
+- BID (≥75% bid/judgment): Strong opportunity
+- REVIEW (60-74%): Needs evaluation  
+- SKIP (<60%): Not recommended
 
-TOOLS (use sparingly):
-- supabase_query: Query historical_auctions, insights, auction_results
-- github_list_files/read_file: Browse code
-- web_search: Current property info
-- memory_search: Knowledge base
+Max Bid: (ARV×70%) - Repairs - $10K - MIN($25K, 15%×ARV)
 
-CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
+CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA
+
+USE TOOLS proactively. You have UNLIMITED context via automatic checkpointing.`;
 
     const tools = [
       {
-        name: "supabase_query",
-        description: "Query auction database. Tables: historical_auctions, insights, auction_results. Keep queries focused.",
-        input_schema: {
-          type: "object",
-          properties: {
-            table: { type: "string" },
-            select: { type: "string", description: "Columns (default: *)" },
-            filter: { type: "string", description: "Filter like: address=ilike.*Melbourne*" },
-            order: { type: "string" },
-            limit: { type: "number", description: "Max 10 recommended" }
-          },
-          required: ["table"]
-        }
-      },
-      {
         name: "github_list_files",
-        description: "List files in repository",
+        description: "List files in BrevardBidderAI repository",
         input_schema: {
           type: "object",
           properties: {
-            repo: { type: "string" },
-            path: { type: "string" }
+            repo: { type: "string", description: "Repository: breverdbidder/brevard-bidder-scraper or breverdbidder/brevard-bidder-landing" },
+            path: { type: "string", description: "Directory path, empty for root" }
           },
           required: ["repo"]
         }
       },
       {
         name: "github_read_file",
-        description: "Read file contents",
+        description: "Read file contents from repository",
         input_schema: {
           type: "object",
           properties: {
-            repo: { type: "string" },
-            path: { type: "string" }
+            repo: { type: "string", description: "Repository in format owner/repo" },
+            path: { type: "string", description: "File path" }
           },
           required: ["repo", "path"]
         }
       },
       {
-        name: "web_search",
-        description: "Search web for property/market info",
+        name: "supabase_query",
+        description: "Query auction database. Tables: historical_auctions, insights, daily_metrics, auction_results, chat_sessions",
         input_schema: {
           type: "object",
           properties: {
-            query: { type: "string" }
+            table: { type: "string", description: "Table name" },
+            select: { type: "string", description: "Columns (default: *)" },
+            filter: { type: "string", description: "Filter like: insight_type=eq.mcp_reference" },
+            order: { type: "string", description: "Order: created_at.desc" },
+            limit: { type: "number", description: "Max rows (default: 10)" }
+          },
+          required: ["table"]
+        }
+      },
+      {
+        name: "web_search",
+        description: "Search web for property info, market data, news",
+        input_schema: {
+          type: "object",
+          properties: {
+            query: { type: "string", description: "Search query" }
           },
           required: ["query"]
+        }
+      },
+      {
+        name: "memory_search",
+        description: "Search stored knowledge: architecture, past analyses, checkpoints",
+        input_schema: {
+          type: "object",
+          properties: {
+            query: { type: "string", description: "What to search for" },
+            type: { type: "string", description: "Optional: mcp_reference, auction_analysis, checkpoint" }
+          },
+          required: ["query"]
+        }
+      },
+      {
+        name: "save_checkpoint",
+        description: "Save current conversation state for continuity. Use when: long conversation, important findings, before context limit.",
+        input_schema: {
+          type: "object",
+          properties: {
+            summary: { type: "string", description: "Summary of conversation so far" },
+            key_findings: { type: "string", description: "Important discoveries or decisions" },
+            next_steps: { type: "string", description: "What to do next" }
+          },
+          required: ["summary"]
         }
       }
     ];
 
     async function executeTool(name, input) {
       try {
-        if (name === "supabase_query") {
-          const { table, select = "*", filter, order, limit = 10 } = input;
-          let url = `${env.SUPABASE_URL}/rest/v1/${table}?select=${select}&limit=${Math.min(limit, 20)}`;
-          if (filter) url += `&${filter}`;
-          if (order) url += `&order=${order}`;
-          
-          const resp = await fetch(url, {
-            headers: {
-              'apikey': env.SUPABASE_SERVICE_KEY,
-              'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`
-            }
-          });
-          if (!resp.ok) return { error: `Query failed: ${resp.status}` };
-          const rows = await resp.json();
-          return { rows: rows.slice(0, 10), count: rows.length };
-        }
-
         if (name === "github_list_files") {
           const { repo, path = "" } = input;
           const url = `https://api.github.com/repos/${repo}/contents/${path}`;
@@ -151,7 +178,7 @@ CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
           if (!resp.ok) return { error: `Failed: ${resp.status}` };
           const files = await resp.json();
           if (Array.isArray(files)) {
-            return { files: files.slice(0, 15).map(f => ({ name: f.name, type: f.type })) };
+            return { files: files.map(f => ({ name: f.name, type: f.type, path: f.path })) };
           }
           return { error: "Not a directory" };
         }
@@ -164,7 +191,24 @@ CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
           });
           if (!resp.ok) return { error: `File not found: ${path}` };
           const content = await resp.text();
-          return { content: content.substring(0, 4000) };
+          return { content: content.substring(0, 8000) };
+        }
+        
+        if (name === "supabase_query") {
+          const { table, select = "*", filter, order, limit = 10 } = input;
+          let url = `${env.SUPABASE_URL}/rest/v1/${table}?select=${select}&limit=${limit}`;
+          if (filter) url += `&${filter}`;
+          if (order) url += `&order=${order}`;
+          
+          const resp = await fetch(url, {
+            headers: {
+              'apikey': env.SUPABASE_SERVICE_KEY,
+              'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`
+            }
+          });
+          if (!resp.ok) return { error: `Query failed: ${resp.status}` };
+          const rows = await resp.json();
+          return { rows, count: rows.length };
         }
 
         if (name === "web_search") {
@@ -173,15 +217,72 @@ CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
           const resp = await fetch(searchUrl, {
             headers: { 'User-Agent': 'Mozilla/5.0 (compatible; BrevardBidderAI/1.0)' }
           });
-          if (!resp.ok) return { error: `Search failed` };
+          if (!resp.ok) return { error: `Search failed: ${resp.status}` };
           const html = await resp.text();
+          
           const results = [];
           const regex = /<a[^>]+class="result__a"[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/gi;
           let match;
-          while ((match = regex.exec(html)) !== null && results.length < 3) {
+          while ((match = regex.exec(html)) !== null && results.length < 5) {
             results.push({ url: match[1], title: match[2].trim() });
           }
-          return { results };
+          
+          if (results.length === 0) return { message: "No results found", query };
+          return { results, query };
+        }
+
+        if (name === "memory_search") {
+          const { query, type } = input;
+          let url = `${env.SUPABASE_URL}/rest/v1/insights?select=*&order=created_at.desc&limit=5`;
+          if (type) url += `&insight_type=eq.${type}`;
+          url += `&or=(title.ilike.*${encodeURIComponent(query)}*,description.ilike.*${encodeURIComponent(query)}*)`;
+          
+          const resp = await fetch(url, {
+            headers: {
+              'apikey': env.SUPABASE_SERVICE_KEY,
+              'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`
+            }
+          });
+          if (!resp.ok) {
+            const fallbackUrl = `${env.SUPABASE_URL}/rest/v1/insights?select=*&order=created_at.desc&limit=5${type ? `&insight_type=eq.${type}` : ''}`;
+            const fallbackResp = await fetch(fallbackUrl, {
+              headers: {
+                'apikey': env.SUPABASE_SERVICE_KEY,
+                'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`
+              }
+            });
+            if (!fallbackResp.ok) return { error: `Search failed` };
+            const rows = await fallbackResp.json();
+            return { results: rows, query };
+          }
+          const rows = await resp.json();
+          return { results: rows, query };
+        }
+        
+        if (name === "save_checkpoint") {
+          const { summary, key_findings, next_steps } = input;
+          
+          // Save to Supabase insights table
+          const checkpoint = {
+            insight_type: 'chat_checkpoint',
+            title: `Checkpoint: ${session_id}`,
+            description: JSON.stringify({ summary, key_findings, next_steps }),
+            source: 'brevard_chat',
+            priority: 'medium',
+            created_at: new Date().toISOString()
+          };
+          
+          await fetch(`${env.SUPABASE_URL}/rest/v1/insights`, {
+            method: 'POST',
+            headers: {
+              'apikey': env.SUPABASE_SERVICE_KEY,
+              'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(checkpoint)
+          });
+          
+          return { success: true, message: "Checkpoint saved. Context preserved for future sessions." };
         }
         
         return { error: "Unknown tool" };
@@ -200,7 +301,7 @@ CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
-          max_tokens: 2048,
+          max_tokens: 4096,
           system: systemPrompt,
           tools: tools,
           messages: msgs
@@ -211,15 +312,19 @@ CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
         const err = await response.json();
         throw new Error(err.error?.message || `API error ${response.status}`);
       }
+
       return response.json();
     }
 
-    let conversationMessages = [...messages];
+    let conversationMessages = [...processedMessages];
     let data;
+    let totalTokens = 0;
     
-    // Reduced to 3 iterations to prevent timeout
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 8; i++) {  // Increased tool loop to 8
       data = await callAnthropic(conversationMessages);
+      
+      // Track tokens
+      totalTokens += (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0);
       
       if (data.stop_reason !== 'tool_use') break;
       
@@ -227,7 +332,7 @@ CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
       if (toolCalls.length === 0) break;
       
       const toolResults = [];
-      for (const tc of toolCalls.slice(0, 2)) { // Max 2 tools per iteration
+      for (const tc of toolCalls) {
         const result = await executeTool(tc.name, tc.input);
         toolResults.push({
           type: 'tool_result',
@@ -240,27 +345,115 @@ CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
       conversationMessages.push({ role: 'user', content: toolResults });
     }
 
-    // Ensure we have text content
-    const hasText = data.content?.some(b => b.type === 'text');
-    if (!hasText && data.stop_reason === 'tool_use') {
-      data.content.push({
-        type: 'text',
-        text: '⏱️ This query requires more processing time. Please try a simpler request, like asking about one property at a time.'
-      });
-    }
+    // Save session state with token tracking
+    await saveSessionState(env, session_id, {
+      total_tokens: totalTokens,
+      message_count: messages.length,
+      last_activity: new Date().toISOString()
+    });
 
-    return new Response(JSON.stringify(data), {
+    // Add token info to response
+    const responseWithMeta = {
+      ...data,
+      _meta: {
+        session_tokens: totalTokens,
+        message_count: messages.length,
+        context_managed: estimatedTokens > TOKEN_THRESHOLD
+      }
+    };
+
+    return new Response(JSON.stringify(responseWithMeta), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
-    return new Response(JSON.stringify({ 
-      error: error.message || 'Internal error',
-      content: [{ type: 'text', text: `⚠️ Error: ${error.message}. Try a simpler query.` }]
-    }), {
+    return new Response(JSON.stringify({ error: error.message || 'Internal error' }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
+}
+
+// === HELPER FUNCTIONS ===
+
+async function loadSessionState(env, session_id) {
+  try {
+    const resp = await fetch(
+      `${env.SUPABASE_URL}/rest/v1/chat_sessions?session_id=eq.${session_id}&select=*`,
+      {
+        headers: {
+          'apikey': env.SUPABASE_SERVICE_KEY,
+          'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`
+        }
+      }
+    );
+    if (!resp.ok) return null;
+    const rows = await resp.json();
+    return rows[0] || null;
+  } catch {
+    return null;
+  }
+}
+
+async function saveSessionState(env, session_id, state) {
+  try {
+    await fetch(`${env.SUPABASE_URL}/rest/v1/chat_sessions`, {
+      method: 'POST',
+      headers: {
+        'apikey': env.SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({
+        session_id,
+        ...state,
+        updated_at: new Date().toISOString()
+      })
+    });
+  } catch {}
+}
+
+async function summarizeConversation(env, messages, sessionState) {
+  // Keep last 20 messages, summarize the rest
+  if (messages.length <= 20) return messages;
+  
+  const oldMessages = messages.slice(0, -20);
+  const recentMessages = messages.slice(-20);
+  
+  // Create summary using Claude
+  try {
+    const summaryResp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 500,
+        messages: [{
+          role: 'user',
+          content: `Summarize this conversation in 2-3 sentences, focusing on key topics, decisions, and findings:\n\n${JSON.stringify(oldMessages)}`
+        }]
+      })
+    });
+    
+    if (summaryResp.ok) {
+      const summaryData = await summaryResp.json();
+      const summary = summaryData.content?.[0]?.text || '';
+      
+      // Return context message + recent messages
+      return [
+        { role: 'user', content: `[Previous conversation summary: ${summary}]` },
+        { role: 'assistant', content: 'I understand the context. Continuing our discussion.' },
+        ...recentMessages
+      ];
+    }
+  } catch {}
+  
+  // Fallback: just return recent messages
+  return recentMessages;
 }
