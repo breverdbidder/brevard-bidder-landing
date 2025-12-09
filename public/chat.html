@@ -17,390 +17,97 @@
             --claude-bubble: #334155;
             --success: #22c55e;
             --warning: #eab308;
-            --error: #ef4444;
+            --gemini: #8b5cf6;
         }
-        html, body {
-            height: 100%;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            overflow: hidden;
-        }
-        .app {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        header {
-            padding: 12px 16px;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid rgba(59,130,246,0.2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .logo-icon {
-            font-size: 24px;
-        }
-        .logo h1 {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-        .status {
-            font-size: 0.75rem;
-            padding: 4px 10px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+        html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-primary); color: var(--text-primary); overflow: hidden; }
+        .app { display: flex; flex-direction: column; height: 100%; max-width: 900px; margin: 0 auto; }
+        header { padding: 12px 16px; background: var(--bg-secondary); border-bottom: 1px solid rgba(59,130,246,0.2); display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo h1 { font-size: 1.1rem; font-weight: 600; }
+        .status { font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; display: flex; align-items: center; gap: 6px; }
         .status.ready { background: rgba(34,197,94,0.2); color: var(--success); }
         .status.working { background: rgba(59,130,246,0.2); color: var(--accent); }
-        .status.error { background: rgba(239,68,68,0.2); color: var(--error); }
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: currentColor;
-        }
-        .status.working .status-dot {
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-        .messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            -webkit-overflow-scrolling: touch;
-        }
-        .message {
-            max-width: 88%;
-            animation: fadeIn 0.2s ease;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .message.user {
-            align-self: flex-end;
-        }
-        .message.assistant {
-            align-self: flex-start;
-        }
-        .bubble {
-            padding: 12px 16px;
-            border-radius: 18px;
-            line-height: 1.5;
-            font-size: 0.9375rem;
-            word-wrap: break-word;
-        }
-        .message.user .bubble {
-            background: var(--user-bubble);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-        .message.assistant .bubble {
-            background: var(--claude-bubble);
-            border-bottom-left-radius: 4px;
-        }
-        .bubble pre {
-            background: var(--bg-primary);
-            padding: 10px;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin: 8px 0;
-            font-size: 0.8rem;
-            font-family: 'SF Mono', Monaco, monospace;
-        }
-        .bubble code {
-            font-family: 'SF Mono', Monaco, monospace;
-            background: rgba(0,0,0,0.2);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.85em;
-        }
-        .bubble pre code {
-            background: none;
-            padding: 0;
-        }
-        .bubble strong {
-            color: #60a5fa;
-        }
-        .meta {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            margin-top: 4px;
-            padding: 0 4px;
-        }
-        .message.user .meta {
-            text-align: right;
-        }
-        .tool-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(59,130,246,0.15);
-            color: var(--accent);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            margin-bottom: 8px;
-        }
-        .tool-indicator .spinner {
-            width: 12px;
-            height: 12px;
-            border: 2px solid currentColor;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .typing {
-            display: none;
-            align-self: flex-start;
-            padding: 12px 16px;
-            background: var(--claude-bubble);
-            border-radius: 18px;
-            border-bottom-left-radius: 4px;
-        }
-        .typing.visible {
-            display: flex;
-            gap: 4px;
-        }
-        .typing span {
-            width: 8px;
-            height: 8px;
-            background: var(--text-secondary);
-            border-radius: 50%;
-            animation: bounce 1.4s ease-in-out infinite;
-        }
+        .status.gemini { background: rgba(139,92,246,0.2); color: var(--gemini); }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+        .status.working .status-dot { animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; -webkit-overflow-scrolling: touch; }
+        .message { max-width: 88%; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .message.user { align-self: flex-end; }
+        .message.assistant { align-self: flex-start; }
+        .bubble { padding: 12px 16px; border-radius: 18px; line-height: 1.5; font-size: 0.9375rem; word-wrap: break-word; }
+        .message.user .bubble { background: var(--user-bubble); color: white; border-bottom-right-radius: 4px; }
+        .message.assistant .bubble { background: var(--claude-bubble); border-bottom-left-radius: 4px; }
+        .bubble pre { background: var(--bg-primary); padding: 10px; border-radius: 8px; overflow-x: auto; margin: 8px 0; font-size: 0.8rem; }
+        .bubble code { font-family: 'SF Mono', Monaco, monospace; background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px; font-size: 0.85em; }
+        .bubble pre code { background: none; padding: 0; }
+        .bubble strong { color: #60a5fa; }
+        .meta { font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; padding: 0 4px; display: flex; gap: 8px; align-items: center; }
+        .meta .model-tag { padding: 2px 6px; border-radius: 4px; font-weight: 500; }
+        .meta .model-tag.gemini { background: rgba(139,92,246,0.2); color: var(--gemini); }
+        .meta .model-tag.claude { background: rgba(59,130,246,0.2); color: var(--accent); }
+        .message.user .meta { justify-content: flex-end; }
+        .typing { display: none; align-self: flex-start; padding: 12px 16px; background: var(--claude-bubble); border-radius: 18px; border-bottom-left-radius: 4px; }
+        .typing.visible { display: flex; gap: 4px; }
+        .typing span { width: 8px; height: 8px; background: var(--text-secondary); border-radius: 50%; animation: bounce 1.4s ease-in-out infinite; }
         .typing span:nth-child(2) { animation-delay: 0.16s; }
         .typing span:nth-child(3) { animation-delay: 0.32s; }
-        @keyframes bounce {
-            0%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-6px); }
-        }
-        .progress-bar {
-            height: 3px;
-            background: var(--bg-secondary);
-            position: relative;
-            overflow: hidden;
-            display: none;
-        }
-        .progress-bar.active {
-            display: block;
-        }
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            left: -50%;
-            width: 50%;
-            height: 100%;
-            background: var(--accent);
-            animation: progress 1s ease-in-out infinite;
-        }
-        @keyframes progress {
-            0% { left: -50%; }
-            100% { left: 100%; }
-        }
-        .input-area {
-            padding: 12px 16px;
-            padding-bottom: max(12px, env(safe-area-inset-bottom));
-            background: var(--bg-secondary);
-            border-top: 1px solid rgba(59,130,246,0.2);
-        }
-        .quick-actions {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 10px;
-            -webkit-overflow-scrolling: touch;
-        }
-        .quick-btn {
-            flex-shrink: 0;
-            padding: 6px 12px;
-            background: var(--bg-primary);
-            border: 1px solid rgba(59,130,246,0.3);
-            border-radius: 16px;
-            color: var(--text-secondary);
-            font-size: 0.75rem;
-            cursor: pointer;
-        }
-        .quick-btn:active {
-            background: var(--accent);
-            color: white;
-        }
-        .input-row {
-            display: flex;
-            gap: 10px;
-            align-items: flex-end;
-        }
-        .input-wrapper {
-            flex: 1;
-            background: var(--bg-primary);
-            border: 1px solid rgba(59,130,246,0.3);
-            border-radius: 24px;
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
-        }
-        .input-wrapper:focus-within {
-            border-color: var(--accent);
-        }
-        #message-input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            font-size: 16px;
-            line-height: 1.4;
-            resize: none;
-            max-height: 120px;
-            min-height: 24px;
-            outline: none;
-        }
-        #message-input::placeholder {
-            color: var(--text-secondary);
-        }
-        .send-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--accent);
-            border: none;
-            color: white;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .send-btn:disabled {
-            opacity: 0.5;
-        }
-        /* Login Modal */
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            padding: 20px;
-        }
+        @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }
+        .progress-bar { height: 3px; background: var(--bg-secondary); position: relative; overflow: hidden; display: none; }
+        .progress-bar.active { display: block; }
+        .progress-bar::after { content: ''; position: absolute; left: -50%; width: 50%; height: 100%; background: linear-gradient(90deg, var(--accent), var(--gemini)); animation: progress 1s ease-in-out infinite; }
+        @keyframes progress { 0% { left: -50%; } 100% { left: 100%; } }
+        .input-area { padding: 12px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom)); background: var(--bg-secondary); border-top: 1px solid rgba(59,130,246,0.2); }
+        .quick-actions { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
+        .quick-btn { flex-shrink: 0; padding: 6px 12px; background: var(--bg-primary); border: 1px solid rgba(59,130,246,0.3); border-radius: 16px; color: var(--text-secondary); font-size: 0.75rem; cursor: pointer; }
+        .quick-btn:active { background: var(--accent); color: white; }
+        .input-row { display: flex; gap: 10px; align-items: flex-end; }
+        .input-wrapper { flex: 1; background: var(--bg-primary); border: 1px solid rgba(59,130,246,0.3); border-radius: 24px; padding: 8px 16px; }
+        .input-wrapper:focus-within { border-color: var(--accent); }
+        #message-input { width: 100%; background: transparent; border: none; color: var(--text-primary); font-size: 16px; line-height: 1.4; resize: none; max-height: 120px; min-height: 24px; outline: none; }
+        .send-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); border: none; color: white; font-size: 18px; cursor: pointer; }
+        .send-btn:disabled { opacity: 0.5; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
         .modal.hidden { display: none; }
-        .modal-box {
-            background: var(--bg-secondary);
-            padding: 24px;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 340px;
-        }
-        .modal-box h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .modal-box input {
-            width: 100%;
-            padding: 14px 16px;
-            margin-bottom: 16px;
-            border: 1px solid rgba(59,130,246,0.3);
-            border-radius: 12px;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            font-size: 16px;
-        }
-        .modal-box button {
-            width: 100%;
-            padding: 14px;
-            background: var(--accent);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-        .error-msg {
-            color: var(--error);
-            font-size: 0.85rem;
-            text-align: center;
-            margin-bottom: 12px;
-            display: none;
-        }
+        .modal-box { background: var(--bg-secondary); padding: 24px; border-radius: 16px; width: 100%; max-width: 340px; }
+        .modal-box h2 { text-align: center; margin-bottom: 20px; }
+        .modal-box input { width: 100%; padding: 14px 16px; margin-bottom: 16px; border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; background: var(--bg-primary); color: var(--text-primary); font-size: 16px; }
+        .modal-box button { width: 100%; padding: 14px; background: var(--accent); border: none; border-radius: 12px; color: white; font-weight: 600; cursor: pointer; }
+        .router-info { text-align: center; font-size: 0.7rem; color: var(--text-secondary); padding: 4px 0; }
     </style>
 </head>
 <body>
-    <!-- Login Modal -->
     <div id="login-modal" class="modal">
         <div class="modal-box">
             <h2>🏠 BrevardBidderAI</h2>
-            <div id="login-error" class="error-msg"></div>
-            <input type="password" id="password-input" placeholder="Enter password" autocomplete="current-password">
+            <input type="password" id="password-input" placeholder="Enter password">
             <button onclick="login()">Access Chat</button>
         </div>
     </div>
 
-    <!-- Main App -->
     <div id="app" class="app" style="display:none">
         <header>
-            <div class="logo">
-                <span class="logo-icon">🏠</span>
-                <h1>BrevardBidderAI</h1>
-            </div>
-            <div id="status" class="status ready">
-                <span class="status-dot"></span>
-                <span id="status-text">Ready</span>
-            </div>
+            <div class="logo"><span>🏠</span><h1>BrevardBidderAI</h1></div>
+            <div id="status" class="status ready"><span class="status-dot"></span><span id="status-text">Ready</span></div>
         </header>
-        
+        <div class="router-info">Smart Router: <span style="color:#8b5cf6">Gemini FREE</span> (simple) | <span style="color:#3b82f6">Claude</span> (analysis)</div>
         <div id="progress" class="progress-bar"></div>
-
         <div id="messages" class="messages">
             <div class="message assistant">
-                <div class="bubble">
-                    Welcome! I have access to:<br><br>
-                    📊 <strong>1,393+ auction records</strong><br>
-                    🏠 <strong>BCPAO property data</strong><br>
-                    💻 <strong>GitHub repositories</strong><br>
-                    🔍 <strong>Web search</strong><br>
-                    💾 <strong>Checkpoint system</strong><br><br>
-                    Ask me anything about Brevard foreclosures!
-                </div>
+                <div class="bubble">Welcome! I use <strong>Smart Router</strong>:<br><br>💜 <strong>Gemini 1.5 Flash</strong> - FREE, 1M context<br>💙 <strong>Claude Sonnet</strong> - Complex analysis + tools<br><br>Ask anything about Brevard foreclosures!</div>
             </div>
         </div>
-        
-        <div id="typing" class="typing">
-            <span></span><span></span><span></span>
-        </div>
-
+        <div id="typing" class="typing"><span></span><span></span><span></span></div>
         <div class="input-area">
             <div class="quick-actions">
-                <button class="quick-btn" onclick="sendQuick('Show 5 recent auction results with prices')">📊 Recent Auctions</button>
-                <button class="quick-btn" onclick="sendQuick('Explain the max bid formula with example')">💰 Max Bid</button>
-                <button class="quick-btn" onclick="sendQuick('Search web for Brevard County foreclosure news')">🔍 News</button>
-                <button class="quick-btn" onclick="sendQuick('Save checkpoint: session summary')">💾 Checkpoint</button>
+                <button class="quick-btn" onclick="sendQuick('What auctions are on Dec 17?')">📅 Dec 17</button>
+                <button class="quick-btn" onclick="sendQuick('Analyze top 3 Dec 10 properties with full investment reports')">📊 Full Report</button>
+                <button class="quick-btn" onclick="sendQuick('Explain max bid formula')">💰 Max Bid</button>
+                <button class="quick-btn" onclick="sendQuick('Query 5 recent sold auctions from database')">🔍 DB Query</button>
             </div>
             <div class="input-row">
-                <div class="input-wrapper">
-                    <textarea id="message-input" placeholder="Ask about auctions..." rows="1" onkeydown="handleKeydown(event)" oninput="autoResize(this)"></textarea>
-                </div>
+                <div class="input-wrapper"><textarea id="message-input" placeholder="Ask about auctions..." rows="1" onkeydown="handleKeydown(event)" oninput="autoResize(this)"></textarea></div>
                 <button id="send-btn" class="send-btn" onclick="sendMessage()">➤</button>
             </div>
         </div>
@@ -409,103 +116,67 @@
     <script>
         const API_URL = '/api/chat';
         let messages = [];
-        let sessionId = localStorage.getItem('brevard_session_id') || generateSessionId();
+        let sessionId = localStorage.getItem('brevard_session_id') || ('bb_' + Date.now());
         localStorage.setItem('brevard_session_id', sessionId);
-
-        function generateSessionId() {
-            return 'bb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
 
         function setStatus(status, text) {
             const el = document.getElementById('status');
-            const textEl = document.getElementById('status-text');
             el.className = 'status ' + status;
-            textEl.textContent = text;
-            
-            const progress = document.getElementById('progress');
-            progress.className = status === 'working' ? 'progress-bar active' : 'progress-bar';
+            document.getElementById('status-text').textContent = text;
+            document.getElementById('progress').className = status === 'working' ? 'progress-bar active' : 'progress-bar';
         }
 
         function login() {
             const pwd = document.getElementById('password-input').value;
             if (!pwd) return;
-            
             localStorage.setItem('brevard_pwd', pwd);
             document.getElementById('login-modal').classList.add('hidden');
             document.getElementById('app').style.display = 'flex';
-            document.getElementById('message-input').focus();
             loadCachedMessages();
         }
 
-        // Auto-login
         if (localStorage.getItem('brevard_pwd')) {
             document.getElementById('login-modal').classList.add('hidden');
             document.getElementById('app').style.display = 'flex';
             loadCachedMessages();
         }
 
-        document.getElementById('password-input').addEventListener('keypress', e => {
-            if (e.key === 'Enter') login();
-        });
+        document.getElementById('password-input').addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
 
         function loadCachedMessages() {
             const cached = localStorage.getItem('brevard_messages_' + sessionId);
-            if (cached) {
-                try {
-                    messages = JSON.parse(cached);
-                    messages.forEach(m => renderMessage(m.role, m.content, false));
-                } catch(e) {}
-            }
+            if (cached) { try { messages = JSON.parse(cached); messages.forEach(m => renderMessage(m.role, m.content, null, false)); } catch(e) {} }
         }
 
-        function saveMessages() {
-            localStorage.setItem('brevard_messages_' + sessionId, JSON.stringify(messages));
-        }
+        function saveMessages() { localStorage.setItem('brevard_messages_' + sessionId, JSON.stringify(messages)); }
 
-        function renderMessage(role, content, animate = true) {
+        function renderMessage(role, content, meta = null, animate = true) {
             const container = document.getElementById('messages');
             const div = document.createElement('div');
             div.className = 'message ' + (role === 'user' ? 'user' : 'assistant');
             if (!animate) div.style.animation = 'none';
             
             const time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-            
-            // Enhanced markdown rendering
             let html = content
                 .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
                 .replace(/`([^`]+)`/g, '<code>$1</code>')
                 .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
                 .replace(/##\s+(.+)/g, '<strong style="display:block;margin:12px 0 8px;font-size:1.05em">$1</strong>')
-                .replace(/###\s+(.+)/g, '<strong style="display:block;margin:8px 0 4px">$1</strong>')
                 .replace(/- \*\*([^*]+)\*\*/g, '• <strong>$1</strong>')
                 .replace(/^- (.+)$/gm, '• $1')
                 .replace(/\n/g, '<br>');
             
-            div.innerHTML = `
-                <div class="bubble">${html}</div>
-                <div class="meta">${time}</div>
-            `;
+            let metaHtml = `<span>${time}</span>`;
+            if (meta) {
+                const isGemini = meta.router === 'GEMINI_FREE';
+                metaHtml += `<span class="model-tag ${isGemini ? 'gemini' : 'claude'}">${isGemini ? '💜 Gemini' : '💙 Claude'}</span>`;
+                if (meta.elapsed_ms) metaHtml += `<span>${(meta.elapsed_ms/1000).toFixed(1)}s</span>`;
+                if (meta.cost) metaHtml += `<span>${meta.cost}</span>`;
+            }
             
+            div.innerHTML = `<div class="bubble">${html}</div><div class="meta">${metaHtml}</div>`;
             container.appendChild(div);
             container.scrollTop = container.scrollHeight;
-        }
-
-        function showToolProgress(toolName) {
-            const container = document.getElementById('messages');
-            let indicator = document.getElementById('tool-indicator');
-            if (!indicator) {
-                indicator = document.createElement('div');
-                indicator.id = 'tool-indicator';
-                indicator.className = 'tool-indicator';
-                container.appendChild(indicator);
-            }
-            indicator.innerHTML = `<div class="spinner"></div> Using ${toolName}...`;
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function hideToolProgress() {
-            const indicator = document.getElementById('tool-indicator');
-            if (indicator) indicator.remove();
         }
 
         async function sendMessage() {
@@ -513,106 +184,52 @@
             const content = input.value.trim();
             if (!content) return;
 
-            // Add user message
             messages.push({ role: 'user', content });
             renderMessage('user', content);
             saveMessages();
-            
-            // Clear input
             input.value = '';
             autoResize(input);
             
-            // Show working state
-            setStatus('working', 'Processing...');
+            setStatus('working', 'Routing...');
             document.getElementById('typing').classList.add('visible');
             document.getElementById('send-btn').disabled = true;
-            
-            const startTime = Date.now();
             
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        password: localStorage.getItem('brevard_pwd'),
-                        messages: messages,
-                        session_id: sessionId
-                    })
+                    body: JSON.stringify({ password: localStorage.getItem('brevard_pwd'), messages, session_id: sessionId })
                 });
 
                 if (response.status === 401) {
                     localStorage.removeItem('brevard_pwd');
-                    renderMessage('assistant', '⚠️ Authentication error. Refreshing...');
-                    setTimeout(() => location.reload(), 1500);
+                    location.reload();
                     return;
                 }
                 
-                if (!response.ok) {
-                    throw new Error(`API error: ${response.status}`);
-                }
-                
                 const data = await response.json();
-                
-                // Check for errors in response
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
-                // Extract ALL text content from response
-                let assistantContent = '';
-                if (data.content && Array.isArray(data.content)) {
-                    const textBlocks = data.content.filter(b => b.type === 'text');
-                    assistantContent = textBlocks.map(b => b.text).join('\n\n');
-                }
-                
-                if (!assistantContent) {
-                    assistantContent = '⚠️ Empty response received. The query may have timed out or hit a limit. Try a simpler question.';
-                }
-                
-                // Show response stats
-                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
                 const meta = data._meta || {};
-                const tokens = meta.session_tokens || data.usage?.input_tokens + data.usage?.output_tokens || 'N/A';
+                const assistantContent = data.content?.filter(b => b.type === 'text').map(b => b.text).join('\n\n') || data.error || 'No response';
                 
-                // Add assistant message
                 messages.push({ role: 'assistant', content: assistantContent });
-                renderMessage('assistant', assistantContent);
+                renderMessage('assistant', assistantContent, meta);
                 saveMessages();
                 
-                // Update status with stats
-                setStatus('ready', `Done (${elapsed}s, ${tokens} tokens)`);
+                const statusClass = meta.router === 'GEMINI_FREE' ? 'gemini' : 'ready';
+                setStatus(statusClass, `Done via ${meta.router === 'GEMINI_FREE' ? 'Gemini' : 'Claude'}`);
                 
             } catch (error) {
-                console.error('Error:', error);
-                const errorMsg = `⚠️ Error: ${error.message}. Please try again.`;
-                renderMessage('assistant', errorMsg);
-                setStatus('error', 'Error');
-                
-                // Reset to ready after 3s
-                setTimeout(() => setStatus('ready', 'Ready'), 3000);
+                renderMessage('assistant', `⚠️ Error: ${error.message}`);
+                setStatus('ready', 'Error');
             } finally {
                 document.getElementById('typing').classList.remove('visible');
                 document.getElementById('send-btn').disabled = false;
-                hideToolProgress();
             }
         }
 
-        function sendQuick(text) {
-            document.getElementById('message-input').value = text;
-            sendMessage();
-        }
-
-        function handleKeydown(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        }
-
-        function autoResize(el) {
-            el.style.height = 'auto';
-            el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-        }
+        function sendQuick(text) { document.getElementById('message-input').value = text; sendMessage(); }
+        function handleKeydown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+        function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
     </script>
 </body>
 </html>
