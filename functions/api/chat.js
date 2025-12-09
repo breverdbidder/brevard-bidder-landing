@@ -1,4 +1,6 @@
-// BrevardBidderAI Chat API V3 - Robust error handling, timeout protection
+// BrevardBidderAI Chat API V4 - Extended tool loop for full reports
+// Fixes: More iterations, longer timeout, complete response delivery
+
 export async function onRequest(context) {
   const { request, env } = context;
   
@@ -42,65 +44,75 @@ export async function onRequest(context) {
 
 CURRENT TIME: ${dateStr} | ${flTime} EST
 
-IMPORTANT: When using tools, complete your response after getting results. Don't leave responses incomplete.
+IMPORTANT: When asked for reports or analysis, COMPLETE THE FULL RESPONSE. Do not stop mid-way.
+If you start listing properties, finish listing ALL of them with details.
 
-TOOLS AVAILABLE:
-1. supabase_query - Query auction database (historical_auctions: 1,393+ records, insights, auction_results)
-2. github_list_files - Browse repository code
-3. github_read_file - Read file contents  
-4. web_search - Search the internet (may be slow, use sparingly)
-
-DATABASE TABLES:
-- historical_auctions: auction_id, case_number, property_address, plaintiff, defendant, final_judgment, opening_bid, sale_price, status, auction_date
-- insights: id, insight_type, title, description, source, priority, created_at
-- auction_results: Results from actual auctions
+12-STAGE PIPELINE:
+1. Discovery - Find auction listings
+2. Scraping - Get property details  
+3. Title Search - Check ownership
+4. Lien Priority - Analyze liens/mortgages
+5. Tax Certificates - Check tax status
+6. Demographics - Area analysis
+7. ML Score - Predict third-party probability
+8. Max Bid - Calculate maximum bid
+9. Decision - BID/REVIEW/SKIP recommendation
+10. Report - Generate summary
+11. Disposition - Track outcome
+12. Archive - Store for history
 
 DECISION FRAMEWORK:
 - BID (≥75% bid/judgment): Strong opportunity
-- REVIEW (60-74%): Needs evaluation  
+- REVIEW (60-74%): Needs manual evaluation  
 - SKIP (<60%): Not recommended
 
-Max Bid Formula: (ARV×70%) - Repairs - $10K - MIN($25K, 15%×ARV)
+MAX BID FORMULA: (ARV×70%) - Repairs - $10K - MIN($25K, 15%×ARV)
 
-CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA
+TOOLS - USE THEM TO GET REAL DATA:
+1. supabase_query - Query auction database (historical_auctions has 1,393+ records)
+2. github_list_files / github_read_file - Browse code
+3. web_search - Search for current info
+4. memory_search - Search stored knowledge
 
-Always provide complete responses. If a tool fails, explain what happened and provide what information you can.`;
+For INVESTMENT REPORTS: Query historical_auctions for the auction date, then provide analysis for EACH property.
+
+CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
 
     const tools = [
       {
         name: "supabase_query",
-        description: "Query Supabase database. Tables: historical_auctions (1393 records), insights, auction_results",
+        description: "Query Supabase database. Key tables: historical_auctions (auction_id, address, case_number, plaintiff, final_judgment, opening_bid, sold_amount, auction_date, status), insights, auction_results",
         input_schema: {
           type: "object",
           properties: {
-            table: { type: "string", description: "Table: historical_auctions, insights, or auction_results" },
-            select: { type: "string", description: "Columns (default: *)" },
-            filter: { type: "string", description: "Filter like: status=eq.SOLD or insight_type=eq.mcp_reference" },
-            order: { type: "string", description: "Order: auction_date.desc or created_at.desc" },
-            limit: { type: "number", description: "Max rows (default: 10)" }
+            table: { type: "string", description: "Table: historical_auctions, insights, auction_results, daily_metrics" },
+            select: { type: "string", description: "Columns to select (default: *)" },
+            filter: { type: "string", description: "PostgREST filter, e.g.: auction_date=eq.2025-12-10 or status=eq.SOLD" },
+            order: { type: "string", description: "Order by, e.g.: created_at.desc or final_judgment.desc" },
+            limit: { type: "number", description: "Max rows (default: 20)" }
           },
           required: ["table"]
         }
       },
       {
         name: "github_list_files",
-        description: "List files in a repository directory",
+        description: "List files in repository directory",
         input_schema: {
           type: "object",
           properties: {
             repo: { type: "string", description: "breverdbidder/brevard-bidder-scraper or breverdbidder/brevard-bidder-landing" },
-            path: { type: "string", description: "Directory path, empty for root" }
+            path: { type: "string", description: "Directory path (empty for root)" }
           },
           required: ["repo"]
         }
       },
       {
         name: "github_read_file",
-        description: "Read file contents from repository",
+        description: "Read file from repository",
         input_schema: {
           type: "object",
           properties: {
-            repo: { type: "string", description: "Repository owner/repo" },
+            repo: { type: "string", description: "Repository owner/name" },
             path: { type: "string", description: "File path" }
           },
           required: ["repo", "path"]
@@ -108,7 +120,7 @@ Always provide complete responses. If a tool fails, explain what happened and pr
       },
       {
         name: "web_search",
-        description: "Search web for current info. Use sparingly - can be slow.",
+        description: "Search the web for current information",
         input_schema: {
           type: "object",
           properties: {
@@ -116,29 +128,41 @@ Always provide complete responses. If a tool fails, explain what happened and pr
           },
           required: ["query"]
         }
+      },
+      {
+        name: "memory_search",
+        description: "Search stored insights and checkpoints",
+        input_schema: {
+          type: "object",
+          properties: {
+            query: { type: "string", description: "Search terms" },
+            type: { type: "string", description: "Filter by type: mcp_reference, chat_checkpoint, auction_analysis" }
+          },
+          required: ["query"]
+        }
       }
     ];
 
-    // Execute tool with timeout
+    // Tool execution with 30s timeout
     async function executeTool(name, input) {
       const timeout = (ms) => new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Tool timeout')), ms)
+        setTimeout(() => reject(new Error('timeout')), ms)
       );
       
       try {
         const result = await Promise.race([
           executeToolInternal(name, input),
-          timeout(25000) // 25 second timeout per tool
+          timeout(30000)
         ]);
         return result;
       } catch (e) {
-        return { error: `Tool ${name} failed: ${e.message}` };
+        return { error: e.message };
       }
     }
 
     async function executeToolInternal(name, input) {
       if (name === "supabase_query") {
-        const { table, select = "*", filter, order, limit = 10 } = input;
+        const { table, select = "*", filter, order, limit = 20 } = input;
         let url = `${env.SUPABASE_URL}/rest/v1/${table}?select=${encodeURIComponent(select)}&limit=${limit}`;
         if (filter) url += `&${filter}`;
         if (order) url += `&order=${order}`;
@@ -151,74 +175,69 @@ Always provide complete responses. If a tool fails, explain what happened and pr
         });
         if (!resp.ok) return { error: `Query failed: ${resp.status}` };
         const rows = await resp.json();
-        return { rows, count: rows.length };
+        return { rows, count: rows.length, table };
       }
       
       if (name === "github_list_files") {
         const { repo, path = "" } = input;
-        const url = `https://api.github.com/repos/${repo}/contents/${path}`;
-        const resp = await fetch(url, {
+        const resp = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
           headers: { 
             'Authorization': `token ${env.GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json',
             'User-Agent': 'BrevardBidderAI'
           }
         });
-        if (!resp.ok) return { error: `GitHub error: ${resp.status}` };
+        if (!resp.ok) return { error: `Failed: ${resp.status}` };
         const files = await resp.json();
-        if (Array.isArray(files)) {
-          return { files: files.map(f => ({ name: f.name, type: f.type, path: f.path })) };
-        }
-        return { error: "Not a directory" };
+        return Array.isArray(files) 
+          ? { files: files.map(f => ({ name: f.name, type: f.type, path: f.path })) }
+          : { error: "Not a directory" };
       }
       
       if (name === "github_read_file") {
         const { repo, path } = input;
-        const url = `https://raw.githubusercontent.com/${repo}/main/${path}`;
-        const resp = await fetch(url, {
+        const resp = await fetch(`https://raw.githubusercontent.com/${repo}/main/${path}`, {
           headers: { 'Authorization': `token ${env.GITHUB_TOKEN}` }
         });
-        if (!resp.ok) return { error: `File not found: ${path}` };
-        const content = await resp.text();
-        return { content: content.substring(0, 6000) };
+        if (!resp.ok) return { error: `Not found: ${path}` };
+        return { content: (await resp.text()).substring(0, 8000) };
       }
-
+      
       if (name === "web_search") {
         const { query } = input;
-        try {
-          const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-          const resp = await fetch(searchUrl, {
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' }
-          });
-          if (!resp.ok) return { error: `Search failed: ${resp.status}` };
-          const html = await resp.text();
-          
-          const results = [];
-          const titleRegex = /<a[^>]+class="result__a"[^>]*>([^<]+)<\/a>/gi;
-          const urlRegex = /<a[^>]+class="result__a"[^>]*href="([^"]+)"/gi;
-          
-          let match;
-          while ((match = titleRegex.exec(html)) !== null && results.length < 5) {
-            results.push({ title: match[1].trim() });
-          }
-          
-          let i = 0;
-          while ((match = urlRegex.exec(html)) !== null && i < results.length) {
-            if (results[i]) results[i].url = match[1];
-            i++;
-          }
-          
-          return results.length > 0 ? { results, query } : { message: "No results found", query };
-        } catch (e) {
-          return { error: `Search error: ${e.message}` };
+        const resp = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`, {
+          headers: { 'User-Agent': 'Mozilla/5.0 (compatible; BrevardBidderAI/1.0)' }
+        });
+        if (!resp.ok) return { error: `Search failed` };
+        const html = await resp.text();
+        const results = [];
+        const regex = /<a[^>]+class="result__a"[^>]*href="([^"]+)"[^>]*>([^<]+)<\/a>/gi;
+        let match;
+        while ((match = regex.exec(html)) !== null && results.length < 5) {
+          results.push({ url: match[1], title: match[2].trim() });
         }
+        return results.length ? { results } : { message: "No results" };
+      }
+      
+      if (name === "memory_search") {
+        const { query, type } = input;
+        let url = `${env.SUPABASE_URL}/rest/v1/insights?select=*&order=created_at.desc&limit=5`;
+        if (type) url += `&insight_type=eq.${type}`;
+        const resp = await fetch(url, {
+          headers: {
+            'apikey': env.SUPABASE_SERVICE_KEY,
+            'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`
+          }
+        });
+        if (!resp.ok) return { error: "Search failed" };
+        return { results: await resp.json() };
       }
       
       return { error: "Unknown tool" };
     }
 
-    async function callAnthropic(msgs) {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // Call Claude API
+    async function callClaude(msgs) {
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -227,70 +246,63 @@ Always provide complete responses. If a tool fails, explain what happened and pr
         },
         body: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
-          max_tokens: 4096,
+          max_tokens: 8192,  // Increased for full reports
           system: systemPrompt,
           tools: tools,
           messages: msgs
         })
       });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Anthropic API error ${response.status}: ${errText.substring(0, 200)}`);
+      if (!resp.ok) {
+        const err = await resp.json();
+        throw new Error(err.error?.message || `API ${resp.status}`);
       }
-
-      return response.json();
+      return resp.json();
     }
 
-    // Main conversation loop with error recovery
+    // Main loop - up to 12 iterations for full pipeline
     let conversationMessages = [...messages];
     let data;
     let totalTokens = 0;
     let toolsUsed = [];
     
-    for (let i = 0; i < 5; i++) {  // Max 5 tool iterations
-      try {
-        data = await callAnthropic(conversationMessages);
-        totalTokens += (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0);
-        
-        if (data.stop_reason !== 'tool_use') break;
-        
-        const toolCalls = data.content.filter(b => b.type === 'tool_use');
-        if (toolCalls.length === 0) break;
-        
-        const toolResults = [];
-        for (const tc of toolCalls) {
-          toolsUsed.push(tc.name);
-          const result = await executeTool(tc.name, tc.input);
-          toolResults.push({
-            type: 'tool_result',
-            tool_use_id: tc.id,
-            content: JSON.stringify(result)
-          });
-        }
-        
-        conversationMessages.push({ role: 'assistant', content: data.content });
-        conversationMessages.push({ role: 'user', content: toolResults });
-        
-      } catch (loopError) {
-        // If error in loop, return what we have so far
-        return new Response(JSON.stringify({
-          content: [{ type: 'text', text: `⚠️ Processing interrupted: ${loopError.message}. Please try a simpler query.` }],
-          _meta: { error: true, tools_used: toolsUsed, partial: true }
-        }), {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    for (let i = 0; i < 12; i++) {
+      data = await callClaude(conversationMessages);
+      totalTokens += (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0);
+      
+      if (data.stop_reason !== 'tool_use') break;
+      
+      const toolCalls = data.content.filter(b => b.type === 'tool_use');
+      if (!toolCalls.length) break;
+      
+      const toolResults = [];
+      for (const tc of toolCalls) {
+        toolsUsed.push(tc.name);
+        const result = await executeTool(tc.name, tc.input);
+        toolResults.push({
+          type: 'tool_result',
+          tool_use_id: tc.id,
+          content: JSON.stringify(result)
         });
       }
+      
+      conversationMessages.push({ role: 'assistant', content: data.content });
+      conversationMessages.push({ role: 'user', content: toolResults });
     }
 
-    // Return response with metadata
+    // Ensure we have text response
+    let textContent = data.content?.filter(b => b.type === 'text').map(b => b.text).join('\n\n') || '';
+    
+    if (!textContent && data.stop_reason === 'tool_use') {
+      textContent = '⚠️ Report generation incomplete. The query required more processing. Try breaking it into smaller requests:\n\n1. "Show December 10 auctions"\n2. Then for each: "Analyze [address]"';
+    }
+
     return new Response(JSON.stringify({
       ...data,
       _meta: {
         session_tokens: totalTokens,
-        message_count: messages.length,
-        tools_used: toolsUsed
+        tools_used: toolsUsed,
+        iterations: toolsUsed.length,
+        message_count: messages.length
       }
     }), {
       status: 200,
@@ -299,10 +311,10 @@ Always provide complete responses. If a tool fails, explain what happened and pr
 
   } catch (error) {
     return new Response(JSON.stringify({ 
-      error: error.message || 'Internal error',
-      content: [{ type: 'text', text: `⚠️ Error: ${error.message}. Please try again with a simpler query.` }]
+      error: error.message,
+      content: [{ type: 'text', text: `⚠️ Error: ${error.message}. Try a simpler query.` }]
     }), {
-      status: 200, // Return 200 with error content so frontend can display it
+      status: 200, // Return 200 so frontend displays the error message
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
