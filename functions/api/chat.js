@@ -1,10 +1,10 @@
 // BrevardBidderAI Chat API V5 - Smart Router with Gemini FREE Tier
-// Gemini 1.5 Flash: FREE, 1M context, 15 RPM, 1M TPM
-// Claude Sonnet: Paid, for complex analysis
+// Routes: FREE (Gemini Flash) → PRODUCTION (Claude Sonnet)
 
 export async function onRequest(context) {
   const { request, env } = context;
   const startTime = Date.now();
+  const MAX_EXECUTION_TIME = 25000;
   
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -22,9 +22,12 @@ export async function onRequest(context) {
     });
   }
 
+  function timeRemaining() { return MAX_EXECUTION_TIME - (Date.now() - startTime); }
+  function isTimeUp() { return timeRemaining() < 3000; }
+
   try {
     const body = await request.json();
-    const { password, messages, session_id, force_claude } = body;
+    const { password, messages, session_id } = body;
 
     if (password !== env.BIDDER_PASSWORD) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -38,52 +41,52 @@ export async function onRequest(context) {
       });
     }
 
-    const lastMessage = messages[messages.length - 1]?.content?.toLowerCase() || '';
-    
-    // SMART ROUTER DECISION
-    // Route to FREE Gemini for: simple queries, data lookups, summaries
-    // Route to Claude for: complex analysis, tool use, reports, code
-    const needsClaude = force_claude || 
-      lastMessage.includes('report') ||
-      lastMessage.includes('analyze') ||
-      lastMessage.includes('investment') ||
-      lastMessage.includes('calculate') ||
-      lastMessage.includes('max bid') ||
-      lastMessage.includes('12 stage') ||
-      lastMessage.includes('pipeline') ||
-      lastMessage.includes('code') ||
-      lastMessage.includes('search') ||
-      lastMessage.includes('github') ||
-      lastMessage.includes('supabase') ||
-      messages.length > 6; // Multi-turn complex conversations
-
-    const router = needsClaude ? 'CLAUDE_SONNET' : 'GEMINI_FREE';
-    
     const now = new Date();
     const flTime = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit' });
     const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+    const lastUserMsg = messages[messages.length - 1]?.content || '';
 
+    // SMART ROUTER: Determine which tier to use
+    function routeQuery(query) {
+      const q = query.toLowerCase();
+      
+      // PRODUCTION tier (Claude) - Complex queries requiring tools
+      const needsClaude = [
+        'search', 'web', 'query', 'database', 'supabase', 'github',
+        'auction', 'property', 'forecast', 'analyze', 'report',
+        'calculate', 'max bid', 'investment', 'scrape', 'fetch'
+      ];
+      
+      if (needsClaude.some(kw => q.includes(kw))) {
+        return 'PRODUCTION';
+      }
+      
+      // FREE tier (Gemini) - Simple queries
+      return 'FREE';
+    }
+
+    const tier = routeQuery(lastUserMsg);
+    
     const systemPrompt = `You are BrevardBidderAI Assistant - Foreclosure intelligence for Brevard County, FL.
-CURRENT TIME: ${dateStr} | ${flTime} EST
-ROUTER: ${router}
 
-You help with Brevard County foreclosure auctions. Key info:
-- Decision Framework: BID (≥75% ratio), REVIEW (60-74%), SKIP (<60%)
-- Max Bid Formula: (ARV×70%) - Repairs - $10K - MIN($25K, 15%×ARV)
+CURRENT: ${dateStr} | ${flTime} EST
+
+You help with foreclosure auction analysis. Key info:
+- Decision: BID (≥75%), REVIEW (60-74%), SKIP (<60%)
+- Max Bid: (ARV×70%) - Repairs - $10K - MIN($25K, 15%×ARV)
 - Next auction: December 17, 2025 at Titusville Courthouse 11AM
 
-For complex queries requiring database access, code, or detailed reports, suggest: "For detailed analysis, try asking for a full investment report."
+For database queries or web searches, tell user to ask specifically.
+Creator: Ariel Shapira, Solo Founder | Everest Capital USA`;
 
-CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
-
-    // ========== GEMINI FREE TIER ==========
-    if (router === 'GEMINI_FREE') {
-      const geminiMessages = messages.map(m => ({
+    // Gemini FREE tier - no tool use, fast responses
+    async function callGemini(msgs) {
+      const geminiMessages = msgs.map(m => ({
         role: m.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: m.content }]
       }));
 
-      const geminiResponse = await fetch(
+      const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${env.GEMINI_API_KEY}`,
         {
           method: 'POST',
@@ -92,40 +95,32 @@ CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
             contents: geminiMessages,
             systemInstruction: { parts: [{ text: systemPrompt }] },
             generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 2048
+              maxOutputTokens: 2048,
+              temperature: 0.7
             }
           })
         }
       );
 
-      if (!geminiResponse.ok) {
-        // Fallback to Claude if Gemini fails
-        console.log('Gemini failed, falling back to Claude');
-      } else {
-        const geminiData = await geminiResponse.json();
-        const text = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
-        
-        return new Response(JSON.stringify({
-          content: [{ type: 'text', text }],
-          model: 'gemini-1.5-flash',
-          _meta: {
-            router: 'GEMINI_FREE',
-            elapsed_ms: Date.now() - startTime,
-            cost: '$0.00'
-          }
-        }), {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
+      if (!response.ok) {
+        throw new Error(`Gemini error: ${response.status}`);
       }
+
+      const data = await response.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response';
+      
+      return {
+        content: [{ type: 'text', text }],
+        model: 'gemini-1.5-flash',
+        usage: { input_tokens: 0, output_tokens: 0 } // Gemini doesn't return this easily
+      };
     }
 
-    // ========== CLAUDE SONNET (with tools) ==========
+    // Claude PRODUCTION tier - with tools
     const tools = [
       {
         name: "supabase_query",
-        description: "Query database. Tables: historical_auctions (1393 records), insights, auction_results",
+        description: "Query database - FAST. Tables: historical_auctions, insights, auction_results",
         input_schema: {
           type: "object",
           properties: {
@@ -140,7 +135,7 @@ CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
       },
       {
         name: "github_read_file",
-        description: "Read file from repository",
+        description: "Read file from repo",
         input_schema: {
           type: "object",
           properties: {
@@ -152,7 +147,7 @@ CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
       },
       {
         name: "web_search",
-        description: "Search the web",
+        description: "Search internet",
         input_schema: {
           type: "object",
           properties: { query: { type: "string" } },
@@ -161,7 +156,22 @@ CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
       }
     ];
 
+    async function fetchWithTimeout(url, options, timeoutMs = 8000) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
+      try {
+        const response = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(timeout);
+        return response;
+      } catch (e) {
+        clearTimeout(timeout);
+        throw e.name === 'AbortError' ? new Error('Timeout') : e;
+      }
+    }
+
     async function executeTool(name, input) {
+      if (isTimeUp()) return { error: "Time limit", skipped: true };
+
       try {
         if (name === "supabase_query") {
           const { table, select = "*", filter, order, limit = 10 } = input;
@@ -169,31 +179,37 @@ CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
           if (filter) url += `&${filter}`;
           if (order) url += `&order=${order}`;
           
-          const resp = await fetch(url, {
+          const resp = await fetchWithTimeout(url, {
             headers: {
               'apikey': env.SUPABASE_SERVICE_KEY,
               'Authorization': `Bearer ${env.SUPABASE_SERVICE_KEY}`
             }
-          });
+          }, 5000);
+          
           if (!resp.ok) return { error: `DB error: ${resp.status}` };
-          return { rows: await resp.json() };
+          const rows = await resp.json();
+          return { rows: rows.slice(0, limit), count: rows.length };
         }
         
         if (name === "github_read_file") {
           const { repo, path } = input;
-          const resp = await fetch(`https://raw.githubusercontent.com/${repo}/main/${path}`, {
-            headers: { 'Authorization': `token ${env.GITHUB_TOKEN}` }
-          });
+          const resp = await fetchWithTimeout(
+            `https://raw.githubusercontent.com/${repo}/main/${path}`,
+            { headers: { 'Authorization': `token ${env.GITHUB_TOKEN}` } },
+            5000
+          );
           if (!resp.ok) return { error: `File not found` };
           const content = await resp.text();
-          return { content: content.substring(0, 5000) };
+          return { content: content.substring(0, 4000) };
         }
 
         if (name === "web_search") {
           const { query } = input;
-          const resp = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`, {
-            headers: { 'User-Agent': 'Mozilla/5.0' }
-          });
+          const resp = await fetchWithTimeout(
+            `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`,
+            { headers: { 'User-Agent': 'Mozilla/5.0' } },
+            6000
+          );
           if (!resp.ok) return { error: "Search failed" };
           const html = await resp.text();
           const results = [];
@@ -211,72 +227,107 @@ CREATOR: Ariel Shapira, Solo Founder | Everest Capital USA`;
       }
     }
 
-    const claudeSystemPrompt = systemPrompt + `
+    async function callClaude(msgs) {
+      const response = await fetchWithTimeout(
+        'https://api.anthropic.com/v1/messages',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': env.ANTHROPIC_API_KEY,
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 2048,
+            system: systemPrompt + '\n\nUse tools when needed. Complete response after tool results.',
+            tools: tools,
+            messages: msgs
+          })
+        },
+        15000
+      );
 
-TOOLS AVAILABLE: supabase_query, github_read_file, web_search
-DATABASE: historical_auctions (auction_id, case_number, address, city, final_judgment, opening_bid, market_value, status, auction_date)
+      if (!response.ok) throw new Error(`Claude error: ${response.status}`);
+      return response.json();
+    }
 
-IMPORTANT: Complete your response after tool results. Keep responses concise but complete.`;
-
-    let conversationMessages = [...messages];
     let data;
     let totalTokens = 0;
     let toolsUsed = [];
-    
-    for (let i = 0; i < 3; i++) {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 2048,
-          system: claudeSystemPrompt,
-          tools: tools,
-          messages: conversationMessages
-        })
-      });
 
-      if (!response.ok) throw new Error(`API error: ${response.status}`);
-      
-      data = await response.json();
-      totalTokens += (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0);
-      
-      if (data.stop_reason !== 'tool_use') break;
-      
-      const toolCalls = data.content.filter(b => b.type === 'tool_use');
-      if (toolCalls.length === 0) break;
-      
-      const toolResults = [];
-      for (const tc of toolCalls.slice(0, 2)) {
-        toolsUsed.push(tc.name);
-        const result = await executeTool(tc.name, tc.input);
-        toolResults.push({
-          type: 'tool_result',
-          tool_use_id: tc.id,
-          content: JSON.stringify(result)
-        });
+    if (tier === 'FREE') {
+      // Use Gemini - fast, no tools
+      try {
+        data = await callGemini(messages);
+        totalTokens = 0; // FREE!
+      } catch (geminiError) {
+        // Fallback to Claude if Gemini fails
+        console.log('Gemini failed, falling back to Claude:', geminiError.message);
+        data = await callClaude(messages);
+        totalTokens = (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0);
       }
+    } else {
+      // PRODUCTION tier - Claude with tools
+      let conversationMessages = [...messages];
       
-      conversationMessages.push({ role: 'assistant', content: data.content });
-      conversationMessages.push({ role: 'user', content: toolResults });
+      for (let i = 0; i < 3; i++) {
+        if (isTimeUp()) {
+          return new Response(JSON.stringify({
+            content: [{ type: 'text', text: `⏱️ Time limit. Tools used: ${toolsUsed.join(', ') || 'none'}` }],
+            _meta: { timeout: true, tier, tools_used: toolsUsed }
+          }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+
+        try {
+          data = await callClaude(conversationMessages);
+          totalTokens += (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0);
+          
+          if (data.stop_reason !== 'tool_use') break;
+          
+          const toolCalls = data.content.filter(b => b.type === 'tool_use');
+          if (toolCalls.length === 0) break;
+          
+          const toolResults = [];
+          for (const tc of toolCalls.slice(0, 2)) {
+            if (isTimeUp()) break;
+            toolsUsed.push(tc.name);
+            const result = await executeTool(tc.name, tc.input);
+            toolResults.push({
+              type: 'tool_result',
+              tool_use_id: tc.id,
+              content: JSON.stringify(result)
+            });
+          }
+          
+          if (toolResults.length === 0) break;
+          
+          conversationMessages.push({ role: 'assistant', content: data.content });
+          conversationMessages.push({ role: 'user', content: toolResults });
+          
+        } catch (loopError) {
+          if (data?.content) {
+            return new Response(JSON.stringify({
+              ...data,
+              _meta: { error: loopError.message, tier, tools_used: toolsUsed }
+            }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+          }
+          throw loopError;
+        }
+      }
     }
 
-    // Estimate cost: ~$0.003/1K input, ~$0.015/1K output for Sonnet
-    const estimatedCost = (totalTokens * 0.009 / 1000).toFixed(4);
+    // Calculate cost savings
+    const savings = tier === 'FREE' ? 'FREE (Gemini)' : `${totalTokens} tokens (Claude)`;
 
     return new Response(JSON.stringify({
       ...data,
-      model: 'claude-sonnet-4-20250514',
       _meta: {
-        router: 'CLAUDE_SONNET',
+        tier,
         session_tokens: totalTokens,
         tools_used: toolsUsed,
         elapsed_ms: Date.now() - startTime,
-        cost: `~$${estimatedCost}`
+        cost: savings
       }
     }), {
       status: 200,
@@ -286,7 +337,8 @@ IMPORTANT: Complete your response after tool results. Keep responses concise but
   } catch (error) {
     return new Response(JSON.stringify({ 
       error: error.message,
-      content: [{ type: 'text', text: `❌ Error: ${error.message}` }]
+      content: [{ type: 'text', text: `❌ Error: ${error.message}` }],
+      _meta: { elapsed_ms: Date.now() - startTime }
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
