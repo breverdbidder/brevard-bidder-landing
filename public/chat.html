@@ -4,80 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#0f172a">
     <title>BrevardBidderAI Chat</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
         :root {
             --bg-primary: #0f172a;
             --bg-secondary: #1e293b;
             --accent: #3b82f6;
             --text-primary: #f0f0f5;
-            --text-secondary: #a0a0b0;
+            --text-secondary: #94a3b8;
             --user-bubble: #3b82f6;
             --claude-bubble: #334155;
+            --success: #22c55e;
+            --warning: #eab308;
+            --error: #ef4444;
         }
-        
         html, body {
             height: 100%;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
+            overflow: hidden;
         }
-        
         .app {
             display: flex;
             flex-direction: column;
             height: 100%;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
         }
-        
         header {
             padding: 12px 16px;
             background: var(--bg-secondary);
             border-bottom: 1px solid rgba(59,130,246,0.2);
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            flex-shrink: 0;
         }
-        
         .logo {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            border-radius: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 20px;
+            gap: 10px;
         }
-        
-        .title-area h1 { font-size: 1.1rem; }
-        .title-area .status { 
-            font-size: 0.75rem; 
-            color: var(--text-secondary);
+        .logo-icon {
+            font-size: 24px;
+        }
+        .logo h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .status {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             gap: 6px;
         }
+        .status.ready { background: rgba(34,197,94,0.2); color: var(--success); }
+        .status.working { background: rgba(59,130,246,0.2); color: var(--accent); }
+        .status.error { background: rgba(239,68,68,0.2); color: var(--error); }
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            background: #22c55e;
+            background: currentColor;
         }
-        .status-dot.working {
-            background: #f59e0b;
+        .status.working .status-dot {
             animation: pulse 1s infinite;
         }
         @keyframes pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            50% { opacity: 0.3; }
         }
-        
         .messages {
             flex: 1;
             overflow-y: auto;
@@ -85,150 +84,217 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            -webkit-overflow-scrolling: touch;
         }
-        
         .message {
-            max-width: 85%;
+            max-width: 88%;
+            animation: fadeIn 0.2s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message.user {
+            align-self: flex-end;
+        }
+        .message.assistant {
+            align-self: flex-start;
+        }
+        .bubble {
             padding: 12px 16px;
             border-radius: 18px;
             line-height: 1.5;
-            font-size: 0.95rem;
+            font-size: 0.9375rem;
+            word-wrap: break-word;
         }
-        
-        .message.user {
+        .message.user .bubble {
             background: var(--user-bubble);
             color: white;
-            margin-left: auto;
             border-bottom-right-radius: 4px;
         }
-        
-        .message.assistant {
+        .message.assistant .bubble {
             background: var(--claude-bubble);
-            margin-right: auto;
             border-bottom-left-radius: 4px;
         }
-        
-        .message pre {
-            background: #1a1a2e;
+        .bubble pre {
+            background: var(--bg-primary);
             padding: 10px;
             border-radius: 8px;
             overflow-x: auto;
             margin: 8px 0;
             font-size: 0.8rem;
-        }
-        
-        .message code {
             font-family: 'SF Mono', Monaco, monospace;
-            background: rgba(0,0,0,0.3);
+        }
+        .bubble code {
+            font-family: 'SF Mono', Monaco, monospace;
+            background: rgba(0,0,0,0.2);
             padding: 2px 6px;
             border-radius: 4px;
             font-size: 0.85em;
         }
-        
-        .progress-indicator {
-            background: var(--claude-bubble);
-            padding: 12px 16px;
-            border-radius: 18px;
-            border-bottom-left-radius: 4px;
-            max-width: 85%;
-            display: none;
+        .bubble pre code {
+            background: none;
+            padding: 0;
         }
-        
-        .progress-indicator.visible { display: block; }
-        
-        .progress-text {
-            font-size: 0.85rem;
+        .bubble strong {
+            color: #60a5fa;
+        }
+        .meta {
+            font-size: 0.7rem;
             color: var(--text-secondary);
+            margin-top: 4px;
+            padding: 0 4px;
+        }
+        .message.user .meta {
+            text-align: right;
+        }
+        .tool-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(59,130,246,0.15);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
             margin-bottom: 8px;
         }
-        
-        .progress-dots {
+        .tool-indicator .spinner {
+            width: 12px;
+            height: 12px;
+            border: 2px solid currentColor;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .typing {
+            display: none;
+            align-self: flex-start;
+            padding: 12px 16px;
+            background: var(--claude-bubble);
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+        }
+        .typing.visible {
             display: flex;
             gap: 4px;
         }
-        
-        .progress-dots span {
+        .typing span {
             width: 8px;
             height: 8px;
-            background: var(--accent);
+            background: var(--text-secondary);
             border-radius: 50%;
             animation: bounce 1.4s ease-in-out infinite;
         }
-        .progress-dots span:nth-child(2) { animation-delay: 0.16s; }
-        .progress-dots span:nth-child(3) { animation-delay: 0.32s; }
-        
+        .typing span:nth-child(2) { animation-delay: 0.16s; }
+        .typing span:nth-child(3) { animation-delay: 0.32s; }
         @keyframes bounce {
             0%, 80%, 100% { transform: translateY(0); }
             40% { transform: translateY(-6px); }
         }
-        
+        .progress-bar {
+            height: 3px;
+            background: var(--bg-secondary);
+            position: relative;
+            overflow: hidden;
+            display: none;
+        }
+        .progress-bar.active {
+            display: block;
+        }
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            left: -50%;
+            width: 50%;
+            height: 100%;
+            background: var(--accent);
+            animation: progress 1s ease-in-out infinite;
+        }
+        @keyframes progress {
+            0% { left: -50%; }
+            100% { left: 100%; }
+        }
         .input-area {
             padding: 12px 16px;
+            padding-bottom: max(12px, env(safe-area-inset-bottom));
             background: var(--bg-secondary);
             border-top: 1px solid rgba(59,130,246,0.2);
-            flex-shrink: 0;
         }
-        
-        .quick-btns {
+        .quick-actions {
             display: flex;
             gap: 8px;
-            margin-bottom: 10px;
             overflow-x: auto;
-            padding-bottom: 4px;
+            padding-bottom: 10px;
+            -webkit-overflow-scrolling: touch;
         }
-        
         .quick-btn {
-            padding: 8px 14px;
-            background: rgba(59,130,246,0.2);
+            flex-shrink: 0;
+            padding: 6px 12px;
+            background: var(--bg-primary);
             border: 1px solid rgba(59,130,246,0.3);
-            border-radius: 20px;
-            color: var(--text-primary);
-            font-size: 0.8rem;
-            white-space: nowrap;
+            border-radius: 16px;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
             cursor: pointer;
         }
-        
-        .quick-btn:active { background: rgba(59,130,246,0.4); }
-        
+        .quick-btn:active {
+            background: var(--accent);
+            color: white;
+        }
         .input-row {
             display: flex;
             gap: 10px;
             align-items: flex-end;
         }
-        
-        #messageInput {
+        .input-wrapper {
             flex: 1;
-            padding: 12px 16px;
             background: var(--bg-primary);
             border: 1px solid rgba(59,130,246,0.3);
             border-radius: 24px;
-            color: var(--text-primary);
-            font-size: 16px;
-            resize: none;
-            max-height: 120px;
-            line-height: 1.4;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
         }
-        
-        #messageInput:focus {
-            outline: none;
+        .input-wrapper:focus-within {
             border-color: var(--accent);
         }
-        
-        #sendBtn {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        #message-input {
+            flex: 1;
+            background: transparent;
             border: none;
-            border-radius: 50%;
-            color: white;
-            font-size: 1.2rem;
-            cursor: pointer;
-            flex-shrink: 0;
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.4;
+            resize: none;
+            max-height: 120px;
+            min-height: 24px;
+            outline: none;
         }
-        
-        #sendBtn:disabled { opacity: 0.5; }
-        
-        .login-overlay {
+        #message-input::placeholder {
+            color: var(--text-secondary);
+        }
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .send-btn:disabled {
+            opacity: 0.5;
+        }
+        /* Login Modal */
+        .modal {
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,0.9);
@@ -236,104 +302,106 @@
             align-items: center;
             justify-content: center;
             z-index: 100;
+            padding: 20px;
         }
-        
-        .login-box {
+        .modal.hidden { display: none; }
+        .modal-box {
             background: var(--bg-secondary);
-            padding: 32px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 360px;
-            text-align: center;
-        }
-        
-        .login-box h2 { margin-bottom: 8px; }
-        .login-box p { color: var(--text-secondary); margin-bottom: 24px; font-size: 0.9rem; }
-        
-        .login-box input {
+            padding: 24px;
+            border-radius: 16px;
             width: 100%;
-            padding: 14px;
-            background: var(--bg-primary);
+            max-width: 340px;
+        }
+        .modal-box h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .modal-box input {
+            width: 100%;
+            padding: 14px 16px;
+            margin-bottom: 16px;
             border: 1px solid rgba(59,130,246,0.3);
             border-radius: 12px;
+            background: var(--bg-primary);
             color: var(--text-primary);
             font-size: 16px;
-            margin-bottom: 16px;
         }
-        
-        .login-box button {
+        .modal-box button {
             width: 100%;
             padding: 14px;
             background: var(--accent);
             border: none;
             border-radius: 12px;
             color: white;
-            font-size: 1rem;
             font-weight: 600;
+            font-size: 1rem;
             cursor: pointer;
         }
-        
-        .hidden { display: none !important; }
-        
-        .timeout-warning {
-            background: rgba(245,158,11,0.2);
-            border: 1px solid rgba(245,158,11,0.5);
-            color: #fbbf24;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            margin-top: 8px;
+        .error-msg {
+            color: var(--error);
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 12px;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div id="loginOverlay" class="login-overlay">
-        <div class="login-box">
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-box">
             <h2>🏠 BrevardBidderAI</h2>
-            <p>Foreclosure Intelligence Assistant</p>
-            <input type="password" id="pwdInput" placeholder="Enter password">
-            <button onclick="login()">Access</button>
+            <div id="login-error" class="error-msg"></div>
+            <input type="password" id="password-input" placeholder="Enter password" autocomplete="current-password">
+            <button onclick="login()">Access Chat</button>
         </div>
     </div>
-    
-    <div id="app" class="app hidden">
+
+    <!-- Main App -->
+    <div id="app" class="app" style="display:none">
         <header>
-            <div class="logo">🏠</div>
-            <div class="title-area">
+            <div class="logo">
+                <span class="logo-icon">🏠</span>
                 <h1>BrevardBidderAI</h1>
-                <div class="status">
-                    <div class="status-dot" id="statusDot"></div>
-                    <span id="statusText">Ready</span>
-                </div>
+            </div>
+            <div id="status" class="status ready">
+                <span class="status-dot"></span>
+                <span id="status-text">Ready</span>
             </div>
         </header>
         
-        <div class="messages" id="messages">
+        <div id="progress" class="progress-bar"></div>
+
+        <div id="messages" class="messages">
             <div class="message assistant">
-                Welcome! I can analyze foreclosures, query auction data, search the web, and browse code repositories.<br><br>
-                <strong>Tip:</strong> Complex queries may take 30-60 seconds as I search multiple sources.
-            </div>
-            
-            <div class="progress-indicator" id="progress">
-                <div class="progress-text" id="progressText">Thinking...</div>
-                <div class="progress-dots">
-                    <span></span><span></span><span></span>
+                <div class="bubble">
+                    Welcome! I have access to:<br><br>
+                    📊 <strong>1,393+ auction records</strong><br>
+                    🏠 <strong>BCPAO property data</strong><br>
+                    💻 <strong>GitHub repositories</strong><br>
+                    🔍 <strong>Web search</strong><br>
+                    💾 <strong>Checkpoint system</strong><br><br>
+                    Ask me anything about Brevard foreclosures!
                 </div>
             </div>
         </div>
         
+        <div id="typing" class="typing">
+            <span></span><span></span><span></span>
+        </div>
+
         <div class="input-area">
-            <div class="quick-btns">
-                <button class="quick-btn" onclick="sendQuick('Show 5 recent auction results')">📊 Auctions</button>
-                <button class="quick-btn" onclick="sendQuick('Explain max bid formula')">💰 Max Bid</button>
-                <button class="quick-btn" onclick="sendQuick('List src in brevard-bidder-scraper')">💻 Code</button>
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="sendQuick('Show 5 recent auction results with prices')">📊 Recent Auctions</button>
+                <button class="quick-btn" onclick="sendQuick('Explain the max bid formula with example')">💰 Max Bid</button>
+                <button class="quick-btn" onclick="sendQuick('Search web for Brevard County foreclosure news')">🔍 News</button>
+                <button class="quick-btn" onclick="sendQuick('Save checkpoint: session summary')">💾 Checkpoint</button>
             </div>
             <div class="input-row">
-                <textarea id="messageInput" rows="1" placeholder="Ask about foreclosures..." onkeydown="handleKey(event)"></textarea>
-                <button id="sendBtn" onclick="sendMessage()">➤</button>
-            </div>
-            <div id="timeoutWarning" class="timeout-warning hidden">
-                ⏱️ Taking longer than expected. Complex queries may need 60+ seconds...
+                <div class="input-wrapper">
+                    <textarea id="message-input" placeholder="Ask about auctions..." rows="1" onkeydown="handleKeydown(event)" oninput="autoResize(this)"></textarea>
+                </div>
+                <button id="send-btn" class="send-btn" onclick="sendMessage()">➤</button>
             </div>
         </div>
     </div>
@@ -341,117 +409,127 @@
     <script>
         const API_URL = '/api/chat';
         let messages = [];
-        let sessionId = 'bb_' + Date.now();
-        
-        // Auto-login
-        const savedPwd = localStorage.getItem('brevard_pwd');
-        if (savedPwd) {
-            document.getElementById('loginOverlay').classList.add('hidden');
-            document.getElementById('app').classList.remove('hidden');
+        let sessionId = localStorage.getItem('brevard_session_id') || generateSessionId();
+        localStorage.setItem('brevard_session_id', sessionId);
+
+        function generateSessionId() {
+            return 'bb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
-        
-        document.getElementById('pwdInput').addEventListener('keypress', e => {
+
+        function setStatus(status, text) {
+            const el = document.getElementById('status');
+            const textEl = document.getElementById('status-text');
+            el.className = 'status ' + status;
+            textEl.textContent = text;
+            
+            const progress = document.getElementById('progress');
+            progress.className = status === 'working' ? 'progress-bar active' : 'progress-bar';
+        }
+
+        function login() {
+            const pwd = document.getElementById('password-input').value;
+            if (!pwd) return;
+            
+            localStorage.setItem('brevard_pwd', pwd);
+            document.getElementById('login-modal').classList.add('hidden');
+            document.getElementById('app').style.display = 'flex';
+            document.getElementById('message-input').focus();
+            loadCachedMessages();
+        }
+
+        // Auto-login
+        if (localStorage.getItem('brevard_pwd')) {
+            document.getElementById('login-modal').classList.add('hidden');
+            document.getElementById('app').style.display = 'flex';
+            loadCachedMessages();
+        }
+
+        document.getElementById('password-input').addEventListener('keypress', e => {
             if (e.key === 'Enter') login();
         });
-        
-        function login() {
-            const pwd = document.getElementById('pwdInput').value;
-            if (pwd) {
-                localStorage.setItem('brevard_pwd', pwd);
-                document.getElementById('loginOverlay').classList.add('hidden');
-                document.getElementById('app').classList.remove('hidden');
+
+        function loadCachedMessages() {
+            const cached = localStorage.getItem('brevard_messages_' + sessionId);
+            if (cached) {
+                try {
+                    messages = JSON.parse(cached);
+                    messages.forEach(m => renderMessage(m.role, m.content, false));
+                } catch(e) {}
             }
         }
-        
-        function setStatus(text, working = false) {
-            document.getElementById('statusText').textContent = text;
-            document.getElementById('statusDot').classList.toggle('working', working);
+
+        function saveMessages() {
+            localStorage.setItem('brevard_messages_' + sessionId, JSON.stringify(messages));
         }
-        
-        function showProgress(text) {
-            document.getElementById('progressText').textContent = text;
-            document.getElementById('progress').classList.add('visible');
-            scrollToBottom();
-        }
-        
-        function hideProgress() {
-            document.getElementById('progress').classList.remove('visible');
-        }
-        
-        function scrollToBottom() {
-            const msgs = document.getElementById('messages');
-            msgs.scrollTop = msgs.scrollHeight;
-        }
-        
-        function addMessage(role, content) {
-            const msgs = document.getElementById('messages');
+
+        function renderMessage(role, content, animate = true) {
+            const container = document.getElementById('messages');
             const div = document.createElement('div');
-            div.className = `message ${role}`;
+            div.className = 'message ' + (role === 'user' ? 'user' : 'assistant');
+            if (!animate) div.style.animation = 'none';
             
-            // Simple markdown
+            const time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            
+            // Enhanced markdown rendering
             let html = content
                 .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
                 .replace(/`([^`]+)`/g, '<code>$1</code>')
                 .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                .replace(/##\s+(.+)/g, '<strong>$1</strong><br>')
-                .replace(/###\s+(.+)/g, '<strong>$1</strong><br>')
+                .replace(/##\s+(.+)/g, '<strong style="display:block;margin:12px 0 8px;font-size:1.05em">$1</strong>')
+                .replace(/###\s+(.+)/g, '<strong style="display:block;margin:8px 0 4px">$1</strong>')
+                .replace(/- \*\*([^*]+)\*\*/g, '• <strong>$1</strong>')
+                .replace(/^- (.+)$/gm, '• $1')
                 .replace(/\n/g, '<br>');
             
-            div.innerHTML = html;
-            msgs.insertBefore(div, document.getElementById('progress'));
-            scrollToBottom();
+            div.innerHTML = `
+                <div class="bubble">${html}</div>
+                <div class="meta">${time}</div>
+            `;
+            
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
         }
-        
-        function sendQuick(text) {
-            document.getElementById('messageInput').value = text;
-            sendMessage();
-        }
-        
-        function handleKey(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
+
+        function showToolProgress(toolName) {
+            const container = document.getElementById('messages');
+            let indicator = document.getElementById('tool-indicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.id = 'tool-indicator';
+                indicator.className = 'tool-indicator';
+                container.appendChild(indicator);
             }
+            indicator.innerHTML = `<div class="spinner"></div> Using ${toolName}...`;
+            container.scrollTop = container.scrollHeight;
         }
-        
+
+        function hideToolProgress() {
+            const indicator = document.getElementById('tool-indicator');
+            if (indicator) indicator.remove();
+        }
+
         async function sendMessage() {
-            const input = document.getElementById('messageInput');
+            const input = document.getElementById('message-input');
             const content = input.value.trim();
             if (!content) return;
-            
-            input.value = '';
-            addMessage('user', content);
+
+            // Add user message
             messages.push({ role: 'user', content });
+            renderMessage('user', content);
+            saveMessages();
             
-            document.getElementById('sendBtn').disabled = true;
-            setStatus('Working...', true);
-            showProgress('🔍 Analyzing your request...');
-            document.getElementById('timeoutWarning').classList.add('hidden');
+            // Clear input
+            input.value = '';
+            autoResize(input);
             
-            // Show timeout warning after 15 seconds
-            const timeoutTimer = setTimeout(() => {
-                showProgress('🔧 Using tools to find data...');
-                document.getElementById('timeoutWarning').classList.remove('hidden');
-            }, 15000);
+            // Show working state
+            setStatus('working', 'Processing...');
+            document.getElementById('typing').classList.add('visible');
+            document.getElementById('send-btn').disabled = true;
             
-            // Update progress messages
-            const progressMessages = [
-                '📊 Querying database...',
-                '🌐 Searching web...',
-                '📝 Generating report...'
-            ];
-            let progressIndex = 0;
-            const progressTimer = setInterval(() => {
-                if (progressIndex < progressMessages.length) {
-                    showProgress(progressMessages[progressIndex]);
-                    progressIndex++;
-                }
-            }, 8000);
+            const startTime = Date.now();
             
             try {
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 120000); // 2 min timeout
-                
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -459,45 +537,81 @@
                         password: localStorage.getItem('brevard_pwd'),
                         messages: messages,
                         session_id: sessionId
-                    }),
-                    signal: controller.signal
+                    })
                 });
-                
-                clearTimeout(timeout);
-                clearTimeout(timeoutTimer);
-                clearInterval(progressTimer);
-                
+
                 if (response.status === 401) {
                     localStorage.removeItem('brevard_pwd');
-                    location.reload();
+                    renderMessage('assistant', '⚠️ Authentication error. Refreshing...');
+                    setTimeout(() => location.reload(), 1500);
                     return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`API error: ${response.status}`);
                 }
                 
                 const data = await response.json();
                 
+                // Check for errors in response
                 if (data.error) {
-                    addMessage('assistant', '⚠️ Error: ' + data.error);
-                } else {
-                    const textContent = data.content?.filter(b => b.type === 'text').map(b => b.text).join('\n\n') || 'No response received.';
-                    addMessage('assistant', textContent);
-                    messages.push({ role: 'assistant', content: textContent });
+                    throw new Error(data.error);
                 }
+                
+                // Extract ALL text content from response
+                let assistantContent = '';
+                if (data.content && Array.isArray(data.content)) {
+                    const textBlocks = data.content.filter(b => b.type === 'text');
+                    assistantContent = textBlocks.map(b => b.text).join('\n\n');
+                }
+                
+                if (!assistantContent) {
+                    assistantContent = '⚠️ Empty response received. The query may have timed out or hit a limit. Try a simpler question.';
+                }
+                
+                // Show response stats
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                const meta = data._meta || {};
+                const tokens = meta.session_tokens || data.usage?.input_tokens + data.usage?.output_tokens || 'N/A';
+                
+                // Add assistant message
+                messages.push({ role: 'assistant', content: assistantContent });
+                renderMessage('assistant', assistantContent);
+                saveMessages();
+                
+                // Update status with stats
+                setStatus('ready', `Done (${elapsed}s, ${tokens} tokens)`);
                 
             } catch (error) {
-                clearTimeout(timeoutTimer);
-                clearInterval(progressTimer);
+                console.error('Error:', error);
+                const errorMsg = `⚠️ Error: ${error.message}. Please try again.`;
+                renderMessage('assistant', errorMsg);
+                setStatus('error', 'Error');
                 
-                if (error.name === 'AbortError') {
-                    addMessage('assistant', '⏱️ Request timed out. Try a simpler query or break it into steps.');
-                } else {
-                    addMessage('assistant', '⚠️ Connection error: ' + error.message);
-                }
+                // Reset to ready after 3s
+                setTimeout(() => setStatus('ready', 'Ready'), 3000);
+            } finally {
+                document.getElementById('typing').classList.remove('visible');
+                document.getElementById('send-btn').disabled = false;
+                hideToolProgress();
             }
-            
-            hideProgress();
-            document.getElementById('timeoutWarning').classList.add('hidden');
-            document.getElementById('sendBtn').disabled = false;
-            setStatus('Ready', false);
+        }
+
+        function sendQuick(text) {
+            document.getElementById('message-input').value = text;
+            sendMessage();
+        }
+
+        function handleKeydown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function autoResize(el) {
+            el.style.height = 'auto';
+            el.style.height = Math.min(el.scrollHeight, 120) + 'px';
         }
     </script>
 </body>
