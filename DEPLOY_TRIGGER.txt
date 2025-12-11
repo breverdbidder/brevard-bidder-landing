@@ -1,5 +1,1 @@
-DEPLOY: 2025-12-08T17:58:29Z
-UPDATE: Dec 10, 2025 Auction Data Live
-VERSION: V13.4.0
-PROPERTIES: 8 (3 BID, 3 REVIEW, 2 SKIP)
-AUTHOR: Ariel Shapira, Solo Founder
+DEPLOY: 2025-12-11T11:49:52Z - Removed noise texture for clean navy background
