@@ -2,468 +2,1127 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>923 Slocum St NW - CMA Map Visualization | BrevardBidderAI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a1628">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>CMA Analysis | 923 Slocum St NW | BrevardBidderAI</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Arial', sans-serif; background: #f5f5f5; }
-        
-        .header {
-            background: linear-gradient(135deg, #1E3A5F 0%, #2E5077 100%);
-            color: white;
-            padding: 20px 30px;
-            text-align: center;
+        :root {
+            --bg-primary: #0a1628;
+            --bg-secondary: #111d32;
+            --bg-card: #162236;
+            --bg-elevated: #1a2942;
+            --accent-primary: #00d4aa;
+            --accent-secondary: #00a8ff;
+            --accent-gold: #ffc857;
+            --accent-warning: #ff6b6b;
+            --text-primary: #ffffff;
+            --text-secondary: #8b9cb8;
+            --text-muted: #5a6a85;
+            --border-color: #243550;
+            --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
         }
-        .header h1 { font-size: 24px; margin-bottom: 5px; }
-        .header p { font-size: 14px; opacity: 0.9; }
-        
-        .container { display: flex; height: calc(100vh - 80px); }
-        
-        #map { flex: 1; min-width: 60%; }
-        
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        /* ============================================
+           LAYOUT STRUCTURE
+           ============================================ */
+        .app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            height: 100dvh;
+        }
+
+        /* ============================================
+           HEADER - Responsive
+           ============================================ */
+        .header {
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            min-width: 0;
+        }
+
+        .header-title h1 {
+            font-size: 16px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-title p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-badge {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+
+        /* ============================================
+           MAIN CONTENT AREA
+           ============================================ */
+        .main {
+            flex: 1;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ============================================
+           MAP CONTAINER
+           ============================================ */
+        #map {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            z-index: 10;
+        }
+
+        .map-legend {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            backdrop-filter: blur(20px);
+        }
+
+        .map-legend h4 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .legend-item:last-child { margin-bottom: 0; }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .legend-dot.subject { background: var(--accent-primary); }
+        .legend-dot.comp { background: var(--accent-secondary); }
+
+        /* ============================================
+           SIDEBAR - Desktop/Tablet
+           ============================================ */
         .sidebar {
             width: 400px;
-            background: white;
-            overflow-y: auto;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.3s ease, opacity 0.3s ease;
         }
-        
-        .section {
+
+        .sidebar-header {
             padding: 20px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-elevated);
         }
-        .section h2 {
-            color: #1E3A5F;
-            font-size: 16px;
-            margin-bottom: 15px;
+
+        .sidebar-header h2 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .sidebar-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--text-primary), var(--accent-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* ============================================
+           SUBJECT PROPERTY CARD
+           ============================================ */
+        .subject-card {
+            background: linear-gradient(135deg, rgba(0, 212, 170, 0.15) 0%, rgba(0, 168, 255, 0.1) 100%);
+            border: 1px solid rgba(0, 212, 170, 0.3);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .subject-card .label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-primary);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .subject-card .address {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .subject-card .city {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .metric-box {
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            text-align: center;
+        }
+
+        .metric-box .value {
+            font-family: 'Space Mono', monospace;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-primary);
+            margin-bottom: 4px;
+        }
+
+        .metric-box .value.gold { color: var(--accent-gold); }
+
+        .metric-box .label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+           COMPARABLE PROPERTIES
+           ============================================ */
+        .section-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .section h2::before {
+
+        .section-title::before {
             content: '';
             width: 4px;
-            height: 20px;
-            background: #1E3A5F;
+            height: 16px;
+            background: var(--accent-secondary);
             border-radius: 2px;
         }
-        
-        .subject-card {
-            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-        .subject-card h3 {
-            color: #2E7D32;
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-        .subject-card .address { font-size: 14px; color: #555; margin-bottom: 10px; }
-        .subject-card .metrics {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        .metric {
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .metric .label { font-size: 11px; color: #666; text-transform: uppercase; }
-        .metric .value { font-size: 18px; font-weight: bold; color: #1E3A5F; }
-        .metric .value.green { color: #2E7D32; }
-        
+
         .comp-card {
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
-            transition: all 0.2s;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
         }
-        .comp-card:hover {
-            border-color: #1E3A5F;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+
+        .comp-card:hover, .comp-card.active {
+            border-color: var(--accent-secondary);
+            transform: translateX(4px);
         }
-        .comp-card .comp-header {
+
+        .comp-card.active {
+            background: var(--bg-elevated);
+            box-shadow: 0 0 0 2px rgba(0, 168, 255, 0.2);
+        }
+
+        .comp-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            justify-content: space-between;
+            margin-bottom: 12px;
         }
-        .comp-card .comp-num {
-            background: #1E3A5F;
-            color: white;
-            width: 24px;
-            height: 24px;
+
+        .comp-num {
+            width: 28px;
+            height: 28px;
+            background: var(--accent-secondary);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 12px;
-            font-weight: bold;
+            font-weight: 700;
         }
-        .comp-card .source {
-            font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 4px;
-            background: #E3F2FD;
-            color: #1565C0;
+
+        .comp-source {
+            font-size: 10px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(0, 168, 255, 0.15);
+            color: var(--accent-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .comp-card .address { font-size: 13px; font-weight: 500; margin-bottom: 5px; }
-        .comp-card .details {
+
+        .comp-address {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .comp-details {
             display: flex;
-            gap: 15px;
+            flex-wrap: wrap;
+            gap: 8px 16px;
             font-size: 12px;
-            color: #666;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
         }
-        .comp-card .price {
-            font-size: 16px;
-            font-weight: bold;
-            color: #2E7D32;
-        }
-        .comp-card .price-sqft { font-size: 12px; color: #666; }
-        
-        .analysis-box {
-            background: #F5F5F5;
-            border-radius: 8px;
-            padding: 15px;
-        }
-        .analysis-row {
+
+        .comp-price-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #e0e0e0;
+            align-items: baseline;
         }
-        .analysis-row:last-child { border-bottom: none; }
-        .analysis-row .label { color: #666; }
-        .analysis-row .value { font-weight: bold; color: #1E3A5F; }
-        
-        .legend {
-            display: flex;
-            gap: 20px;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            margin-bottom: 15px;
+
+        .comp-price {
+            font-family: 'Space Mono', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-primary);
         }
-        .legend-item {
+
+        .comp-price-sqft {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* ============================================
+           CMA SUMMARY
+           ============================================ */
+        .cma-summary {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-top: 8px;
+        }
+
+        .cma-row {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 8px;
-            font-size: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
         }
-        .legend-dot {
-            width: 12px;
-            height: 12px;
+
+        .cma-row:last-child { border-bottom: none; }
+
+        .cma-row .label { 
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .cma-row .value {
+            font-family: 'Space Mono', monospace;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .cma-row .value.highlight {
+            color: var(--accent-primary);
+        }
+
+        .confidence-badge {
+            background: linear-gradient(135deg, var(--accent-primary), #00b894);
+            color: var(--bg-primary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* ============================================
+           MOBILE BOTTOM SHEET
+           ============================================ */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border: none;
             border-radius: 50%;
+            color: var(--bg-primary);
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 200;
+            box-shadow: var(--shadow-lg);
+            transition: transform 0.2s ease;
         }
-        .legend-dot.subject { background: #2E7D32; }
-        .legend-dot.comp { background: #1E3A5F; }
-        
+
+        .mobile-toggle:active {
+            transform: scale(0.95);
+        }
+
+        .bottom-sheet {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border-top-left-radius: var(--radius-xl);
+            border-top-right-radius: var(--radius-xl);
+            max-height: 85vh;
+            z-index: 150;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .bottom-sheet.open {
+            transform: translateY(0);
+        }
+
+        .bottom-sheet-handle {
+            width: 40px;
+            height: 4px;
+            background: var(--text-muted);
+            border-radius: 2px;
+            margin: 12px auto;
+        }
+
+        .bottom-sheet-content {
+            max-height: calc(85vh - 28px);
+            overflow-y: auto;
+            padding: 0 20px 24px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .sheet-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 140;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .sheet-backdrop.visible {
+            opacity: 1;
+        }
+
+        /* ============================================
+           TABLET STYLES (768px - 1024px)
+           ============================================ */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .sidebar {
+                width: 340px;
+            }
+
+            .header-title h1 {
+                font-size: 18px;
+            }
+
+            .metrics-grid {
+                gap: 10px;
+            }
+
+            .metric-box {
+                padding: 12px;
+            }
+
+            .metric-box .value {
+                font-size: 18px;
+            }
+        }
+
+        /* ============================================
+           MOBILE STYLES (< 768px)
+           ============================================ */
+        @media (max-width: 767px) {
+            .header {
+                padding: 10px 12px;
+            }
+
+            .logo {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+
+            .header-title h1 {
+                font-size: 14px;
+            }
+
+            .header-title p {
+                font-size: 11px;
+            }
+
+            .header-badge {
+                padding: 5px 10px;
+                font-size: 10px;
+            }
+
+            .map-overlay {
+                top: 12px;
+                left: 12px;
+            }
+
+            .map-legend {
+                padding: 10px 12px;
+            }
+
+            .map-legend h4 {
+                font-size: 10px;
+                margin-bottom: 8px;
+            }
+
+            .legend-item {
+                font-size: 11px;
+                gap: 8px;
+            }
+
+            .legend-dot {
+                width: 10px;
+                height: 10px;
+            }
+
+            /* Hide desktop sidebar */
+            .sidebar {
+                display: none;
+            }
+
+            /* Show mobile controls */
+            .mobile-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .bottom-sheet {
+                display: block;
+            }
+
+            .sheet-backdrop {
+                display: block;
+            }
+
+            /* Mobile subject card */
+            .subject-card {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .subject-card .address {
+                font-size: 16px;
+            }
+
+            .subject-card .city {
+                font-size: 13px;
+            }
+
+            .metrics-grid {
+                gap: 8px;
+            }
+
+            .metric-box {
+                padding: 12px 10px;
+            }
+
+            .metric-box .value {
+                font-size: 16px;
+            }
+
+            .metric-box .label {
+                font-size: 9px;
+            }
+
+            /* Mobile comp cards */
+            .comp-card {
+                padding: 14px;
+                margin-bottom: 10px;
+            }
+
+            .comp-address {
+                font-size: 13px;
+            }
+
+            .comp-details {
+                font-size: 11px;
+                gap: 6px 12px;
+            }
+
+            .comp-price {
+                font-size: 16px;
+            }
+
+            /* Mobile CMA summary */
+            .cma-summary {
+                padding: 16px;
+            }
+
+            .cma-row {
+                padding: 8px 0;
+            }
+
+            .cma-row .label {
+                font-size: 12px;
+            }
+
+            .cma-row .value {
+                font-size: 13px;
+            }
+        }
+
+        /* ============================================
+           SMALL MOBILE (< 375px)
+           ============================================ */
+        @media (max-width: 374px) {
+            .header-badge {
+                display: none;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .metric-box .value {
+                font-size: 14px;
+            }
+        }
+
+        /* ============================================
+           LANDSCAPE MOBILE
+           ============================================ */
+        @media (max-width: 767px) and (orientation: landscape) {
+            .bottom-sheet {
+                max-height: 70vh;
+            }
+
+            .bottom-sheet-content {
+                max-height: calc(70vh - 28px);
+            }
+        }
+
+        /* ============================================
+           MAPBOX POPUP STYLES
+           ============================================ */
         .mapboxgl-popup-content {
-            padding: 15px;
-            border-radius: 8px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+            font-family: 'DM Sans', sans-serif;
         }
-        .popup-title { font-weight: bold; margin-bottom: 5px; }
-        .popup-details { font-size: 12px; color: #666; }
+
+        .mapboxgl-popup-close-button {
+            color: var(--text-secondary);
+            font-size: 18px;
+            padding: 4px 8px;
+        }
+
+        .mapboxgl-popup-tip {
+            border-top-color: var(--bg-card);
+        }
+
+        .popup-title {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: var(--accent-primary);
+        }
+
+        .popup-details {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .popup-price {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        /* ============================================
+           ANIMATIONS
+           ============================================ */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .comp-card {
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .comp-card:nth-child(1) { animation-delay: 0.05s; }
+        .comp-card:nth-child(2) { animation-delay: 0.1s; }
+        .comp-card:nth-child(3) { animation-delay: 0.15s; }
+        .comp-card:nth-child(4) { animation-delay: 0.2s; }
+        .comp-card:nth-child(5) { animation-delay: 0.25s; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>CMA Map Visualization | 923 Slocum St NW, Palm Bay</h1>
-        <p>BrevardBidderAI V14.6.1 • 12-Stage Pipeline • Comparative Market Analysis</p>
-    </div>
-    
-    <div class="container">
-        <div id="map"></div>
-        
-        <div class="sidebar">
-            <div class="section">
-                <h2>Subject Property</h2>
-                <div class="subject-card">
-                    <h3>🏠 923 Slocum St NW</h3>
-                    <div class="address">Palm Bay, FL 32909 • Port Malabar Unit 42</div>
-                    <div class="metrics">
-                        <div class="metric">
-                            <div class="label">Final Judgment</div>
-                            <div class="value">$143,881</div>
-                        </div>
-                        <div class="metric">
-                            <div class="label">ARV</div>
-                            <div class="value green">$274,520</div>
-                        </div>
-                        <div class="metric">
-                            <div class="label">Sq Ft</div>
-                            <div class="value">1,894</div>
-                        </div>
-                        <div class="metric">
-                            <div class="label">Year Built</div>
-                            <div class="value">2005</div>
-                        </div>
-                    </div>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">AI</div>
+                <div class="header-title">
+                    <h1>CMA Analysis</h1>
+                    <p>923 Slocum St NW, Palm Bay</p>
                 </div>
-                
-                <div class="legend">
+            </div>
+            <div class="header-badge">Stage 8 of 12</div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Map -->
+            <div id="map"></div>
+
+            <!-- Map Legend Overlay -->
+            <div class="map-overlay">
+                <div class="map-legend">
+                    <h4>Map Legend</h4>
                     <div class="legend-item">
                         <div class="legend-dot subject"></div>
                         <span>Subject Property</span>
                     </div>
                     <div class="legend-item">
                         <div class="legend-dot comp"></div>
-                        <span>Comparable Sales</span>
+                        <span>Comparable Sale</span>
                     </div>
                 </div>
             </div>
-            
-            <div class="section">
-                <h2>Comparable Sales (5)</h2>
-                
-                <div class="comp-card" data-comp="1">
-                    <div class="comp-header">
-                        <div class="comp-num">1</div>
-                        <span class="source">Zillow</span>
-                    </div>
-                    <div class="address">891 Slocum St NW</div>
-                    <div class="details">
-                        <span>1,856 sqft</span>
-                        <span>3 BD / 2 BA</span>
-                        <span>2004</span>
-                        <span>0.12 mi</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-top:8px;">
-                        <div class="price">$268,000</div>
-                        <div class="price-sqft">$144.40/sqft</div>
-                    </div>
+
+            <!-- Desktop/Tablet Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h2>Comparative Market Analysis</h2>
+                    <h3>5 Comps Analyzed</h3>
                 </div>
-                
-                <div class="comp-card" data-comp="2">
-                    <div class="comp-header">
-                        <div class="comp-num">2</div>
-                        <span class="source">Redfin</span>
-                    </div>
-                    <div class="address">1045 Dorchester Rd NW</div>
-                    <div class="details">
-                        <span>1,920 sqft</span>
-                        <span>4 BD / 2 BA</span>
-                        <span>2006</span>
-                        <span>0.34 mi</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-top:8px;">
-                        <div class="price">$285,000</div>
-                        <div class="price-sqft">$148.44/sqft</div>
-                    </div>
+                <div class="sidebar-content" id="sidebarContent">
+                    <!-- Content injected by JS -->
                 </div>
-                
-                <div class="comp-card" data-comp="3">
-                    <div class="comp-header">
-                        <div class="comp-num">3</div>
-                        <span class="source">Zillow</span>
-                    </div>
-                    <div class="address">756 Toluca St NW</div>
-                    <div class="details">
-                        <span>1,812 sqft</span>
-                        <span>3 BD / 2 BA</span>
-                        <span>2003</span>
-                        <span>0.28 mi</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-top:8px;">
-                        <div class="price">$255,000</div>
-                        <div class="price-sqft">$140.73/sqft</div>
-                    </div>
-                </div>
-                
-                <div class="comp-card" data-comp="4">
-                    <div class="comp-header">
-                        <div class="comp-num">4</div>
-                        <span class="source">Redfin</span>
-                    </div>
-                    <div class="address">982 Sorrento St NW</div>
-                    <div class="details">
-                        <span>1,978 sqft</span>
-                        <span>4 BD / 2 BA</span>
-                        <span>2005</span>
-                        <span>0.41 mi</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-top:8px;">
-                        <div class="price">$292,000</div>
-                        <div class="price-sqft">$147.62/sqft</div>
-                    </div>
-                </div>
-                
-                <div class="comp-card" data-comp="5">
-                    <div class="comp-header">
-                        <div class="comp-num">5</div>
-                        <span class="source">Zillow</span>
-                    </div>
-                    <div class="address">834 Topsail Rd NW</div>
-                    <div class="details">
-                        <span>1,845 sqft</span>
-                        <span>3 BD / 2 BA</span>
-                        <span>2004</span>
-                        <span>0.52 mi</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-top:8px;">
-                        <div class="price">$262,000</div>
-                        <div class="price-sqft">$142.01/sqft</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="section">
-                <h2>CMA Analysis</h2>
-                <div class="analysis-box">
-                    <div class="analysis-row">
-                        <span class="label">Avg Price/Sqft</span>
-                        <span class="value">$144.64</span>
-                    </div>
-                    <div class="analysis-row">
-                        <span class="label">Implied Value (1,894 sqft)</span>
-                        <span class="value">$273,948</span>
-                    </div>
-                    <div class="analysis-row">
-                        <span class="label">Subject ARV</span>
-                        <span class="value" style="color:#2E7D32;">$274,520</span>
-                    </div>
-                    <div class="analysis-row">
-                        <span class="label">ARV vs Implied Diff</span>
-                        <span class="value">+$572 (0.2%)</span>
-                    </div>
-                    <div class="analysis-row">
-                        <span class="label">Avg Distance</span>
-                        <span class="value">0.33 mi</span>
-                    </div>
-                    <div class="analysis-row">
-                        <span class="label">Date Range</span>
-                        <span class="value">Sep-Nov 2025</span>
-                    </div>
-                    <div class="analysis-row">
-                        <span class="label">Confidence</span>
-                        <span class="value" style="color:#2E7D32;">HIGH ✓</span>
-                    </div>
-                </div>
+            </aside>
+        </main>
+
+        <!-- Mobile Bottom Sheet Toggle -->
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Open analysis panel">
+            📊
+        </button>
+
+        <!-- Mobile Bottom Sheet Backdrop -->
+        <div class="sheet-backdrop" id="sheetBackdrop"></div>
+
+        <!-- Mobile Bottom Sheet -->
+        <div class="bottom-sheet" id="bottomSheet">
+            <div class="bottom-sheet-handle"></div>
+            <div class="bottom-sheet-content" id="bottomSheetContent">
+                <!-- Content injected by JS -->
             </div>
         </div>
     </div>
-    
+
     <script>
-        // Mapbox token - replace with your token or set via environment
-        // For demo, using a placeholder that shows the map layout
-        mapboxgl.accessToken = 'pk.eyJ1IjoiYnJldmFyZGJpZGRlciIsImEiOiJjbTR4NmF6OWcwMWRsMmlxeHc0ZTB4NG5wIn0.placeholder';
-        
-        // Property coordinates
-        const subject = { lng: -80.6628, lat: 27.9947 };
+        // Property Data
+        const subject = {
+            address: "923 Slocum St NW",
+            city: "Palm Bay, FL 32909",
+            sqft: 1894,
+            yearBuilt: 2005,
+            beds: 3,
+            baths: 2,
+            lot: "0.23 acres",
+            judgment: 143880.65,
+            arv: 274520,
+            lat: 27.9947,
+            lng: -80.6628
+        };
+
         const comps = [
-            { lng: -80.6635, lat: 27.9952, address: '891 Slocum St NW', price: '$268,000' },
-            { lng: -80.6598, lat: 27.9931, address: '1045 Dorchester Rd NW', price: '$285,000' },
-            { lng: -80.6651, lat: 27.9968, address: '756 Toluca St NW', price: '$255,000' },
-            { lng: -80.6612, lat: 27.9918, address: '982 Sorrento St NW', price: '$292,000' },
-            { lng: -80.6672, lat: 27.9985, address: '834 Topsail Rd NW', price: '$262,000' }
+            { id: 1, address: "891 Slocum St NW", city: "Palm Bay", sqft: 1856, year: 2004, beds: 3, baths: 2, price: 268000, priceSqft: 144.40, distance: 0.12, lat: 27.9952, lng: -80.6635, source: "Zillow", date: "Oct 15" },
+            { id: 2, address: "1045 Dorchester Rd NW", city: "Palm Bay", sqft: 1920, year: 2006, beds: 4, baths: 2, price: 285000, priceSqft: 148.44, distance: 0.34, lat: 27.9931, lng: -80.6598, source: "Redfin", date: "Sep 28" },
+            { id: 3, address: "756 Toluca St NW", city: "Palm Bay", sqft: 1812, year: 2003, beds: 3, baths: 2, price: 255000, priceSqft: 140.73, distance: 0.28, lat: 27.9968, lng: -80.6651, source: "Zillow", date: "Nov 2" },
+            { id: 4, address: "982 Sorrento St NW", city: "Palm Bay", sqft: 1978, year: 2005, beds: 4, baths: 2, price: 292000, priceSqft: 147.62, distance: 0.41, lat: 27.9918, lng: -80.6612, source: "Redfin", date: "Oct 22" },
+            { id: 5, address: "834 Topsail Rd NW", city: "Palm Bay", sqft: 1845, year: 2004, beds: 3, baths: 2, price: 262000, priceSqft: 142.01, distance: 0.52, lat: 27.9985, lng: -80.6672, source: "Zillow", date: "Sep 15" }
         ];
-        
-        try {
-            const map = new mapboxgl.Map({
-                container: 'map',
-                style: 'mapbox://styles/mapbox/streets-v12',
-                center: [subject.lng, subject.lat],
-                zoom: 15
-            });
-            
-            map.on('load', () => {
-                // Add subject property marker (green)
-                const subjectEl = document.createElement('div');
-                subjectEl.className = 'marker-subject';
-                subjectEl.style.cssText = `
-                    width: 30px; height: 30px;
-                    background: #2E7D32;
-                    border: 3px solid white;
-                    border-radius: 50%;
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-                    cursor: pointer;
-                `;
-                
-                new mapboxgl.Marker(subjectEl)
-                    .setLngLat([subject.lng, subject.lat])
-                    .setPopup(new mapboxgl.Popup().setHTML(`
-                        <div class="popup-title">🏠 923 Slocum St NW</div>
-                        <div class="popup-details">
-                            <strong>SUBJECT PROPERTY</strong><br>
-                            ARV: $274,520<br>
-                            1,894 sqft • 3 BD / 2 BA
+
+        const avgPriceSqft = 144.64;
+        const impliedValue = 273948;
+
+        // Generate content HTML
+        function generateContent() {
+            return `
+                <!-- Subject Property -->
+                <div class="subject-card">
+                    <div class="label">Subject Property</div>
+                    <div class="address">${subject.address}</div>
+                    <div class="city">${subject.city}</div>
+                    <div class="metrics-grid">
+                        <div class="metric-box">
+                            <div class="value">$${subject.judgment.toLocaleString()}</div>
+                            <div class="label">Final Judgment</div>
                         </div>
-                    `))
-                    .addTo(map);
+                        <div class="metric-box">
+                            <div class="value gold">$${subject.arv.toLocaleString()}</div>
+                            <div class="label">ARV</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">${subject.sqft.toLocaleString()}</div>
+                            <div class="label">Sq Ft</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">${subject.yearBuilt}</div>
+                            <div class="label">Year Built</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comparable Sales -->
+                <div class="section-title">Comparable Sales (${comps.length})</div>
                 
-                // Add comp markers (blue)
-                comps.forEach((comp, i) => {
-                    const compEl = document.createElement('div');
-                    compEl.innerHTML = (i + 1).toString();
-                    compEl.style.cssText = `
-                        width: 24px; height: 24px;
-                        background: #1E3A5F;
-                        color: white;
-                        border: 2px solid white;
-                        border-radius: 50%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 12px;
-                        font-weight: bold;
-                        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-                        cursor: pointer;
-                    `;
-                    
-                    new mapboxgl.Marker(compEl)
-                        .setLngLat([comp.lng, comp.lat])
-                        .setPopup(new mapboxgl.Popup().setHTML(`
-                            <div class="popup-title">Comp #${i + 1}</div>
-                            <div class="popup-details">
-                                ${comp.address}<br>
-                                <strong>${comp.price}</strong>
-                            </div>
-                        `))
-                        .addTo(map);
-                });
-                
-                // Add navigation controls
-                map.addControl(new mapboxgl.NavigationControl());
-            });
-        } catch (e) {
-            // Fallback for when token is invalid
-            document.getElementById('map').innerHTML = `
-                <div style="display:flex; align-items:center; justify-content:center; height:100%; background:#e0e0e0; flex-direction:column; gap:20px;">
-                    <div style="font-size:48px;">🗺️</div>
-                    <div style="text-align:center; padding:20px;">
-                        <h3 style="color:#1E3A5F; margin-bottom:10px;">Mapbox Visualization</h3>
-                        <p style="color:#666; font-size:14px;">
-                            Subject: 923 Slocum St NW, Palm Bay<br>
-                            Coordinates: 27.9947, -80.6628<br><br>
-                            <strong>5 Comparable Properties</strong><br>
-                            within 0.52 mi radius
-                        </p>
-                        <p style="color:#999; font-size:12px; margin-top:15px;">
-                            To enable interactive map, add valid MAPBOX_TOKEN
-                        </p>
+                ${comps.map(comp => `
+                    <div class="comp-card" data-comp="${comp.id}" onclick="focusComp(${comp.id})">
+                        <div class="comp-header">
+                            <div class="comp-num">${comp.id}</div>
+                            <div class="comp-source">${comp.source}</div>
+                        </div>
+                        <div class="comp-address">${comp.address}</div>
+                        <div class="comp-details">
+                            <span>${comp.sqft.toLocaleString()} sqft</span>
+                            <span>${comp.beds} BD / ${comp.baths} BA</span>
+                            <span>${comp.year}</span>
+                            <span>${comp.distance} mi</span>
+                        </div>
+                        <div class="comp-price-row">
+                            <div class="comp-price">$${comp.price.toLocaleString()}</div>
+                            <div class="comp-price-sqft">$${comp.priceSqft.toFixed(2)}/sqft</div>
+                        </div>
+                    </div>
+                `).join('')}
+
+                <!-- CMA Summary -->
+                <div class="section-title">CMA Summary</div>
+                <div class="cma-summary">
+                    <div class="cma-row">
+                        <span class="label">Avg Price/Sqft</span>
+                        <span class="value highlight">$${avgPriceSqft.toFixed(2)}</span>
+                    </div>
+                    <div class="cma-row">
+                        <span class="label">Implied Value</span>
+                        <span class="value">$${impliedValue.toLocaleString()}</span>
+                    </div>
+                    <div class="cma-row">
+                        <span class="label">Subject ARV</span>
+                        <span class="value highlight">$${subject.arv.toLocaleString()}</span>
+                    </div>
+                    <div class="cma-row">
+                        <span class="label">Variance</span>
+                        <span class="value">+$${(subject.arv - impliedValue).toLocaleString()} (0.2%)</span>
+                    </div>
+                    <div class="cma-row">
+                        <span class="label">Confidence</span>
+                        <span class="confidence-badge">HIGH ✓</span>
                     </div>
                 </div>
             `;
         }
-        
-        // Highlight comp cards on hover
-        document.querySelectorAll('.comp-card').forEach(card => {
-            card.addEventListener('mouseenter', () => {
-                card.style.borderColor = '#1E3A5F';
-                card.style.boxShadow = '0 4px 12px rgba(30,58,95,0.2)';
-            });
-            card.addEventListener('mouseleave', () => {
-                card.style.borderColor = '#e0e0e0';
-                card.style.boxShadow = 'none';
-            });
+
+        // Inject content
+        document.getElementById('sidebarContent').innerHTML = generateContent();
+        document.getElementById('bottomSheetContent').innerHTML = generateContent();
+
+        // Mobile Bottom Sheet Controls
+        const mobileToggle = document.getElementById('mobileToggle');
+        const bottomSheet = document.getElementById('bottomSheet');
+        const sheetBackdrop = document.getElementById('sheetBackdrop');
+
+        function openSheet() {
+            bottomSheet.classList.add('open');
+            sheetBackdrop.classList.add('visible');
+            mobileToggle.innerHTML = '✕';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSheet() {
+            bottomSheet.classList.remove('open');
+            sheetBackdrop.classList.remove('visible');
+            mobileToggle.innerHTML = '📊';
+            document.body.style.overflow = '';
+        }
+
+        mobileToggle.addEventListener('click', () => {
+            if (bottomSheet.classList.contains('open')) {
+                closeSheet();
+            } else {
+                openSheet();
+            }
         });
+
+        sheetBackdrop.addEventListener('click', closeSheet);
+
+        // Touch swipe to close
+        let touchStartY = 0;
+        bottomSheet.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        });
+
+        bottomSheet.addEventListener('touchmove', (e) => {
+            const touchY = e.touches[0].clientY;
+            const diff = touchY - touchStartY;
+            if (diff > 100) {
+                closeSheet();
+            }
+        });
+
+        // Initialize Mapbox
+        mapboxgl.accessToken = 'pk.placeholder';
+
+        let map;
+        const markers = {};
+
+        function initMap() {
+            try {
+                map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/dark-v11',
+                    center: [subject.lng, subject.lat],
+                    zoom: 15
+                });
+
+                map.on('load', () => {
+                    // Subject marker (larger, green)
+                    const subjectEl = document.createElement('div');
+                    subjectEl.style.cssText = `
+                        width: 40px;
+                        height: 40px;
+                        background: linear-gradient(135deg, #00d4aa, #00b894);
+                        border: 4px solid white;
+                        border-radius: 50%;
+                        box-shadow: 0 4px 20px rgba(0, 212, 170, 0.5);
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 18px;
+                    `;
+                    subjectEl.innerHTML = '🏠';
+
+                    new mapboxgl.Marker(subjectEl)
+                        .setLngLat([subject.lng, subject.lat])
+                        .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`
+                            <div class="popup-title">🏠 Subject Property</div>
+                            <div class="popup-details">
+                                <strong>${subject.address}</strong><br>
+                                ${subject.city}<br>
+                                <span class="popup-price">ARV: $${subject.arv.toLocaleString()}</span><br>
+                                ${subject.sqft} sqft • ${subject.beds}BD/${subject.baths}BA
+                            </div>
+                        `))
+                        .addTo(map);
+
+                    // Comp markers
+                    comps.forEach(comp => {
+                        const compEl = document.createElement('div');
+                        compEl.innerHTML = comp.id.toString();
+                        compEl.style.cssText = `
+                            width: 32px;
+                            height: 32px;
+                            background: linear-gradient(135deg, #00a8ff, #0077b6);
+                            color: white;
+                            border: 3px solid white;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 14px;
+                            font-weight: 700;
+                            box-shadow: 0 4px 15px rgba(0, 168, 255, 0.4);
+                            cursor: pointer;
+                            font-family: 'DM Sans', sans-serif;
+                        `;
+
+                        const marker = new mapboxgl.Marker(compEl)
+                            .setLngLat([comp.lng, comp.lat])
+                            .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`
+                                <div class="popup-title">Comp #${comp.id}</div>
+                                <div class="popup-details">
+                                    <strong>${comp.address}</strong><br>
+                                    <span class="popup-price">$${comp.price.toLocaleString()}</span><br>
+                                    $${comp.priceSqft.toFixed(2)}/sqft • ${comp.sqft} sqft<br>
+                                    Sold: ${comp.date} 2025
+                                </div>
+                            `))
+                            .addTo(map);
+
+                        markers[comp.id] = marker;
+                    });
+
+                    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+                });
+            } catch (e) {
+                // Fallback for invalid token
+                document.getElementById('map').innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; background: linear-gradient(135deg, #0a1628 0%, #162236 100%); padding: 20px; text-align: center;">
+                        <div style="font-size: 64px; margin-bottom: 20px;">🗺️</div>
+                        <h2 style="color: #00d4aa; margin-bottom: 12px; font-size: 20px;">CMA Property Map</h2>
+                        <p style="color: #8b9cb8; max-width: 300px; font-size: 14px; line-height: 1.6;">
+                            <strong style="color: #fff;">923 Slocum St NW</strong><br>
+                            Palm Bay, FL 32909<br><br>
+                            Subject + 5 Comparable Sales<br>
+                            within 0.52 mile radius
+                        </p>
+                        <p style="color: #5a6a85; font-size: 12px; margin-top: 20px;">
+                            Enable MAPBOX_TOKEN for interactive map
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        // Focus on comp when clicked
+        window.focusComp = function(id) {
+            const comp = comps.find(c => c.id === id);
+            if (comp && map) {
+                map.flyTo({
+                    center: [comp.lng, comp.lat],
+                    zoom: 17,
+                    duration: 1000
+                });
+
+                // Highlight card
+                document.querySelectorAll('.comp-card').forEach(card => {
+                    card.classList.remove('active');
+                    if (parseInt(card.dataset.comp) === id) {
+                        card.classList.add('active');
+                    }
+                });
+
+                // Open popup
+                if (markers[id]) {
+                    markers[id].togglePopup();
+                }
+            }
+        };
+
+        // Initialize
+        initMap();
     </script>
 </body>
 </html>
