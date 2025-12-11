@@ -1,735 +1,410 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
-// BrevardBidderAI Pipeline Demo - Auto-playing animated walkthrough
-// Embeddable on brevard-bidder-landing.pages.dev
-
-const STAGES = [
-  { id: 1, name: 'Discovery', icon: '🔍', duration: 2000, description: 'Scanning RealForeclose auction calendar...' },
-  { id: 2, name: 'BECA Scraping', icon: '📄', duration: 2500, description: 'Extracting Final Judgment & Opening Bid...' },
-  { id: 3, name: 'Title Search', icon: '📋', duration: 2000, description: 'Querying BCPAO property records...' },
-  { id: 4, name: 'Lien Priority', icon: '⚖️', duration: 3000, description: 'Analyzing AcclaimWeb recorded documents...' },
-  { id: 5, name: 'Tax Certificates', icon: '💰', duration: 1500, description: 'Checking RealTDM for outstanding taxes...' },
-  { id: 6, name: 'Demographics', icon: '📊', duration: 1500, description: 'Pulling Census API neighborhood data...' },
-  { id: 7, name: 'ML Score', icon: '🤖', duration: 2500, description: 'Running XGBoost prediction model...' },
-  { id: 8, name: 'Max Bid Calc', icon: '🧮', duration: 2000, description: 'Computing (ARV×70%)-Repairs-$10K-Buffer...' },
-  { id: 9, name: 'Decision Log', icon: '✅', duration: 1500, description: 'Recording audit trail to Supabase...' },
-  { id: 10, name: 'Report Gen', icon: '📝', duration: 2000, description: 'Generating one-page DOCX analysis...' },
-  { id: 11, name: 'Disposition', icon: '🎯', duration: 1000, description: 'Assigning exit strategy...' },
-  { id: 12, name: 'Archive', icon: '💾', duration: 1000, description: 'Storing to historical_auctions table...' },
+const DEMO_PROPERTIES = [
+  {
+    id: '05-2024-CA-012847',
+    address: '1847 Coral Bay Dr, Satellite Beach',
+    plaintiff: 'FREEDOM MORTGAGE CORP',
+    finalJudgment: 287650,
+    arv: 385000,
+    repairs: 28500,
+    maxBid: 202000,
+    bidJudgmentRatio: 0.78,
+    decision: 'BID',
+    mlScore: 72,
+    thirdPartyProb: 0.34,
+    liens: ['Senior Mortgage: NONE', 'HOA: Current', 'Tax Cert: NONE'],
+    demographics: { income: 82400, vacancy: 5.2, growth: 3.8 }
+  },
+  {
+    id: '05-2024-CA-018923',
+    address: '4521 Hammock Oak Dr, Melbourne',
+    plaintiff: 'SHELLPOINT MORTGAGE',
+    finalJudgment: 412890,
+    arv: 445000,
+    repairs: 52000,
+    maxBid: 197500,
+    bidJudgmentRatio: 0.48,
+    decision: 'SKIP',
+    mlScore: 23,
+    thirdPartyProb: 0.81,
+    liens: ['Senior Mortgage: NONE', 'HOA: $4,200 delinquent', 'Tax Cert: 2023'],
+    demographics: { income: 68200, vacancy: 8.1, growth: 1.2 }
+  },
+  {
+    id: '05-2024-CA-021456',
+    address: '892 Atlantic Ave, Indialantic',
+    plaintiff: 'BANK OF AMERICA NA',
+    finalJudgment: 156780,
+    arv: 295000,
+    repairs: 18000,
+    maxBid: 150250,
+    bidJudgmentRatio: 0.68,
+    decision: 'REVIEW',
+    mlScore: 58,
+    thirdPartyProb: 0.52,
+    liens: ['Senior Mortgage: NONE', 'HOA: Current', 'Tax Cert: NONE'],
+    demographics: { income: 79800, vacancy: 4.8, growth: 4.2 }
+  }
 ];
 
-const SAMPLE_PROPERTY = {
-  caseNumber: '05-2024-CA-012847',
-  address: '1847 Rockledge Dr, Rockledge, FL 32955',
-  parcelId: '24-36-03-76-00001.0-0012.00',
-  plaintiff: 'Nationstar Mortgage LLC',
-  finalJudgment: 287450,
-  openingBid: 100,
-  propertyType: 'Single Family',
-  bedBath: '3/2',
-  sqft: 1847,
-  yearBuilt: 1992,
-  arvEstimate: 385000,
-  repairEstimate: 45000,
-  taxesDue: 3247,
-  hoaLiens: 0,
-  seniorMortgage: null,
-  zipCode: '32955',
-  medianIncome: 72450,
-  vacancyRate: 5.2,
-  mlProbability: 0.73,
-  thirdPartyProb: 0.64,
-};
+const PIPELINE_STAGES = [
+  { id: 1, name: 'Discovery', icon: '🔍', desc: 'Scanning RealForeclose calendar' },
+  { id: 2, name: 'BECA Scraping', icon: '📄', desc: 'Extracting Clerk records' },
+  { id: 3, name: 'Title Search', icon: '📋', desc: 'Querying AcclaimWeb' },
+  { id: 4, name: 'Lien Priority', icon: '⚖️', desc: 'Analyzing mortgage position' },
+  { id: 5, name: 'Tax Certs', icon: '🏛️', desc: 'Checking RealTDM' },
+  { id: 6, name: 'Demographics', icon: '📊', desc: 'Census API analysis' },
+  { id: 7, name: 'ML Score', icon: '🤖', desc: 'XGBoost prediction' },
+  { id: 8, name: 'Max Bid', icon: '💰', desc: 'Formula calculation' },
+  { id: 9, name: 'Decision', icon: '✅', desc: 'BID/REVIEW/SKIP' },
+  { id: 10, name: 'Report', icon: '📑', desc: 'DOCX generation' },
+  { id: 11, name: 'Disposition', icon: '🎯', desc: 'Exit strategy' },
+  { id: 12, name: 'Archive', icon: '💾', desc: 'Supabase storage' }
+];
 
-const formatCurrency = (num) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(num);
+const fmt = (n) => '$' + n.toLocaleString();
+const pct = (n) => (n * 100).toFixed(0) + '%';
 
 export default function BrevardBidderDemo() {
-  const [currentStage, setCurrentStage] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [showDecision, setShowDecision] = useState(false);
-  const [dataPoints, setDataPoints] = useState({});
+  const [stage, setStage] = useState(0);
+  const [propIdx, setPropIdx] = useState(0);
+  const [playing, setPlaying] = useState(true);
+  const [showResult, setShowResult] = useState(false);
+  const [completed, setCompleted] = useState([]);
   const [logs, setLogs] = useState([]);
 
-  // Calculate max bid using the formula
-  const arvBuffer = Math.min(25000, SAMPLE_PROPERTY.arvEstimate * 0.15);
-  const maxBid = (SAMPLE_PROPERTY.arvEstimate * 0.70) - SAMPLE_PROPERTY.repairEstimate - 10000 - arvBuffer;
-  const bidJudgmentRatio = (maxBid / SAMPLE_PROPERTY.finalJudgment) * 100;
-  const decision = bidJudgmentRatio >= 75 ? 'BID' : bidJudgmentRatio >= 60 ? 'REVIEW' : 'SKIP';
+  const prop = DEMO_PROPERTIES[propIdx];
+  const currentStage = PIPELINE_STAGES[stage];
 
   useEffect(() => {
-    if (!isPlaying || currentStage >= STAGES.length) return;
-
-    const stage = STAGES[currentStage];
+    if (!playing) return;
     
-    // Add log entry
-    const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
-    setLogs(prev => [...prev.slice(-8), { time: timestamp, stage: stage.name, status: 'processing' }]);
-
-    // Reveal data points based on stage
-    const timer = setTimeout(() => {
-      setDataPoints(prev => {
-        const newData = { ...prev };
-        switch(currentStage) {
-          case 0: newData.caseFound = true; break;
-          case 1: newData.becaData = true; break;
-          case 2: newData.titleData = true; break;
-          case 3: newData.lienData = true; break;
-          case 4: newData.taxData = true; break;
-          case 5: newData.demoData = true; break;
-          case 6: newData.mlData = true; break;
-          case 7: newData.maxBidData = true; break;
-          case 8: newData.logged = true; break;
-          case 9: newData.reportGen = true; break;
-          case 10: newData.disposition = true; break;
-          case 11: newData.archived = true; break;
+    const timer = setInterval(() => {
+      setStage(s => {
+        const next = s + 1;
+        
+        // Add log entry
+        const now = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        setLogs(l => [...l.slice(-6), { time: now, stage: PIPELINE_STAGES[s]?.name || 'Init', done: true }]);
+        
+        if (next >= 12) {
+          setShowResult(true);
+          setCompleted(c => [...c, prop]);
+          
+          setTimeout(() => {
+            setShowResult(false);
+            setPropIdx(p => (p + 1) % DEMO_PROPERTIES.length);
+            setLogs([]);
+          }, 2000);
+          
+          return 0;
         }
-        return newData;
+        return next;
       });
+    }, 1500);
 
-      // Update log to complete
-      setLogs(prev => prev.map((log, i) => 
-        i === prev.length - 1 ? { ...log, status: 'complete' } : log
-      ));
+    return () => clearInterval(timer);
+  }, [playing, prop]);
 
-      if (currentStage < STAGES.length - 1) {
-        setCurrentStage(prev => prev + 1);
-      } else {
-        setTimeout(() => setShowDecision(true), 500);
-      }
-    }, stage.duration);
-
-    return () => clearTimeout(timer);
-  }, [currentStage, isPlaying]);
-
-  const restart = () => {
-    setCurrentStage(0);
-    setIsPlaying(true);
-    setShowDecision(false);
-    setDataPoints({});
-    setLogs([]);
+  const decisionColor = {
+    BID: { bg: '#065f46', border: '#10b981', text: '#34d399' },
+    REVIEW: { bg: '#78350f', border: '#f59e0b', text: '#fbbf24' },
+    SKIP: { bg: '#7f1d1d', border: '#ef4444', text: '#f87171' }
   };
+
+  const dc = decisionColor[prop.decision];
 
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #0a0f1a 0%, #111827 50%, #0d1321 100%)',
-      fontFamily: "'JetBrains Mono', 'SF Mono', 'Fira Code', monospace",
+      background: 'linear-gradient(180deg, #0f172a 0%, #020617 100%)',
+      fontFamily: "'SF Mono', 'Fira Code', 'Consolas', monospace",
       color: '#e2e8f0',
-      padding: '24px',
-      position: 'relative',
-      overflow: 'hidden',
+      padding: '20px',
+      position: 'relative'
     }}>
-      {/* Background grid effect */}
+      {/* Grid background */}
       <div style={{
         position: 'absolute',
         inset: 0,
-        backgroundImage: `
-          linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px)
-        `,
-        backgroundSize: '50px 50px',
-        pointerEvents: 'none',
+        backgroundImage: 'linear-gradient(rgba(16, 185, 129, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(16, 185, 129, 0.05) 1px, transparent 1px)',
+        backgroundSize: '40px 40px',
+        pointerEvents: 'none'
       }} />
 
-      {/* Header */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        marginBottom: '24px',
-        position: 'relative',
-        zIndex: 10,
-      }}>
-        <div>
-          <h1 style={{ 
-            fontSize: '28px', 
-            fontWeight: 700, 
-            margin: 0,
-            background: 'linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            letterSpacing: '-0.5px',
-          }}>
-            BrevardBidderAI
-          </h1>
-          <p style={{ 
-            fontSize: '12px', 
-            color: '#64748b', 
-            margin: '4px 0 0 0',
-            letterSpacing: '2px',
-            textTransform: 'uppercase',
-          }}>
-            Agentic AI Foreclosure Intelligence
-          </p>
-        </div>
-        <div style={{ 
-          display: 'flex', 
-          gap: '12px', 
+      {/* Decision Overlay */}
+      {showResult && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 100,
+          display: 'flex',
           alignItems: 'center',
+          justifyContent: 'center',
+          background: 'rgba(2, 6, 23, 0.95)',
+          backdropFilter: 'blur(8px)'
         }}>
           <div style={{
-            background: isPlaying ? 'rgba(34, 197, 94, 0.15)' : 'rgba(251, 191, 36, 0.15)',
-            border: `1px solid ${isPlaying ? '#22c55e' : '#fbbf24'}`,
-            borderRadius: '20px',
-            padding: '6px 14px',
-            fontSize: '11px',
-            fontWeight: 600,
-            color: isPlaying ? '#4ade80' : '#fcd34d',
+            padding: '48px 64px',
+            borderRadius: '24px',
+            background: `linear-gradient(135deg, ${dc.bg} 0%, ${dc.bg}88 100%)`,
+            border: `3px solid ${dc.border}`,
+            textAlign: 'center',
+            animation: 'pulse 1s infinite'
+          }}>
+            <div style={{ fontSize: '72px', fontWeight: 900, color: dc.text, letterSpacing: '8px' }}>
+              {prop.decision}
+            </div>
+            <div style={{ fontSize: '20px', color: '#e2e8f0', marginTop: '16px' }}>
+              {prop.address}
+            </div>
+            <div style={{ fontSize: '16px', color: '#94a3b8', marginTop: '8px' }}>
+              Max Bid: {fmt(prop.maxBid)} • Ratio: {pct(prop.bidJudgmentRatio)}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', position: 'relative', zIndex: 10 }}>
+        <div>
+          <h1 style={{ fontSize: '32px', fontWeight: 800, margin: 0 }}>
+            <span style={{ color: '#10b981' }}>Brevard</span>
+            <span style={{ color: '#fff' }}>Bidder</span>
+            <span style={{ color: '#10b981' }}>AI</span>
+          </h1>
+          <p style={{ color: '#64748b', margin: '4px 0 0', fontSize: '13px' }}>Agentic AI Foreclosure Intelligence • V13.4.0</p>
+        </div>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
+            gap: '8px',
+            padding: '8px 16px',
+            background: playing ? 'rgba(16, 185, 129, 0.15)' : 'rgba(100, 116, 139, 0.15)',
+            border: `1px solid ${playing ? '#10b981' : '#64748b'}`,
+            borderRadius: '8px'
           }}>
-            <span style={{
-              width: '6px',
-              height: '6px',
+            <div style={{
+              width: '8px',
+              height: '8px',
               borderRadius: '50%',
-              background: isPlaying ? '#22c55e' : '#fbbf24',
-              animation: isPlaying ? 'pulse 1.5s infinite' : 'none',
+              background: playing ? '#10b981' : '#64748b',
+              animation: playing ? 'pulse 1.5s infinite' : 'none'
             }} />
-            {isPlaying ? 'PROCESSING' : 'COMPLETE'}
+            <span style={{ fontSize: '12px', fontWeight: 600, color: playing ? '#10b981' : '#64748b' }}>
+              {playing ? 'PROCESSING' : 'PAUSED'}
+            </span>
           </div>
           <button
-            onClick={restart}
+            onClick={() => setPlaying(!playing)}
             style={{
-              background: 'rgba(59, 130, 246, 0.1)',
-              border: '1px solid rgba(59, 130, 246, 0.3)',
+              padding: '8px 20px',
+              background: '#10b981',
+              border: 'none',
               borderRadius: '8px',
-              padding: '8px 16px',
-              color: '#60a5fa',
-              cursor: 'pointer',
-              fontSize: '12px',
+              color: '#fff',
               fontWeight: 600,
-              fontFamily: 'inherit',
-              transition: 'all 0.2s',
+              cursor: 'pointer',
+              fontFamily: 'inherit'
             }}
           >
-            ↻ RESTART
+            {playing ? '⏸ Pause' : '▶ Play'}
           </button>
         </div>
       </div>
 
       {/* Main Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '280px 1fr 320px',
-        gap: '20px',
-        position: 'relative',
-        zIndex: 10,
-      }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr 280px', gap: '20px', position: 'relative', zIndex: 10 }}>
         
-        {/* Left Panel - Pipeline Stages */}
-        <div style={{
-          background: 'rgba(15, 23, 42, 0.6)',
-          border: '1px solid rgba(51, 65, 85, 0.5)',
-          borderRadius: '12px',
-          padding: '16px',
-          backdropFilter: 'blur(10px)',
-        }}>
-          <h3 style={{ 
-            fontSize: '11px', 
-            color: '#94a3b8', 
-            margin: '0 0 16px 0',
-            letterSpacing: '1.5px',
-            textTransform: 'uppercase',
-          }}>
-            12-Stage Pipeline
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {STAGES.map((stage, idx) => {
-              const isActive = idx === currentStage && isPlaying;
-              const isComplete = idx < currentStage || (idx === currentStage && !isPlaying && currentStage === STAGES.length - 1);
-              const isPending = idx > currentStage;
-              
-              return (
-                <div
-                  key={stage.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    padding: '8px 10px',
-                    borderRadius: '6px',
-                    background: isActive ? 'rgba(59, 130, 246, 0.15)' : 'transparent',
-                    border: isActive ? '1px solid rgba(59, 130, 246, 0.4)' : '1px solid transparent',
-                    transition: 'all 0.3s ease',
-                    opacity: isPending ? 0.4 : 1,
-                  }}
-                >
-                  <div style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '12px',
-                    background: isComplete ? 'rgba(34, 197, 94, 0.2)' : isActive ? 'rgba(59, 130, 246, 0.2)' : 'rgba(51, 65, 85, 0.3)',
-                    border: `1px solid ${isComplete ? '#22c55e' : isActive ? '#3b82f6' : '#334155'}`,
-                  }}>
-                    {isComplete ? '✓' : stage.icon}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ 
-                      fontSize: '12px', 
-                      fontWeight: isActive ? 600 : 400,
-                      color: isActive ? '#f1f5f9' : '#94a3b8',
-                    }}>
-                      {stage.name}
-                    </div>
-                  </div>
-                  {isActive && (
-                    <div style={{
-                      width: '16px',
-                      height: '16px',
-                      border: '2px solid #3b82f6',
-                      borderTopColor: 'transparent',
-                      borderRadius: '50%',
-                      animation: 'spin 1s linear infinite',
-                    }} />
-                  )}
-                </div>
-              );
-            })}
-          </div>
+        {/* Pipeline */}
+        <div style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid #334155', borderRadius: '12px', padding: '16px' }}>
+          <h3 style={{ fontSize: '11px', color: '#64748b', margin: '0 0 12px', letterSpacing: '1.5px' }}>12-STAGE PIPELINE</h3>
+          {PIPELINE_STAGES.map((s, i) => (
+            <div key={s.id} style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 10px',
+              marginBottom: '4px',
+              borderRadius: '6px',
+              background: i === stage ? 'rgba(16, 185, 129, 0.2)' : 'transparent',
+              border: i === stage ? '1px solid #10b981' : '1px solid transparent',
+              opacity: i > stage ? 0.4 : 1,
+              transition: 'all 0.3s'
+            }}>
+              <span style={{ fontSize: '14px' }}>{i < stage ? '✓' : s.icon}</span>
+              <span style={{ fontSize: '12px', color: i === stage ? '#fff' : i < stage ? '#10b981' : '#64748b' }}>{s.name}</span>
+              {i === stage && <span style={{ marginLeft: 'auto', width: '6px', height: '6px', background: '#10b981', borderRadius: '50%', animation: 'pulse 1s infinite' }} />}
+            </div>
+          ))}
         </div>
 
-        {/* Center Panel - Property Data */}
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '16px',
-        }}>
-          {/* Property Header Card */}
-          <div style={{
-            background: 'rgba(15, 23, 42, 0.6)',
-            border: '1px solid rgba(51, 65, 85, 0.5)',
-            borderRadius: '12px',
-            padding: '20px',
-            backdropFilter: 'blur(10px)',
-          }}>
+        {/* Center */}
+        <div>
+          {/* Property Card */}
+          <div style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid #334155', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <div style={{ 
-                  fontSize: '10px', 
-                  color: '#64748b', 
-                  letterSpacing: '1px',
-                  marginBottom: '4px',
-                }}>
-                  CASE #{SAMPLE_PROPERTY.caseNumber}
-                </div>
-                <h2 style={{ 
-                  fontSize: '18px', 
-                  fontWeight: 600, 
-                  margin: '0 0 8px 0',
-                  color: '#f1f5f9',
-                }}>
-                  {SAMPLE_PROPERTY.address}
-                </h2>
-                <div style={{ 
-                  fontSize: '12px', 
-                  color: '#94a3b8',
-                  display: 'flex',
-                  gap: '16px',
-                }}>
-                  <span>{SAMPLE_PROPERTY.propertyType}</span>
-                  <span>•</span>
-                  <span>{SAMPLE_PROPERTY.bedBath}</span>
-                  <span>•</span>
-                  <span>{SAMPLE_PROPERTY.sqft.toLocaleString()} sqft</span>
-                  <span>•</span>
-                  <span>Built {SAMPLE_PROPERTY.yearBuilt}</span>
-                </div>
+                <div style={{ fontSize: '10px', color: '#64748b', letterSpacing: '1px' }}>CASE #{prop.id}</div>
+                <div style={{ fontSize: '18px', fontWeight: 700, color: '#fff', marginTop: '4px' }}>{prop.address}</div>
+                <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>{prop.plaintiff}</div>
               </div>
               <div style={{
-                background: 'rgba(59, 130, 246, 0.1)',
-                border: '1px solid rgba(59, 130, 246, 0.3)',
-                borderRadius: '8px',
-                padding: '8px 12px',
-                textAlign: 'right',
-              }}>
-                <div style={{ fontSize: '10px', color: '#64748b', marginBottom: '2px' }}>PARCEL</div>
-                <div style={{ fontSize: '11px', color: '#60a5fa', fontWeight: 500 }}>{SAMPLE_PROPERTY.parcelId}</div>
-              </div>
-            </div>
-          </div>
-
-          {/* Data Grid */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '12px',
-          }}>
-            {/* BECA Data */}
-            <DataCard
-              title="BECA Extraction"
-              visible={dataPoints.becaData}
-              items={[
-                { label: 'Final Judgment', value: formatCurrency(SAMPLE_PROPERTY.finalJudgment), highlight: true },
-                { label: 'Opening Bid', value: formatCurrency(SAMPLE_PROPERTY.openingBid) },
-                { label: 'Plaintiff', value: SAMPLE_PROPERTY.plaintiff.split(' ')[0] + '...' },
-              ]}
-            />
-
-            {/* Title Data */}
-            <DataCard
-              title="Property Records"
-              visible={dataPoints.titleData}
-              items={[
-                { label: 'ARV Estimate', value: formatCurrency(SAMPLE_PROPERTY.arvEstimate), highlight: true },
-                { label: 'Repair Est.', value: formatCurrency(SAMPLE_PROPERTY.repairEstimate) },
-                { label: 'Year Built', value: SAMPLE_PROPERTY.yearBuilt },
-              ]}
-            />
-
-            {/* Lien Data */}
-            <DataCard
-              title="Lien Analysis"
-              visible={dataPoints.lienData}
-              items={[
-                { label: 'Senior Mortgage', value: SAMPLE_PROPERTY.seniorMortgage || 'NONE', highlight: !SAMPLE_PROPERTY.seniorMortgage, highlightColor: '#22c55e' },
-                { label: 'HOA Liens', value: formatCurrency(SAMPLE_PROPERTY.hoaLiens) },
-                { label: 'Status', value: '✓ Clear to Bid', highlightColor: '#22c55e' },
-              ]}
-            />
-
-            {/* Tax Data */}
-            <DataCard
-              title="Tax Certificates"
-              visible={dataPoints.taxData}
-              items={[
-                { label: 'Taxes Due', value: formatCurrency(SAMPLE_PROPERTY.taxesDue) },
-                { label: 'Status', value: 'Redeemable' },
-                { label: 'Interest', value: '18% max' },
-              ]}
-            />
-
-            {/* Demographics */}
-            <DataCard
-              title="Demographics"
-              visible={dataPoints.demoData}
-              items={[
-                { label: 'Zip Code', value: SAMPLE_PROPERTY.zipCode },
-                { label: 'Median Income', value: formatCurrency(SAMPLE_PROPERTY.medianIncome) },
-                { label: 'Vacancy Rate', value: SAMPLE_PROPERTY.vacancyRate + '%' },
-              ]}
-            />
-
-            {/* ML Prediction */}
-            <DataCard
-              title="ML Prediction"
-              visible={dataPoints.mlData}
-              items={[
-                { label: '3rd Party Prob', value: (SAMPLE_PROPERTY.thirdPartyProb * 100).toFixed(0) + '%', highlight: true },
-                { label: 'Model', value: 'XGBoost v2.1' },
-                { label: 'Confidence', value: (SAMPLE_PROPERTY.mlProbability * 100).toFixed(0) + '%' },
-              ]}
-            />
-          </div>
-
-          {/* Max Bid Calculation */}
-          {dataPoints.maxBidData && (
-            <div style={{
-              background: 'rgba(15, 23, 42, 0.6)',
-              border: '1px solid rgba(51, 65, 85, 0.5)',
-              borderRadius: '12px',
-              padding: '20px',
-              backdropFilter: 'blur(10px)',
-              animation: 'fadeIn 0.5s ease',
-            }}>
-              <h3 style={{ 
-                fontSize: '11px', 
-                color: '#94a3b8', 
-                margin: '0 0 16px 0',
-                letterSpacing: '1.5px',
-                textTransform: 'uppercase',
-              }}>
-                Max Bid Formula
-              </h3>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                flexWrap: 'wrap',
-                fontSize: '14px',
-                fontFamily: "'JetBrains Mono', monospace",
-              }}>
-                <span style={{ color: '#60a5fa' }}>({formatCurrency(SAMPLE_PROPERTY.arvEstimate)} × 70%)</span>
-                <span style={{ color: '#64748b' }}>−</span>
-                <span style={{ color: '#f87171' }}>{formatCurrency(SAMPLE_PROPERTY.repairEstimate)}</span>
-                <span style={{ color: '#64748b' }}>−</span>
-                <span style={{ color: '#f87171' }}>$10K</span>
-                <span style={{ color: '#64748b' }}>−</span>
-                <span style={{ color: '#f87171' }}>{formatCurrency(arvBuffer)}</span>
-                <span style={{ color: '#64748b' }}>=</span>
-                <span style={{ 
-                  color: '#4ade80', 
-                  fontWeight: 700,
-                  fontSize: '18px',
-                  background: 'rgba(34, 197, 94, 0.1)',
-                  padding: '4px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid rgba(34, 197, 94, 0.3)',
-                }}>
-                  {formatCurrency(maxBid)}
-                </span>
-              </div>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                gap: '32px',
-                marginTop: '16px',
+                padding: '6px 14px',
+                borderRadius: '20px',
+                background: dc.bg,
+                border: `1px solid ${dc.border}`,
+                color: dc.text,
                 fontSize: '12px',
+                fontWeight: 700
               }}>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ color: '#64748b' }}>Bid/Judgment Ratio</div>
-                  <div style={{ 
-                    color: bidJudgmentRatio >= 75 ? '#4ade80' : bidJudgmentRatio >= 60 ? '#fbbf24' : '#f87171',
-                    fontWeight: 600,
-                    fontSize: '16px',
-                  }}>
-                    {bidJudgmentRatio.toFixed(1)}%
-                  </div>
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  <div style={{ color: '#64748b' }}>Threshold</div>
-                  <div style={{ color: '#94a3b8', fontWeight: 600, fontSize: '16px' }}>
-                    ≥75% BID | 60-74% REVIEW | &lt;60% SKIP
-                  </div>
-                </div>
+                {stage >= 8 ? prop.decision : '...'}
               </div>
             </div>
-          )}
 
-          {/* Decision Display */}
-          {showDecision && (
-            <div style={{
-              background: decision === 'BID' 
-                ? 'linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.05) 100%)'
-                : decision === 'REVIEW'
-                ? 'linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(251, 191, 36, 0.05) 100%)'
-                : 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%)',
-              border: `2px solid ${decision === 'BID' ? '#22c55e' : decision === 'REVIEW' ? '#fbbf24' : '#ef4444'}`,
-              borderRadius: '16px',
-              padding: '32px',
-              textAlign: 'center',
-              animation: 'scaleIn 0.4s ease',
-            }}>
-              <div style={{ 
-                fontSize: '14px', 
-                color: '#94a3b8', 
-                marginBottom: '8px',
-                letterSpacing: '2px',
-              }}>
-                AI RECOMMENDATION
-              </div>
-              <div style={{
-                fontSize: '48px',
-                fontWeight: 800,
-                color: decision === 'BID' ? '#4ade80' : decision === 'REVIEW' ? '#fcd34d' : '#f87171',
-                letterSpacing: '4px',
-                textShadow: `0 0 40px ${decision === 'BID' ? 'rgba(34, 197, 94, 0.5)' : decision === 'REVIEW' ? 'rgba(251, 191, 36, 0.5)' : 'rgba(239, 68, 68, 0.5)'}`,
-              }}>
-                {decision}
-              </div>
-              <div style={{ 
-                fontSize: '13px', 
-                color: '#94a3b8', 
-                marginTop: '12px',
-              }}>
-                Max Bid: <strong style={{ color: '#f1f5f9' }}>{formatCurrency(maxBid)}</strong> • 
-                Ratio: <strong style={{ color: '#f1f5f9' }}>{bidJudgmentRatio.toFixed(1)}%</strong> • 
-                Exit: <strong style={{ color: '#f1f5f9' }}>Fix & Flip</strong>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginTop: '20px' }}>
+              {[
+                { label: 'Judgment', value: fmt(prop.finalJudgment), show: true },
+                { label: 'ARV', value: fmt(prop.arv), show: stage >= 5, color: '#10b981' },
+                { label: 'Repairs', value: fmt(prop.repairs), show: stage >= 5, color: '#f59e0b' },
+                { label: 'Max Bid', value: fmt(prop.maxBid), show: stage >= 7, color: '#60a5fa' }
+              ].map((item, i) => (
+                <div key={i} style={{ background: 'rgba(30, 41, 59, 0.5)', borderRadius: '8px', padding: '12px' }}>
+                  <div style={{ fontSize: '10px', color: '#64748b' }}>{item.label}</div>
+                  <div style={{ fontSize: '16px', fontWeight: 700, color: item.show ? (item.color || '#fff') : '#334155', marginTop: '4px' }}>
+                    {item.show ? item.value : '---'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Terminal */}
+          <div style={{ background: 'rgba(15, 23, 42, 0.9)', border: '1px solid #334155', borderRadius: '12px', overflow: 'hidden' }}>
+            <div style={{ background: '#1e293b', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid #334155' }}>
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ef4444' }} />
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#f59e0b' }} />
+              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#10b981' }} />
+              <span style={{ marginLeft: '12px', fontSize: '12px', color: '#64748b' }}>brevard-bidder-ai</span>
+            </div>
+            <div style={{ padding: '16px', minHeight: '200px', fontSize: '13px' }}>
+              <div style={{ color: '#10b981' }}>$ brevard-bidder --analyze "{prop.id}"</div>
+              <div style={{ color: '#334155', margin: '8px 0' }}>────────────────────────────────────</div>
+              {currentStage && (
+                <>
+                  <div style={{ color: '#94a3b8' }}>
+                    <span style={{ color: '#f59e0b' }}>→</span> Stage {stage + 1}: {currentStage.name}
+                  </div>
+                  <div style={{ color: '#64748b', marginTop: '4px' }}>{currentStage.desc}</div>
+                  
+                  {stage >= 3 && (
+                    <div style={{ marginTop: '12px', color: '#10b981' }}>
+                      ✓ Lien Status: {prop.liens[0]}
+                    </div>
+                  )}
+                  {stage >= 6 && (
+                    <div style={{ color: '#60a5fa' }}>
+                      ✓ ML Score: {prop.mlScore}% | 3rd Party: {pct(prop.thirdPartyProb)}
+                    </div>
+                  )}
+                  {stage >= 8 && (
+                    <div style={{ color: dc.text, fontWeight: 700 }}>
+                      ✓ Decision: {prop.decision} (Ratio: {pct(prop.bidJudgmentRatio)})
+                    </div>
+                  )}
+                </>
+              )}
+              <div style={{ marginTop: '16px', color: '#334155' }}>
+                <span style={{ animation: 'blink 1s infinite' }}>█</span>
               </div>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Right Panel - Activity Log */}
-        <div style={{
-          background: 'rgba(15, 23, 42, 0.6)',
-          border: '1px solid rgba(51, 65, 85, 0.5)',
-          borderRadius: '12px',
-          padding: '16px',
-          backdropFilter: 'blur(10px)',
-          display: 'flex',
-          flexDirection: 'column',
-        }}>
-          <h3 style={{ 
-            fontSize: '11px', 
-            color: '#94a3b8', 
-            margin: '0 0 16px 0',
-            letterSpacing: '1.5px',
-            textTransform: 'uppercase',
-          }}>
-            Activity Log
-          </h3>
-          <div style={{ 
-            flex: 1, 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '6px',
-            overflow: 'hidden',
-          }}>
-            {logs.map((log, idx) => (
-              <div
-                key={idx}
-                style={{
+        {/* Right Panel */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Stats */}
+          <div style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid #334155', borderRadius: '12px', padding: '16px' }}>
+            <h3 style={{ fontSize: '11px', color: '#64748b', margin: '0 0 12px', letterSpacing: '1.5px' }}>SESSION STATS</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div style={{ background: 'rgba(30, 41, 59, 0.5)', borderRadius: '8px', padding: '12px', textAlign: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: 700, color: '#10b981' }}>{completed.filter(p => p.decision === 'BID').length}</div>
+                <div style={{ fontSize: '10px', color: '#64748b' }}>BID</div>
+              </div>
+              <div style={{ background: 'rgba(30, 41, 59, 0.5)', borderRadius: '8px', padding: '12px', textAlign: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: 700, color: '#f59e0b' }}>{completed.filter(p => p.decision === 'REVIEW').length}</div>
+                <div style={{ fontSize: '10px', color: '#64748b' }}>REVIEW</div>
+              </div>
+              <div style={{ background: 'rgba(30, 41, 59, 0.5)', borderRadius: '8px', padding: '12px', textAlign: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: 700, color: '#ef4444' }}>{completed.filter(p => p.decision === 'SKIP').length}</div>
+                <div style={{ fontSize: '10px', color: '#64748b' }}>SKIP</div>
+              </div>
+              <div style={{ background: 'rgba(30, 41, 59, 0.5)', borderRadius: '8px', padding: '12px', textAlign: 'center' }}>
+                <div style={{ fontSize: '24px', fontWeight: 700, color: '#60a5fa' }}>{completed.length}</div>
+                <div style={{ fontSize: '10px', color: '#64748b' }}>TOTAL</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Activity Log */}
+          <div style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid #334155', borderRadius: '12px', padding: '16px', flex: 1 }}>
+            <h3 style={{ fontSize: '11px', color: '#64748b', margin: '0 0 12px', letterSpacing: '1.5px' }}>ACTIVITY LOG</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {logs.map((log, i) => (
+                <div key={i} style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
                   fontSize: '11px',
-                  padding: '8px 10px',
-                  background: 'rgba(30, 41, 59, 0.5)',
-                  borderRadius: '6px',
-                  animation: 'slideIn 0.3s ease',
-                }}
-              >
-                <span style={{ color: '#64748b', fontFamily: 'monospace' }}>{log.time}</span>
-                <span style={{ 
-                  color: log.status === 'complete' ? '#4ade80' : '#fbbf24',
-                  width: '6px',
-                  height: '6px',
-                  borderRadius: '50%',
-                  background: log.status === 'complete' ? '#4ade80' : '#fbbf24',
-                }} />
-                <span style={{ color: '#e2e8f0' }}>{log.stage}</span>
-              </div>
-            ))}
-          </div>
-          
-          {/* Stats */}
-          <div style={{
-            borderTop: '1px solid rgba(51, 65, 85, 0.5)',
-            marginTop: '16px',
-            paddingTop: '16px',
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '12px',
-          }}>
-            <div style={{
-              background: 'rgba(30, 41, 59, 0.5)',
-              borderRadius: '8px',
-              padding: '12px',
-              textAlign: 'center',
-            }}>
-              <div style={{ fontSize: '10px', color: '#64748b', marginBottom: '4px' }}>PROCESSING</div>
-              <div style={{ fontSize: '18px', fontWeight: 700, color: '#60a5fa' }}>
-                {((currentStage + 1) / STAGES.length * 100).toFixed(0)}%
-              </div>
+                  padding: '6px 8px',
+                  background: 'rgba(30, 41, 59, 0.3)',
+                  borderRadius: '4px'
+                }}>
+                  <span style={{ color: '#475569', fontFamily: 'monospace' }}>{log.time}</span>
+                  <span style={{ color: '#10b981' }}>✓</span>
+                  <span style={{ color: '#94a3b8' }}>{log.stage}</span>
+                </div>
+              ))}
+              {logs.length === 0 && <div style={{ color: '#475569', fontSize: '12px' }}>Starting pipeline...</div>}
             </div>
-            <div style={{
-              background: 'rgba(30, 41, 59, 0.5)',
-              borderRadius: '8px',
-              padding: '12px',
-              textAlign: 'center',
-            }}>
-              <div style={{ fontSize: '10px', color: '#64748b', marginBottom: '4px' }}>FREE TIER</div>
-              <div style={{ fontSize: '18px', fontWeight: 700, color: '#4ade80' }}>47%</div>
+          </div>
+
+          {/* Data Sources */}
+          <div style={{ background: 'rgba(15, 23, 42, 0.8)', border: '1px solid #334155', borderRadius: '12px', padding: '16px' }}>
+            <h3 style={{ fontSize: '11px', color: '#64748b', margin: '0 0 12px', letterSpacing: '1.5px' }}>DATA SOURCES</h3>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {['BECA', 'BCPAO', 'AcclaimWeb', 'RealTDM', 'Census'].map(src => (
+                <span key={src} style={{
+                  padding: '4px 8px',
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                  borderRadius: '4px',
+                  fontSize: '10px',
+                  color: '#10b981'
+                }}>{src}</span>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div style={{
-        marginTop: '24px',
-        textAlign: 'center',
-        color: '#64748b',
-        fontSize: '11px',
-        position: 'relative',
-        zIndex: 10,
-      }}>
-        <span style={{ opacity: 0.7 }}>Everest Capital of Brevard LLC</span>
-        <span style={{ margin: '0 12px' }}>•</span>
-        <span style={{ opacity: 0.7 }}>BrevardBidderAI V13.4.0</span>
-        <span style={{ margin: '0 12px' }}>•</span>
-        <span style={{ opacity: 0.7 }}>Agentic AI Ecosystem</span>
+      <div style={{ textAlign: 'center', marginTop: '24px', color: '#475569', fontSize: '12px', position: 'relative', zIndex: 10 }}>
+        Everest Capital of Brevard LLC • 10 hours → 10 minutes • 100x ROI
       </div>
 
-      {/* CSS Animations */}
       <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
         }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes scaleIn {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        @keyframes slideIn {
-          from { opacity: 0; transform: translateX(-10px); }
-          to { opacity: 1; transform: translateX(0); }
+        @keyframes blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
         }
       `}</style>
-    </div>
-  );
-}
-
-// Data Card Component
-function DataCard({ title, visible, items }) {
-  if (!visible) {
-    return (
-      <div style={{
-        background: 'rgba(15, 23, 42, 0.3)',
-        border: '1px dashed rgba(51, 65, 85, 0.3)',
-        borderRadius: '12px',
-        padding: '16px',
-        opacity: 0.5,
-      }}>
-        <h4 style={{ 
-          fontSize: '10px', 
-          color: '#475569', 
-          margin: '0 0 12px 0',
-          letterSpacing: '1px',
-          textTransform: 'uppercase',
-        }}>
-          {title}
-        </h4>
-        <div style={{ color: '#334155', fontSize: '12px' }}>Awaiting data...</div>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{
-      background: 'rgba(15, 23, 42, 0.6)',
-      border: '1px solid rgba(51, 65, 85, 0.5)',
-      borderRadius: '12px',
-      padding: '16px',
-      backdropFilter: 'blur(10px)',
-      animation: 'fadeIn 0.5s ease',
-    }}>
-      <h4 style={{ 
-        fontSize: '10px', 
-        color: '#94a3b8', 
-        margin: '0 0 12px 0',
-        letterSpacing: '1px',
-        textTransform: 'uppercase',
-      }}>
-        {title}
-      </h4>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {items.map((item, idx) => (
-          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '11px', color: '#64748b' }}>{item.label}</span>
-            <span style={{ 
-              fontSize: '12px', 
-              fontWeight: item.highlight ? 600 : 400,
-              color: item.highlightColor || (item.highlight ? '#f1f5f9' : '#94a3b8'),
-            }}>
-              {item.value}
-            </span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
