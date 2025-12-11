@@ -1,25 +1,16 @@
-// BrevardBidderAI Landing Page V3.5.0 - "$1M Homepage" Edition
-// Built by Ariel Shapira - Real Estate Developer & Founder, Everest Capital USA
+// BrevardBidderAI Landing Page V14.0.0 - "LangGraph Agentic AI Ecosystem" Edition
+// Built by Ariel Shapira - Solo Founder, Everest Capital USA
 // Design System: Luxury Data Terminal - Industrial Fintech Aesthetic
+// © 2025 All Rights Reserved - Proprietary IP
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import AnimatedDemo from './AnimatedDemo';
-import PremiumHero from './PremiumHero';
-import AILiveDemo from './AILiveDemo';
-import NextAuction from './NextAuction';
-import DemoButton from './DemoButton';
-import EmbeddedPipelineDemo from './EmbeddedPipelineDemo';
+import LangGraphDemo from './LangGraphDemo';
 
 // ============ ANIMATION VARIANTS ============
 const fadeInUp = {
   hidden: { opacity: 0, y: 40 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } }
-};
-
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 1 } }
 };
 
 const staggerContainer = {
@@ -33,16 +24,6 @@ const staggerContainer = {
 const scaleIn = {
   hidden: { opacity: 0, scale: 0.85, y: 20 },
   visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] } }
-};
-
-const slideInLeft = {
-  hidden: { opacity: 0, x: -60 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } }
-};
-
-const slideInRight = {
-  hidden: { opacity: 0, x: 60 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } }
 };
 
 // ============ FLOATING PARTICLE COMPONENT ============
@@ -63,6 +44,71 @@ const FloatingParticle = ({ delay = 0, size = 4, x = 0, y = 0 }) => (
     }}
   />
 );
+
+// ============ LANGGRAPH PIPELINE ANIMATION ============
+const LangGraphPipelineAnimation = () => {
+  const [activeNode, setActiveNode] = useState(0);
+  
+  const nodes = [
+    { icon: '🔍', label: 'Discovery' },
+    { icon: '📥', label: 'Scraper' },
+    { icon: '📋', label: 'Title' },
+    { icon: '⚖️', label: 'Lien' },
+    { icon: '🧠', label: 'ML' },
+    { icon: '💰', label: 'Valuation' },
+    { icon: '✅', label: 'Decision' },
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveNode(prev => (prev + 1) % nodes.length);
+    }, 1500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="relative h-20 flex items-center justify-center gap-2">
+      {nodes.map((node, i) => (
+        <React.Fragment key={i}>
+          <motion.div
+            className={`relative flex flex-col items-center p-2 rounded-lg transition-all duration-300 ${
+              i === activeNode 
+                ? 'bg-amber-500/20 scale-110' 
+                : i < activeNode 
+                  ? 'bg-emerald-500/10' 
+                  : 'bg-slate-800/50'
+            }`}
+            animate={i === activeNode ? { scale: [1, 1.1, 1] } : {}}
+            transition={{ duration: 0.5 }}
+          >
+            <span className="text-xl">{node.icon}</span>
+            <span className={`text-xs mt-1 ${
+              i === activeNode ? 'text-amber-400' : i < activeNode ? 'text-emerald-400' : 'text-slate-500'
+            }`}>
+              {node.label}
+            </span>
+            {i === activeNode && (
+              <motion.div
+                className="absolute -inset-1 rounded-lg border-2 border-amber-500"
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              />
+            )}
+          </motion.div>
+          {i < nodes.length - 1 && (
+            <motion.div 
+              className={`w-6 h-0.5 ${
+                i < activeNode ? 'bg-emerald-500' : i === activeNode ? 'bg-amber-500' : 'bg-slate-700'
+              }`}
+              animate={i === activeNode ? { scaleX: [0, 1] } : {}}
+              transition={{ duration: 0.5 }}
+            />
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+};
 
 // ============ WAITLIST FORM COMPONENT ============
 const WaitlistForm = ({ variant = 'default' }) => {
@@ -108,88 +154,39 @@ const WaitlistForm = ({ variant = 'default' }) => {
             value={email}
             onChange={(e) => { setEmail(e.target.value); setStatus('idle'); }}
             placeholder="Enter your email"
-            className={`relative w-full px-6 py-5 bg-blue-950 border-2 rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:border-amber-500 transition-all font-medium tracking-wide ${
-              status === 'error' ? 'border-red-500' : 'border-blue-800'
+            className={`relative w-full px-6 py-5 bg-slate-900 border-2 rounded-2xl text-white placeholder-slate-600 focus:outline-none focus:border-amber-500 transition-all font-medium tracking-wide ${
+              status === 'error' ? 'border-red-500' : 'border-slate-700'
             } ${isHero ? 'text-lg' : ''}`}
             disabled={status === 'loading' || status === 'success'}
           />
-          {status === 'success' && (
-            <motion.div 
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              className="absolute right-5 top-1/2 -translate-y-1/2"
-            >
-              <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
-                <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-            </motion.div>
-          )}
         </div>
         <motion.button
           type="submit"
           disabled={status === 'loading' || status === 'success'}
-          whileHover={{ scale: status === 'idle' ? 1.02 : 1, y: status === 'idle' ? -2 : 0 }}
+          whileHover={{ scale: status === 'idle' ? 1.02 : 1 }}
           whileTap={{ scale: status === 'idle' ? 0.98 : 1 }}
           className={`relative px-10 py-5 font-bold rounded-2xl transition-all overflow-hidden ${
             status === 'success' 
-              ? 'bg-emerald-500 text-black cursor-default' 
+              ? 'bg-emerald-500 text-black' 
               : status === 'loading'
-              ? 'bg-amber-500/50 text-black/50 cursor-wait'
+              ? 'bg-amber-500/50 text-black/50'
               : 'bg-amber-500 text-black hover:shadow-2xl hover:shadow-amber-500/40'
           } ${isHero ? 'text-lg whitespace-nowrap tracking-wide' : ''}`}
         >
-          {/* Shine effect */}
-          {status === 'idle' && (
-            <motion.div 
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-              animate={{ x: ['-200%', '200%'] }}
-              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-            />
-          )}
           <span className="relative">
-            {status === 'loading' ? (
-              <span className="flex items-center gap-3">
-                <motion.div 
-                  className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-                />
-                Joining...
-              </span>
-            ) : status === 'success' ? (
-              <span className="flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                You're In!
-              </span>
-            ) : (
-              'Join Waitlist'
-            )}
+            {status === 'loading' ? 'Joining...' : status === 'success' ? "✓ You're In!" : 'Join Waitlist'}
           </span>
         </motion.button>
       </div>
       
-      <AnimatePresence>
-        {message && (
-          <motion.p 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className={`mt-4 text-sm font-medium ${status === 'error' ? 'text-red-400' : 'text-emerald-400'}`}
-          >
-            {message}
-          </motion.p>
-        )}
-      </AnimatePresence>
-      
-      {status === 'idle' && (
-        <p className="mt-4 text-sm text-blue-400/50 flex items-center gap-2">
-          <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-          Join 50+ Florida investors on the waitlist
-        </p>
+      {message && (
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className={`mt-4 text-sm font-medium ${status === 'error' ? 'text-red-400' : 'text-emerald-400'}`}
+        >
+          {message}
+        </motion.p>
       )}
     </form>
   );
@@ -214,539 +211,342 @@ const Section = ({ children, className = '', id }) => {
   );
 };
 
-// ============ STAT CARD COMPONENT ============
-const StatCard = ({ value, label, detail, delay = 0, accent = false }) => (
+// ============ AGENT CARD COMPONENT ============
+const AgentCard = ({ icon, name, description, tools, delay = 0 }) => (
   <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] }}
-    className={`relative group ${accent ? 'col-span-2 md:col-span-1' : ''}`}
+    variants={fadeInUp}
+    className="relative group"
   >
-    {/* Glow effect */}
-    <div className={`absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm ${
-      accent ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' : 'bg-gradient-to-br from-amber-500 to-amber-600'
-    }`} />
-    
-    <div className="relative p-6 rounded-2xl bg-blue-950 border border-blue-800 group-hover:border-transparent transition-all h-full">
-      <div className={`text-5xl md:text-6xl font-black tracking-tighter mb-2 ${
-        accent ? 'text-emerald-400' : 'text-amber-400'
-      }`}>
-        {value}
+    <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    <div className="relative bg-slate-900/80 border border-slate-700 rounded-2xl p-6 hover:border-amber-500/50 transition-all duration-300">
+      <div className="text-4xl mb-4">{icon}</div>
+      <h3 className="text-xl font-bold text-white mb-2">{name}</h3>
+      <p className="text-slate-400 text-sm mb-4">{description}</p>
+      <div className="flex flex-wrap gap-2">
+        {tools.map((tool, i) => (
+          <span key={i} className="px-2 py-1 bg-slate-800 rounded text-xs text-amber-400">
+            {tool}
+          </span>
+        ))}
       </div>
-      <div className="text-white font-semibold text-lg mb-1">{label}</div>
-      <div className="text-sm text-blue-300/60">{detail}</div>
     </div>
   </motion.div>
 );
 
-// ============ MAIN APP ============
-const App = () => {
-  const [activeStage, setActiveStage] = useState(0);
-  const [showAnimatedDemo, setShowAnimatedDemo] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  
-  const { scrollYProgress } = useScroll();
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
-  const heroScale = useTransform(scrollYProgress, [0, 0.3], [1, 0.9]);
-  const heroY = useTransform(scrollYProgress, [0, 0.3], [0, 100]);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveStage((prev) => (prev + 1) % 12);
-    }, 2500);
-    return () => clearInterval(interval);
-  }, []);
-
-  const pipeline = [
-    { id: 1, name: 'Discovery', icon: '🔍', desc: 'Auction calendar sync' },
-    { id: 2, name: 'Scraping', icon: '⚡', desc: 'BECA V2.0 extraction' },
-    { id: 3, name: 'Title Search', icon: '📋', desc: 'Chain of title analysis' },
-    { id: 4, name: 'Lien Priority', icon: '⚖️', desc: 'Senior/junior classification' },
-    { id: 5, name: 'Tax Certs', icon: '🏛️', desc: 'Certificate detection' },
-    { id: 6, name: 'Demographics', icon: '📊', desc: 'Census API integration' },
-    { id: 7, name: 'ML Score', icon: '🧠', desc: 'XGBoost prediction' },
-    { id: 8, name: 'Max Bid', icon: '💰', desc: 'Formula calculation' },
-    { id: 9, name: 'Decision', icon: '✅', desc: 'BID / REVIEW / SKIP' },
-    { id: 10, name: 'Report', icon: '📄', desc: 'One-page DOCX' },
-    { id: 11, name: 'Disposition', icon: '🏠', desc: 'Exit strategy tracking' },
-    { id: 12, name: 'Archive', icon: '📦', desc: 'Historical database' },
-  ];
-
-  const features = [
-    { 
-      icon: '🎯', 
-      title: 'BECA Scraper V2.0', 
-      desc: 'Proprietary document extraction with 12 regex patterns, anti-detection tech, and pdfplumber integration. Pulls what others miss.',
-      highlight: 'EXCLUSIVE'
-    },
-    { 
-      icon: '🧠', 
-      title: 'XGBoost ML Engine', 
-      desc: '64.4% accuracy predicting third-party purchases. Trained on 1,393+ historical Brevard auctions. Real data, real edge.',
-      highlight: '64.4% ACC'
-    },
-    { 
-      icon: '⚡', 
-      title: 'Smart Router', 
-      desc: 'Multi-tier LLM routing achieves 40-55% FREE processing. DeepSeek V3.2 for ultra-cheap operations. Maximum intelligence, minimum cost.',
-      highlight: '55% FREE'
-    },
-    { 
-      icon: '🔐', 
-      title: 'Layer 8 Protection', 
-      desc: 'AES-256 encryption on ML models, externalized business logic, endpoint obfuscation. Your competitive advantage stays yours.',
-      highlight: 'VAULT'
-    },
-  ];
-
-  const stats = [
-    { value: '23s', label: 'Per Property', detail: 'vs 4+ hours manual' },
-    { value: '100x', label: 'ROI', detail: '$300-400K annual value' },
-    { value: '12', label: 'Stage Pipeline', detail: 'Fully autonomous' },
-    { value: '64.4%', label: 'ML Accuracy', detail: 'XGBoost prediction', accent: true },
-  ];
+// ============ STAT CARD COMPONENT ============
+const StatCard = ({ value, label, detail, accent = 'amber' }) => {
+  const colors = {
+    amber: 'from-amber-500 to-amber-600 shadow-amber-500/20',
+    emerald: 'from-emerald-500 to-emerald-600 shadow-emerald-500/20',
+    purple: 'from-purple-500 to-purple-600 shadow-purple-500/20',
+    blue: 'from-blue-500 to-blue-600 shadow-blue-500/20'
+  };
 
   return (
-    <div className="min-h-screen bg-blue-950 text-white overflow-x-hidden selection:bg-amber-500 selection:text-black">
-      {/* ============ CUSTOM CURSOR GLOW ============ */}
-      <div 
-        className="fixed w-96 h-96 rounded-full pointer-events-none z-0 opacity-20"
-        style={{
-          background: 'radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%)',
-          left: mousePos.x - 192,
-          top: mousePos.y - 192,
-          transition: 'left 0.1s, top 0.1s',
-        }}
-      />
-
-      {/* ============ BACKGROUND ============ */}
-      <div className="fixed inset-0 z-0 bg-blue-950" />
-
-      {/* ============ NAVIGATION ============ */}
-      <motion.nav 
-        className={`fixed top-0 left-0 right-0 z-40 px-6 py-4 transition-all duration-500 ${
-          scrolled ? 'bg-blue-950/95 border-b border-blue-800/50' : ''
-        }`}
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <motion.div 
-            className="flex items-center gap-4"
-            whileHover={{ scale: 1.02 }}
-          >
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl blur-sm opacity-70" />
-              <div className="relative w-11 h-11 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center font-black text-blue-950 text-lg tracking-tighter">
-                BB
-              </div>
-            </div>
-            <div className="hidden sm:block">
-              <span className="text-xl font-bold tracking-tight">
-                BrevardBidder<span className="text-amber-400">AI</span>
-              </span>
-              <span className="ml-3 px-2 py-0.5 bg-blue-800 rounded text-xs font-mono text-blue-200/70">V14.4.0</span>
-            </div>
-          </motion.div>
-          
-          <div className="flex items-center gap-4">
-            <a 
-              href="#demo" 
-              className="hidden md:block text-blue-200/70 hover:text-amber-400 transition-colors font-medium"
-            >
-              Demo
-            </a>
-            <a 
-              href="#pipeline" 
-              className="hidden md:block text-blue-200/70 hover:text-amber-400 transition-colors font-medium"
-            >
-              Pipeline
-            </a>
-            <motion.a 
-              href="#waitlist"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="px-5 py-2.5 bg-amber-500 text-black font-bold rounded-xl hover:shadow-lg hover:shadow-amber-500/30 transition-all"
-            >
-              Join Waitlist
-            </motion.a>
-          </div>
+    <motion.div variants={scaleIn} className="relative group">
+      <div className={`absolute -inset-1 bg-gradient-to-r ${colors[accent]} rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity`} />
+      <div className="relative bg-slate-900 border border-slate-700 rounded-2xl p-8 text-center hover:border-slate-600 transition-colors">
+        <div className={`text-5xl font-bold bg-gradient-to-r ${colors[accent]} bg-clip-text text-transparent mb-2`}>
+          {value}
         </div>
-      </motion.nav>
-
-      {/* ============ HERO SECTION - PREMIUM OBSIDIAN VAULT ============ */}
-      <PremiumHero
-        heroOpacity={heroOpacity}
-        heroScale={heroScale}
-        heroY={heroY}
-        stats={stats}
-        WaitlistForm={WaitlistForm}
-      />
-
-      {/* ============ SOCIAL PROOF BAR ============ */}
-      <Section className="relative z-10 px-6 py-16 border-y border-blue-800/50 bg-blue-900/50">
-        <div className="max-w-6xl mx-auto">
-          <motion.div 
-            variants={fadeIn}
-            className="flex flex-wrap items-center justify-center gap-8 md:gap-16"
-          >
-            <div className="text-center">
-              <div className="text-4xl font-black text-white mb-1">1,393+</div>
-              <div className="text-sm text-blue-300/60">Historical Auctions Analyzed</div>
-            </div>
-            <div className="hidden md:block w-px h-12 bg-blue-800" />
-            <div className="text-center">
-              <div className="text-4xl font-black text-white mb-1">20+</div>
-              <div className="text-sm text-blue-300/60">Years FL Experience</div>
-            </div>
-            <div className="hidden md:block w-px h-12 bg-blue-800" />
-            <div className="text-center">
-              <div className="text-4xl font-black text-white mb-1">200+</div>
-              <div className="text-sm text-blue-300/60">Auctions Attended</div>
-            </div>
-            <div className="hidden md:block w-px h-12 bg-blue-800" />
-            <div className="text-center">
-              <div className="text-4xl font-black text-amber-400 mb-1">$0</div>
-              <div className="text-sm text-blue-300">Guesswork Required</div>
-            </div>
-            <div className="hidden md:block w-px h-12 bg-blue-800" />
-            <div className="text-center col-span-2 md:col-span-1">
-              <div className="text-emerald-400 font-bold text-lg">For Everyone. Everywhere.</div>
-              <div className="text-xs text-blue-400">Democratizing Distressed Asset Auctions</div>
-            </div>
-          </motion.div>
-        </div>
-      </Section>
-
-      {/* ============ DEMO SECTION ============ */}
-      <Section id="demo" className="relative z-10 px-6 py-32">
-        <div className="max-w-5xl mx-auto">
-          <motion.div variants={fadeInUp} className="text-center mb-16">
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-sm font-semibold mb-6">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              Live Demo Available
-            </span>
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6">
-              <span className="text-white">See the Pipeline</span>
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">In Action</span>
-            </h2>
-            <p className="text-xl text-blue-200/70 max-w-2xl mx-auto">
-              Watch autonomous agents analyze a real foreclosure property from Brevard County in real-time.
-            </p>
-          </motion.div>
-
-          <motion.div variants={scaleIn} className="relative group">
-            {/* Glow effect */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-amber-500/30 via-amber-600/30 to-amber-500/30 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-            
-            <div 
-              className="relative rounded-2xl overflow-hidden border-2 border-blue-800 group-hover:border-amber-500/50 cursor-pointer transition-all duration-500"
-              onClick={() => setShowAnimatedDemo(true)}
-              style={{ 
-                background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(2, 6, 23, 0.95) 100%)',
-              }}
-            >
-              {/* Terminal header */}
-              <div className="flex items-center justify-between px-6 py-4 bg-blue-900/80 border-b border-blue-800">
-                <div className="flex items-center gap-4">
-                  <div className="flex gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-400 transition-colors" />
-                    <div className="w-3 h-3 rounded-full bg-amber-500 hover:bg-amber-400 transition-colors" />
-                    <div className="w-3 h-3 rounded-full bg-emerald-500 hover:bg-emerald-400 transition-colors" />
-                  </div>
-                  <span className="text-sm text-blue-200/70 font-mono tracking-wider">brevard-bidder-pipeline.exe</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 text-xs font-mono rounded">● READY</span>
-                </div>
-              </div>
-              
-              {/* Preview content */}
-              <div className="p-12 min-h-[350px] flex items-center justify-center">
-                <div className="text-center">
-                  <motion.div
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border-2 border-amber-500/40 flex items-center justify-center group-hover:shadow-2xl group-hover:shadow-amber-500/20 transition-all duration-500"
-                  >
-                    <svg className="w-10 h-10 text-amber-400 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </motion.div>
-                  <div className="text-white font-bold text-2xl mb-3 tracking-tight">Launch Demo</div>
-                  <div className="text-blue-300/60">Experience real property analysis in 60 seconds</div>
-                </div>
-              </div>
-
-              {/* Bottom bar */}
-              <div className="px-6 py-3 bg-blue-900/50 border-t border-blue-800 flex items-center justify-between">
-                <span className="text-xs text-blue-400/50 font-mono">12 stages • 23 seconds • Real data</span>
-                <span className="text-xs text-amber-500 font-mono">Click to start →</span>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </Section>
-      {/* ============ AI LIVE DEMO SECTION ============ */}
-      <AILiveDemo />
-      <NextAuction />
-
-      {/* ============ PIPELINE SECTION ============ */}
-      <Section id="pipeline" className="relative z-10 px-6 py-32 bg-blue-900/50">
-        <div className="max-w-7xl mx-auto">
-          <motion.div variants={fadeInUp} className="text-center mb-12">
-            <motion.span 
-              variants={fadeInUp}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-400 text-sm font-semibold mb-6"
-            >
-              <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
-              Live Demo
-            </motion.span>
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6">
-              <span className="text-white">12-Stage</span>{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">Agentic Pipeline</span>
-            </h2>
-            <p className="text-xl text-blue-200/70 max-w-2xl mx-auto">
-              Watch AI analyze foreclosure properties in real-time—from discovery to decision.
-            </p>
-          </motion.div>
-
-          <motion.div variants={scaleIn}>
-            <EmbeddedPipelineDemo />
-          </motion.div>
-          
-          {/* CTA under demo */}
-          <motion.div variants={fadeInUp} className="mt-12 text-center">
-            <a 
-              href="#pipeline" 
-              onClick={(e) => { e.preventDefault(); window.location.hash = 'pipeline'; window.location.reload(); }}
-              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl text-blue-950 font-bold text-lg hover:from-amber-400 hover:to-amber-500 transition-all shadow-xl shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-105"
-            >
-              <span>🚀</span>
-              View Full-Screen Demo
-              <span>→</span>
-            </a>
-          </motion.div>
-        </div>
-      </Section>
-
-      {/* ============ FEATURES SECTION ============ */}
-      <Section id="features" className="relative z-10 px-6 py-32">
-        <div className="max-w-6xl mx-auto">
-          <motion.div variants={fadeInUp} className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6">
-              <span className="text-white">Engineered for</span>{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">Edge</span>
-            </h2>
-            <p className="text-xl text-blue-200/70">
-              Proprietary systems that create unfair advantages.
-            </p>
-          </motion.div>
-
-          <motion.div variants={staggerContainer} className="grid md:grid-cols-2 gap-6">
-            {features.map((feature, i) => (
-              <motion.div
-                key={i}
-                variants={i % 2 === 0 ? slideInLeft : slideInRight}
-                className="group relative"
-              >
-                {/* Hover glow */}
-                <div className="absolute -inset-px bg-gradient-to-br from-amber-500/50 to-amber-600/50 rounded-3xl opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500" />
-                
-                <div className="relative p-8 rounded-3xl bg-blue-900 border border-blue-800 group-hover:border-transparent transition-all duration-500 h-full">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-blue-800 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
-                        {feature.icon}
-                      </div>
-                      <h3 className="text-xl font-bold text-white group-hover:text-amber-400 transition-colors">
-                        {feature.title}
-                      </h3>
-                    </div>
-                    <span className="px-3 py-1.5 bg-amber-500/10 text-amber-400 text-xs font-bold rounded-full border border-amber-500/30">
-                      {feature.highlight}
-                    </span>
-                  </div>
-                  <p className="text-blue-200/70 leading-relaxed text-lg">{feature.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </Section>
-
-      {/* ============ FOUNDER SECTION ============ */}
-      <Section id="founder" className="relative z-10 px-6 py-32 bg-blue-900/50">
-        <div className="max-w-4xl mx-auto">
-          <motion.div variants={staggerContainer} className="text-center">
-            <motion.span 
-              variants={fadeInUp}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-400 text-sm font-semibold mb-10"
-            >
-              <span className="w-2 h-2 bg-amber-400 rounded-full" />
-              Built by an Investor, for Investors
-            </motion.span>
-            
-            <motion.div variants={scaleIn} className="relative inline-block mb-8">
-              <div className="absolute -inset-2 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full blur-lg opacity-50" />
-              <div className="relative w-32 h-32 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center text-5xl font-black text-blue-950 ring-4 ring-amber-500/30">
-                AS
-              </div>
-            </motion.div>
-            
-            <motion.h2 variants={fadeInUp} className="text-4xl md:text-5xl font-black text-white mb-3 tracking-tight">
-              Ariel Shapira
-            </motion.h2>
-            <motion.p variants={fadeInUp} className="text-xl text-amber-400 font-semibold mb-2">
-              Real Estate Developer & Founder, Everest Capital USA
-            </motion.p>
-            <motion.p variants={fadeInUp} className="text-blue-300 mb-2">
-              Solo Founder of BrevardBidderAI & BidDeedAI
-            </motion.p>
-            <motion.p variants={fadeInUp} className="text-emerald-400/80 text-sm font-medium mb-10">
-              Mission: Distressed Asset Auctions — For Everyone. Everywhere.
-            </motion.p>
-            
-            {/* Quote */}
-            <motion.div variants={scaleIn} className="relative max-w-2xl mx-auto mb-12">
-              <div className="absolute -top-6 -left-4 text-8xl text-amber-500/10 font-serif leading-none">"</div>
-              <p className="text-2xl text-slate-300 leading-relaxed italic px-8">
-                I've been to 200+ foreclosure auctions in Florida. I built BrevardBidderAI because 
-                I was tired of losing deals to incomplete data—and winning deals I shouldn't have.
-              </p>
-              <div className="absolute -bottom-6 -right-4 text-8xl text-amber-500/10 font-serif leading-none rotate-180">"</div>
-            </motion.div>
-
-            {/* Credibility badges */}
-            <motion.div variants={staggerContainer} className="flex flex-wrap items-center justify-center gap-4 mb-12">
-              {[
-                { value: '20+', label: 'Years FL Experience', sub: 'Investing • Developing' },
-                { value: '200+', label: 'Auctions Attended', sub: 'Brevard Courthouse' },
-                { value: '2', label: 'AI Ecosystems', sub: 'BrevardBidder • BidDeed' },
-              ].map((badge, i) => (
-                <motion.div 
-                  key={i}
-                  variants={scaleIn}
-                  className="px-6 py-4 bg-blue-800/50 rounded-2xl border border-blue-700 hover:border-amber-500/30 transition-all"
-                >
-                  <div className="text-3xl font-black text-amber-400 mb-1">{badge.value}</div>
-                  <div className="text-sm text-white font-medium">{badge.label}</div>
-                  <div className="text-xs text-blue-300/60">{badge.sub}</div>
-                </motion.div>
-              ))}
-            </motion.div>
-
-            <motion.a 
-              variants={fadeInUp}
-              href="https://linkedin.com/in/ariel-shapira-533a776" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-cyan-500/10 border-2 border-cyan-500/30 rounded-2xl text-cyan-400 hover:bg-cyan-500/20 hover:text-cyan-300 transition-all font-semibold"
-            >
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-              </svg>
-              Connect with Ariel on LinkedIn
-            </motion.a>
-          </motion.div>
-        </div>
-      </Section>
-
-      {/* ============ FINAL CTA SECTION ============ */}
-      <Section id="waitlist" className="relative z-10 px-6 py-32">
-        <div className="max-w-4xl mx-auto text-center">
-          <motion.div variants={staggerContainer} className="relative">
-            <motion.h2 variants={fadeInUp} className="text-5xl md:text-7xl font-black tracking-tight mb-6">
-              <span className="block text-white">Your Edge.</span>
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-500 to-amber-400">
-                Everywhere.
-              </span>
-            </motion.h2>
-            <motion.p variants={fadeInUp} className="text-2xl text-emerald-400 font-bold mb-4">
-              Democratizing USA Distressed Asset Auctions
-            </motion.p>
-            <motion.p variants={fadeInUp} className="text-xl md:text-2xl text-blue-200/70 mb-12 max-w-2xl mx-auto">
-              Join the waitlist for America's most sophisticated foreclosure intelligence platform. For everyone. Everywhere.
-            </motion.p>
-            
-            <motion.div variants={scaleIn} className="flex justify-center mb-10">
-              <WaitlistForm />
-            </motion.div>
-            
-            <motion.p variants={fadeIn} className="text-blue-400/50 text-sm flex items-center justify-center gap-2">
-              <span className="w-2 h-2 bg-amber-500 rounded-full" />
-              Currently onboarding select investors in Brevard County, FL
-            </motion.p>
-          </motion.div>
-        </div>
-      </Section>
-
-      {/* ============ FOOTER ============ */}
-      <footer className="relative z-10 px-6 py-16 border-t border-blue-800/50 bg-blue-950">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="absolute -inset-0.5 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl blur-sm opacity-50" />
-                <div className="relative w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center font-black text-blue-950">
-                  BB
-                </div>
-              </div>
-              <div>
-                <span className="text-white font-bold">
-                  BrevardBidder<span className="text-amber-400">AI</span>
-                </span>
-                <span className="ml-2 text-blue-400/50 text-sm font-mono">V14.4.0</span>
-              </div>
-            </div>
-            
-            <div className="text-blue-300/60 text-sm text-center md:text-right">
-              <div>© 2025 Ariel Shapira | Real Estate Developer & Founder</div>
-              <div className="text-blue-700">Everest Capital USA</div>
-            </div>
-          </div>
-          
-          <div className="mt-10 pt-8 border-t border-blue-800/50 text-center">
-            <p className="text-blue-700 text-sm">
-              Built by a developer & investor. For investors everywhere. — Democratizing USA distressed asset auctions.
-            </p>
-          </div>
-        </div>
-      </footer>
-
-      {/* Demo CTA Button */}
-      <DemoButton />
-
-      {/* Animated Demo Modal */}
-      <AnimatePresence>
-        {showAnimatedDemo && (
-          <AnimatedDemo onClose={() => setShowAnimatedDemo(false)} />
-        )}
-      </AnimatePresence>
-    </div>
+        <div className="text-xl text-white font-medium mb-2">{label}</div>
+        <div className="text-sm text-slate-400">{detail}</div>
+      </div>
+    </motion.div>
   );
 };
 
-export default App;
+// ============ MAIN APP COMPONENT ============
+export default function App() {
+  const [showDemo, setShowDemo] = useState(false);
+  const { scrollY } = useScroll();
+  const headerOpacity = useTransform(scrollY, [0, 100], [0, 1]);
 
+  const agents = [
+    { icon: '🔍', name: 'Discovery Agent', description: 'Scans RealForeclose auction calendars daily, identifies new foreclosure listings', tools: ['RealForeclose API', 'BECA Scraper'] },
+    { icon: '📥', name: 'Data Scraper Agent', description: 'Extracts property data from multiple county sources in parallel', tools: ['BCPAO', 'AcclaimWeb', 'Selenium'] },
+    { icon: '📋', name: 'Title Search Agent', description: 'Analyzes chain of title, identifies ownership history', tools: ['Official Records', 'Doc Parser'] },
+    { icon: '⚖️', name: 'Lien Priority Agent', description: 'Critical! Detects senior liens that survive foreclosure', tools: ['Mortgage DB', 'HOA Detection'] },
+    { icon: '📜', name: 'Tax Certificate Agent', description: 'Checks for outstanding tax certificates that affect title', tools: ['RealTDM', 'Tax Cert API'] },
+    { icon: '👥', name: 'Demographics Agent', description: 'Analyzes neighborhood income, trends, school districts', tools: ['Census API', 'Zillow Data'] },
+    { icon: '🧠', name: 'ML Predictor Agent', description: 'XGBoost model predicts third-party buyer probability', tools: ['64.4% Accuracy', 'XGBoost'] },
+    { icon: '💰', name: 'Valuation Agent', description: 'Calculates ARV, repair estimates, and optimal max bid', tools: ['Comp Analysis', 'Repair Est'] },
+    { icon: '✅', name: 'Decision Agent', description: 'Applies business rules: BID, REVIEW, or SKIP', tools: ['Rule Engine', 'Risk Matrix'] },
+    { icon: '📊', name: 'Report Generator', description: 'Creates one-page DOCX analysis with photos', tools: ['docx-templater', 'BCPAO Photos'] },
+    { icon: '🎯', name: 'Disposition Agent', description: 'Maps exit strategies: Flip, Hold, or Wholesale', tools: ['ROI Calculator', 'Market Fit'] },
+    { icon: '🗄️', name: 'Archive Agent', description: 'Persists all data for historical analysis', tools: ['Supabase', 'Vector Store'] },
+  ];
 
+  return (
+    <div className="min-h-screen bg-slate-950 text-white overflow-x-hidden">
+      {/* Demo Modal */}
+      <AnimatePresence>
+        {showDemo && <LangGraphDemo onClose={() => setShowDemo(false)} />}
+      </AnimatePresence>
 
+      {/* Fixed Header */}
+      <motion.header 
+        style={{ opacity: headerOpacity }}
+        className="fixed top-0 left-0 right-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800"
+      >
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl font-bold">
+              BrevardBidder<span className="text-amber-400">AI</span>
+            </span>
+            <span className="px-2 py-1 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-400 text-xs font-medium">
+              LangGraph
+            </span>
+          </div>
+          <button
+            onClick={() => setShowDemo(true)}
+            className="px-6 py-2 bg-amber-500 text-black font-bold rounded-xl hover:bg-amber-400 transition-colors"
+          >
+            Watch Demo
+          </button>
+        </div>
+      </motion.header>
+
+      {/* Hero Section */}
+      <Section className="relative min-h-screen flex items-center justify-center px-6 py-24 overflow-hidden">
+        {/* Animated Background */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-500/5 via-transparent to-transparent" />
+          {/* Floating Particles */}
+          {[...Array(20)].map((_, i) => (
+            <FloatingParticle key={i} delay={i * 0.2} size={3 + Math.random() * 4} x={Math.random() * 100} y={Math.random() * 100} />
+          ))}
+        </div>
+
+        <div className="relative z-10 max-w-6xl mx-auto text-center">
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-gradient-to-r from-purple-500/10 to-amber-500/10 border border-purple-500/30 mb-8"
+          >
+            <motion.span 
+              className="w-2 h-2 bg-emerald-500 rounded-full"
+              animate={{ scale: [1, 1.5, 1] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            />
+            <span className="text-purple-400 font-medium">Agentic AI Ecosystem</span>
+            <span className="text-slate-500">•</span>
+            <span className="text-amber-400 font-medium">Powered by LangGraph</span>
+          </motion.div>
+
+          {/* Main Headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-5xl md:text-7xl font-bold mb-6 leading-tight"
+          >
+            <span className="text-white">Stop </span>
+            <span className="bg-gradient-to-r from-red-500 to-red-400 bg-clip-text text-transparent">Guessing</span>
+            <span className="text-white"> at</span>
+            <br />
+            <span className="text-white">Foreclosure Auctions</span>
+          </motion.h1>
+
+          {/* Subheadline */}
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto mb-8"
+          >
+            12 autonomous AI agents analyze every property in{' '}
+            <span className="text-amber-400 font-semibold">23 seconds</span>.
+            <br />
+            Know exactly when to <span className="text-emerald-400 font-semibold">BID</span>,{' '}
+            <span className="text-amber-400 font-semibold">REVIEW</span>, or{' '}
+            <span className="text-red-400 font-semibold">SKIP</span>.
+          </motion.p>
+
+          {/* LangGraph Pipeline Animation */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="max-w-3xl mx-auto mb-10 p-4 bg-slate-900/50 rounded-2xl border border-slate-700"
+          >
+            <div className="text-xs text-slate-500 mb-3 font-mono">LANGGRAPH PIPELINE • LIVE PREVIEW</div>
+            <LangGraphPipelineAnimation />
+          </motion.div>
+
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
+          >
+            <motion.button
+              onClick={() => setShowDemo(true)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-10 py-5 bg-gradient-to-r from-amber-500 to-amber-600 text-black font-bold rounded-2xl text-lg shadow-2xl shadow-amber-500/30 hover:shadow-amber-500/50 transition-all flex items-center gap-3"
+            >
+              <span>▶</span>
+              <span>Watch LangGraph Demo</span>
+            </motion.button>
+            <a
+              href="#agents"
+              className="px-10 py-5 bg-slate-800 text-white font-bold rounded-2xl text-lg border border-slate-600 hover:bg-slate-700 hover:border-slate-500 transition-all"
+            >
+              See All 12 Agents
+            </a>
+          </motion.div>
+
+          {/* Trust Indicators */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2 }}
+            className="flex flex-wrap items-center justify-center gap-6 text-sm text-slate-400"
+          >
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+              <span>Built by a 20+ year Florida investor</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 bg-amber-500 rounded-full" />
+              <span>64.4% ML prediction accuracy</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 bg-purple-500 rounded-full" />
+              <span>Zero human-in-the-loop</span>
+            </div>
+          </motion.div>
+        </div>
+      </Section>
+
+      {/* Stats Section */}
+      <Section className="py-24 px-6 bg-slate-900/50">
+        <div className="max-w-6xl mx-auto">
+          <motion.div variants={fadeInUp} className="text-center mb-16">
+            <div className="text-amber-400 font-medium mb-4">THE NUMBERS</div>
+            <h2 className="text-4xl md:text-5xl font-bold">Why Investors Choose Us</h2>
+          </motion.div>
+
+          <div className="grid md:grid-cols-4 gap-6">
+            <StatCard value="23s" label="Per Property" detail="vs 4 hours manual research" accent="amber" />
+            <StatCard value="64.4%" label="ML Accuracy" detail="Third-party buyer prediction" accent="emerald" />
+            <StatCard value="12" label="AI Agents" detail="LangGraph orchestrated" accent="purple" />
+            <StatCard value="100x" label="ROI" detail="$300K value vs $3K cost" accent="blue" />
+          </div>
+        </div>
+      </Section>
+
+      {/* Agents Section */}
+      <Section id="agents" className="py-24 px-6">
+        <div className="max-w-7xl mx-auto">
+          <motion.div variants={fadeInUp} className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-500/10 border border-purple-500/30 mb-6">
+              <span className="text-purple-400 font-medium">LangGraph Architecture</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">12 Autonomous Agents</h2>
+            <p className="text-xl text-slate-400 max-w-2xl mx-auto">
+              Each agent specializes in one task. They communicate, share data, and make decisions together.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {agents.map((agent, i) => (
+              <AgentCard key={i} {...agent} delay={i * 0.1} />
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* How It Works Section */}
+      <Section className="py-24 px-6 bg-slate-900/50">
+        <div className="max-w-6xl mx-auto">
+          <motion.div variants={fadeInUp} className="text-center mb-16">
+            <div className="text-amber-400 font-medium mb-4">HOW IT WORKS</div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">From Chaos to Clarity</h2>
+            <p className="text-xl text-slate-400 max-w-2xl mx-auto">
+              Traditional research takes 4 hours per property. We do it in 23 seconds.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { step: '01', title: 'Auction Discovery', desc: 'Our agents scan courthouse calendars daily and identify every upcoming foreclosure' },
+              { step: '02', title: 'Deep Analysis', desc: '12 specialized agents extract data, search liens, run ML models, and calculate max bids' },
+              { step: '03', title: 'Clear Recommendation', desc: 'Get a one-page report: BID with confidence, REVIEW further, or SKIP entirely' }
+            ].map((item, i) => (
+              <motion.div key={i} variants={fadeInUp} className="relative">
+                <div className="text-7xl font-bold text-slate-800 absolute -top-6 -left-2">{item.step}</div>
+                <div className="relative bg-slate-900 border border-slate-700 rounded-2xl p-8 pt-12">
+                  <h3 className="text-2xl font-bold text-white mb-4">{item.title}</h3>
+                  <p className="text-slate-400">{item.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* Founder Section */}
+      <Section className="py-24 px-6">
+        <div className="max-w-4xl mx-auto">
+          <motion.div variants={fadeInUp} className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-10 border border-slate-700">
+            <div className="text-center">
+              <div className="text-5xl mb-6">🏠</div>
+              <blockquote className="text-2xl md:text-3xl font-medium text-white mb-6 italic">
+                "I built this because I was tired of guessing at auctions. After 20 years and hundreds of deals, 
+                I knew exactly what data I needed — I just needed AI to get it faster."
+              </blockquote>
+              <div className="text-amber-400 font-bold text-xl">Ariel Shapira</div>
+              <div className="text-slate-400">Solo Founder • Everest Capital USA</div>
+              <div className="text-slate-500 text-sm mt-2">20+ years Florida real estate • Licensed Broker & GC</div>
+            </div>
+          </motion.div>
+        </div>
+      </Section>
+
+      {/* CTA Section */}
+      <Section className="py-24 px-6 bg-gradient-to-br from-amber-500/10 via-slate-900 to-purple-500/10">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div variants={fadeInUp}>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 mb-6">
+              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-emerald-400 font-medium">Limited Beta Access</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to Stop Guessing?</h2>
+            <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
+              Join 50+ Florida investors on the waitlist. Be first to access the 
+              Agentic AI ecosystem that's changing foreclosure investing.
+            </p>
+            <WaitlistForm variant="hero" />
+          </motion.div>
+        </div>
+      </Section>
+
+      {/* Footer */}
+      <footer className="py-12 px-6 border-t border-slate-800">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-3">
+              <span className="text-xl font-bold">BrevardBidder<span className="text-amber-400">AI</span></span>
+              <span className="text-slate-600">|</span>
+              <span className="text-sm text-slate-500">Agentic AI Ecosystem</span>
+            </div>
+            <div className="text-sm text-slate-500">
+              © 2025 Everest Capital of Brevard LLC. All rights reserved.
+            </div>
+            <div className="flex items-center gap-4 text-sm text-slate-500">
+              <span>LangGraph Powered</span>
+              <span>•</span>
+              <span>Made in Florida 🌴</span>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
