@@ -9,6 +9,7 @@ import PremiumHero from './PremiumHero';
 import AILiveDemo from './AILiveDemo';
 import NextAuction from './NextAuction';
 import DemoButton from './DemoButton';
+import EmbeddedPipelineDemo from './EmbeddedPipelineDemo';
 
 // ============ ANIMATION VARIANTS ============
 const fadeInUp = {
@@ -548,61 +549,39 @@ const App = () => {
       {/* ============ PIPELINE SECTION ============ */}
       <Section id="pipeline" className="relative z-10 px-6 py-32 bg-blue-900/50">
         <div className="max-w-7xl mx-auto">
-          <motion.div variants={fadeInUp} className="text-center mb-20">
+          <motion.div variants={fadeInUp} className="text-center mb-12">
+            <motion.span 
+              variants={fadeInUp}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/20 rounded-full text-amber-400 text-sm font-semibold mb-6"
+            >
+              <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
+              Live Demo
+            </motion.span>
             <h2 className="text-4xl md:text-6xl font-black tracking-tight mb-6">
               <span className="text-white">12-Stage</span>{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">Agentic Pipeline</span>
             </h2>
             <p className="text-xl text-blue-200/70 max-w-2xl mx-auto">
-              From discovery to decision—fully autonomous intelligence at every step.
+              Watch AI analyze foreclosure properties in real-time—from discovery to decision.
             </p>
           </motion.div>
 
-          <motion.div variants={staggerContainer} className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {pipeline.map((stage, index) => (
-              <motion.div
-                key={stage.id}
-                variants={scaleIn}
-                className={`relative p-5 rounded-2xl border-2 transition-all duration-500 cursor-pointer ${
-                  activeStage === index
-                    ? 'bg-amber-500/10 border-amber-500 scale-105 shadow-2xl shadow-amber-500/20'
-                    : 'bg-blue-900/50 border-blue-800 hover:border-blue-700 hover:bg-blue-800/50'
-                }`}
-                onMouseEnter={() => setActiveStage(index)}
-              >
-                <div className="text-3xl mb-3">{stage.icon}</div>
-                <div className={`font-bold text-sm mb-1 transition-colors ${
-                  activeStage === index ? 'text-amber-400' : 'text-white'
-                }`}>
-                  {stage.id}. {stage.name}
-                </div>
-                <div className="text-xs text-blue-300/60">{stage.desc}</div>
-                
-                {activeStage === index && (
-                  <motion.div 
-                    className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 rounded-full"
-                    animate={{ scale: [1, 1.3, 1] }}
-                    transition={{ duration: 1, repeat: Infinity }}
-                  />
-                )}
-              </motion.div>
-            ))}
+          <motion.div variants={scaleIn}>
+            <EmbeddedPipelineDemo />
           </motion.div>
-
-          {/* Pipeline progress bar */}
-          <div className="mt-12 max-w-2xl mx-auto">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-blue-300/60">Pipeline Progress</span>
-              <span className="text-sm text-amber-400 font-mono">{activeStage + 1}/12</span>
-            </div>
-            <div className="h-2 bg-blue-800 rounded-full overflow-hidden">
-              <motion.div 
-                className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full"
-                animate={{ width: `${((activeStage + 1) / 12) * 100}%` }}
-                transition={{ duration: 0.5 }}
-              />
-            </div>
-          </div>
+          
+          {/* CTA under demo */}
+          <motion.div variants={fadeInUp} className="mt-12 text-center">
+            <a 
+              href="#pipeline" 
+              onClick={(e) => { e.preventDefault(); window.location.hash = 'pipeline'; window.location.reload(); }}
+              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl text-blue-950 font-bold text-lg hover:from-amber-400 hover:to-amber-500 transition-all shadow-xl shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-105"
+            >
+              <span>🚀</span>
+              View Full-Screen Demo
+              <span>→</span>
+            </a>
+          </motion.div>
         </div>
       </Section>
 
@@ -809,3 +788,4 @@ const App = () => {
 };
 
 export default App;
+
