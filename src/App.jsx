@@ -344,16 +344,12 @@ const App = () => {
 
       {/* ============ BACKGROUND EFFECTS ============ */}
       <div className="fixed inset-0 z-0">
-        {/* Mesh gradient */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-[150px]" />
-          <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-amber-600/8 rounded-full blur-[120px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-900/50 rounded-full blur-[100px]" />
-        </div>
+        {/* Clean navy background */}
+        <div className="absolute inset-0 bg-blue-950" />
         
-        {/* Grid pattern */}
+        {/* Subtle grid pattern */}
         <div 
-          className="absolute inset-0 opacity-[0.03]"
+          className="absolute inset-0 opacity-[0.02]"
           style={{
             backgroundImage: `linear-gradient(rgba(245,158,11,0.3) 1px, transparent 1px), 
                              linear-gradient(90deg, rgba(245,158,11,0.3) 1px, transparent 1px)`,
@@ -376,7 +372,7 @@ const App = () => {
       {/* ============ NAVIGATION ============ */}
       <motion.nav 
         className={`fixed top-0 left-0 right-0 z-40 px-6 py-4 transition-all duration-500 ${
-          scrolled ? 'bg-blue-950/90 backdrop-blur-xl border-b border-blue-800/50' : ''
+          scrolled ? 'bg-blue-950/95 border-b border-blue-800/50' : ''
         }`}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
@@ -436,7 +432,7 @@ const App = () => {
       />
 
       {/* ============ SOCIAL PROOF BAR ============ */}
-      <Section className="relative z-10 px-6 py-16 border-y border-blue-800/50 bg-blue-900/30 backdrop-blur-sm">
+      <Section className="relative z-10 px-6 py-16 border-y border-blue-800/50 bg-blue-900/50">
         <div className="max-w-6xl mx-auto">
           <motion.div 
             variants={fadeIn}
@@ -608,7 +604,7 @@ const App = () => {
                 {/* Hover glow */}
                 <div className="absolute -inset-px bg-gradient-to-br from-amber-500/50 to-amber-600/50 rounded-3xl opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500" />
                 
-                <div className="relative p-8 rounded-3xl bg-blue-900/80 border border-blue-800 group-hover:border-transparent transition-all duration-500 h-full backdrop-blur-sm">
+                <div className="relative p-8 rounded-3xl bg-blue-900 border border-blue-800 group-hover:border-transparent transition-all duration-500 h-full">
                   <div className="flex items-start justify-between mb-6">
                     <div className="flex items-center gap-4">
                       <div className="w-14 h-14 rounded-2xl bg-blue-800 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
@@ -710,11 +706,6 @@ const App = () => {
       {/* ============ FINAL CTA SECTION ============ */}
       <Section id="waitlist" className="relative z-10 px-6 py-32">
         <div className="max-w-4xl mx-auto text-center">
-          {/* Background accent */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-[600px] h-[600px] bg-amber-500/5 rounded-full blur-[100px]" />
-          </div>
-          
           <motion.div variants={staggerContainer} className="relative">
             <motion.h2 variants={fadeInUp} className="text-5xl md:text-7xl font-black tracking-tight mb-6">
               <span className="block text-white">Your Edge.</span>
@@ -788,4 +779,5 @@ const App = () => {
 };
 
 export default App;
+
 
