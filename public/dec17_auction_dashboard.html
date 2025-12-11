@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>December 17, 2025 Foreclosure Auction Dashboard | BrevardBidderAI</title>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            padding: 20px 30px;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { 
+            font-size: 24px; 
+            background: linear-gradient(90deg, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header-info { text-align: right; }
+        .header-info .date { font-size: 18px; color: #94a3b8; }
+        .header-info .version { font-size: 12px; color: #64748b; }
+        
+        .dashboard { display: grid; grid-template-columns: 1fr 400px; height: calc(100vh - 72px); }
+        
+        #map { width: 100%; height: 100%; }
+        
+        .sidebar {
+            background: #1e293b;
+            overflow-y: auto;
+            border-left: 1px solid #334155;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 15px;
+            border-bottom: 1px solid #334155;
+        }
+        .stat-card {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        .stat-card .value { 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #60a5fa;
+        }
+        .stat-card .value.green { color: #34d399; }
+        .stat-card .label { font-size: 11px; color: #64748b; text-transform: uppercase; margin-top: 4px; }
+        
+        .section-title {
+            padding: 15px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #334155;
+            background: #0f172a;
+        }
+        
+        .property-list { padding: 10px; }
+        
+        .property-card {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .property-card:hover {
+            border-color: #60a5fa;
+            transform: translateX(3px);
+        }
+        .property-card.active {
+            border-color: #34d399;
+            background: #1e3a5f;
+        }
+        
+        .property-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .rank-badge {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .rank-badge.gold { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0f172a; }
+        .rank-badge.silver { background: linear-gradient(135deg, #94a3b8, #64748b); color: #0f172a; }
+        .rank-badge.bronze { background: linear-gradient(135deg, #d97706, #b45309); color: white; }
+        .rank-badge.default { background: #334155; color: #94a3b8; }
+        
+        .score-badge {
+            background: linear-gradient(135deg, #34d399, #10b981);
+            color: #0f172a;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .property-info h4 { font-size: 13px; color: #e2e8f0; margin-bottom: 4px; }
+        .property-info .case { font-size: 11px; color: #64748b; }
+        
+        .property-metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .metric {
+            background: #1e293b;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        .metric .label { font-size: 10px; color: #64748b; text-transform: uppercase; }
+        .metric .value { font-size: 14px; font-weight: 600; color: #60a5fa; }
+        
+        .action-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+        .action-badge.bid { background: #059669; color: white; }
+        .action-badge.review { background: #d97706; color: white; }
+        .action-badge.skip { background: #dc2626; color: white; }
+        
+        .legend {
+            padding: 15px;
+            border-top: 1px solid #334155;
+            background: #0f172a;
+        }
+        .legend h4 { font-size: 12px; color: #94a3b8; margin-bottom: 10px; }
+        .legend-items { display: flex; gap: 15px; flex-wrap: wrap; }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: #64748b;
+        }
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        
+        .mapboxgl-popup-content {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid #334155;
+        }
+        .mapboxgl-popup-close-button { color: #94a3b8; }
+        .popup-title { font-weight: bold; font-size: 14px; margin-bottom: 8px; }
+        .popup-details { font-size: 12px; color: #94a3b8; line-height: 1.6; }
+        .popup-judgment { color: #34d399; font-weight: bold; }
+        
+        .chart-container {
+            padding: 15px;
+            border-bottom: 1px solid #334155;
+        }
+        .chart-container canvas { max-height: 150px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>🏛️ December 17, 2025 Foreclosure Auction</h1>
+            <span style="font-size: 12px; color: #64748b;">Titusville Courthouse • 11:00 AM • IN-PERSON</span>
+        </div>
+        <div class="header-info">
+            <div class="date">Wed, Dec 17</div>
+            <div class="version">BrevardBidderAI V14.6.1 • XGBoost ML</div>
+        </div>
+    </div>
+    
+    <div class="dashboard">
+        <div id="map"></div>
+        
+        <div class="sidebar">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="value">8</div>
+                    <div class="label">Properties</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value green">$3.05M</div>
+                    <div class="label">Total Judgments</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value">100</div>
+                    <div class="label">Avg ML Score</div>
+                </div>
+                <div class="stat-card">
+                    <div class="value green">8 BID</div>
+                    <div class="label">Recommendations</div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="judgmentChart"></canvas>
+            </div>
+            
+            <div class="section-title">📍 Auction Properties (Ranked by ML Score)</div>
+            
+            <div class="property-list" id="propertyList">
+                <!-- Properties will be injected here -->
+            </div>
+            
+            <div class="legend">
+                <h4>Map Legend</h4>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #fbbf24;"></div>
+                        <span>Rank 1</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #94a3b8;"></div>
+                        <span>Rank 2</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #d97706;"></div>
+                        <span>Rank 3</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background: #60a5fa;"></div>
+                        <span>Rank 4-8</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // December 17, 2025 Auction Properties with estimated coordinates (Brevard County, FL)
+        const properties = [
+            {
+                rank: 1,
+                case_number: "05-2023-CA-020534",
+                plaintiff: "US BANK",
+                final_judgment: 1158914.32,
+                xgboost_score: 100,
+                recommendation: "BID",
+                address: "Property Location TBD",
+                city: "Brevard County",
+                lat: 28.3922,
+                lng: -80.7452,
+                arv: 2028100,
+                max_bid: 1419099
+            },
+            {
+                rank: 2,
+                case_number: "05-2025-CA-017191",
+                plaintiff: "CITIZENS BANK",
+                final_judgment: 334505.28,
+                xgboost_score: 100,
+                recommendation: "BID",
+                address: "Property Location TBD",
+                city: "Brevard County",
+                lat: 28.0836,
+                lng: -80.6081,
+                arv: 585384,
+                max_bid: 410384
+            },
+            {
+                rank: 3,
+                case_number: "05-2024-CA-051335",
+                plaintiff: "EVELYN SIMEON",
+                final_judgment: 325000.00,
+                xgboost_score: 100,
+                recommendation: "BID",
+                address: "Property Location TBD",
+                city: "Brevard County",
+                lat: 28.1578,
+                lng: -80.5883,
+                arv: 568750,
+                max_bid: 398750
+            },
+            {
+                rank: 4,
+                case_number: "05-2025-CA-024879",
+                plaintiff: "DATA MORT",
+                final_judgment: 281528.68,
+                xgboost_score: 100,
+                recommendation: "BID",
+                address: "Property Location TBD",
+                city: "Brevard County",
+                lat: 27.9947,
+                lng: -80.6628,
+                arv: 492675,
+                max_bid: 345375
+            },
+            {
+                rank: 5,
+                case_number: "05-2025-CA-034578",
+                plaintiff: "UNITED WHOLESALE",
+                final_judgment: 268305.13,
+                xgboost_score: 100,
+                recommendation: "BID",
+                address: "Property Location TBD",
+                city: "Brevard County",
+                lat: 28.0694,
+                lng: -80.5623,
+                arv: 469534,
+                max_bid: 329074
+            },
+            {
+                rank: 6,
+                case_number: "05-2023-CA-044476",
+                plaintiff: "NATIONSTAR",
+                final_judgment: 232556.89,
+                xgboost_score: 100,
+                recommendation: "BID",
+                address: "Property Location TBD",
+                city: "Brevard County",
+                lat: 28.2391,
+                lng: -80.7294,
+                arv: 406974,
+                max_bid: 285283
+            },
+            {
+                rank: 7,
+                case_number: "05-2025-CA-026675",
+                plaintiff: "NEWREZ",
+                final_judgment: 224779.39,
+                xgboost_score: 100,
+                recommendation: "BID",
+                address: "Property Location TBD",
+                city: "Brevard County",
+                lat: 28.3189,
+                lng: -80.6087,
+                arv: 393363,
+                max_bid: 275755
+            },
+            {
+                rank: 8,
+                case_number: "05-2024-CA-014947",
+                plaintiff: "LAKEVIEW LOAN",
+                final_judgment: 219655.37,
+                xgboost_score: 100,
+                recommendation: "BID",
+                address: "Property Location TBD",
+                city: "Brevard County",
+                lat: 28.4023,
+                lng: -80.6582,
+                arv: 384397,
+                max_bid: 269478
+            }
+        ];
+        
+        // Render property cards
+        const propertyList = document.getElementById('propertyList');
+        properties.forEach((prop, index) => {
+            const rankClass = prop.rank === 1 ? 'gold' : prop.rank === 2 ? 'silver' : prop.rank === 3 ? 'bronze' : 'default';
+            const actionClass = prop.recommendation.toLowerCase();
+            
+            const card = document.createElement('div');
+            card.className = 'property-card';
+            card.dataset.index = index;
+            card.innerHTML = `
+                <div class="property-header">
+                    <div class="rank-badge ${rankClass}">${prop.rank}</div>
+                    <div class="score-badge">ML: ${prop.xgboost_score}</div>
+                </div>
+                <div class="property-info">
+                    <h4>${prop.plaintiff}</h4>
+                    <div class="case">${prop.case_number}</div>
+                </div>
+                <div class="property-metrics">
+                    <div class="metric">
+                        <div class="label">Judgment</div>
+                        <div class="value">$${prop.final_judgment.toLocaleString()}</div>
+                    </div>
+                    <div class="metric">
+                        <div class="label">Max Bid</div>
+                        <div class="value">$${prop.max_bid.toLocaleString()}</div>
+                    </div>
+                </div>
+                <span class="action-badge ${actionClass}">${prop.recommendation}</span>
+            `;
+            
+            card.addEventListener('click', () => {
+                // Remove active from all
+                document.querySelectorAll('.property-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                
+                // Fly to property on map
+                if (window.map) {
+                    window.map.flyTo({
+                        center: [prop.lng, prop.lat],
+                        zoom: 13,
+                        duration: 1500
+                    });
+                }
+            });
+            
+            propertyList.appendChild(card);
+        });
+        
+        // Initialize Mapbox
+        mapboxgl.accessToken = 'pk.eyJ1IjoiYnJldmFyZGJpZGRlciIsImEiOiJjbTR4NmF6OWcwMWRsMmlxeHc0ZTB4NG5wIn0.placeholder';
+        
+        try {
+            const map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/dark-v11',
+                center: [-80.65, 28.15],
+                zoom: 9
+            });
+            window.map = map;
+            
+            map.on('load', () => {
+                // Add property markers
+                properties.forEach(prop => {
+                    const color = prop.rank === 1 ? '#fbbf24' : 
+                                  prop.rank === 2 ? '#94a3b8' : 
+                                  prop.rank === 3 ? '#d97706' : '#60a5fa';
+                    
+                    const el = document.createElement('div');
+                    el.innerHTML = prop.rank.toString();
+                    el.style.cssText = `
+                        width: ${prop.rank <= 3 ? '36px' : '28px'};
+                        height: ${prop.rank <= 3 ? '36px' : '28px'};
+                        background: ${color};
+                        color: ${prop.rank <= 3 ? '#0f172a' : 'white'};
+                        border: 3px solid white;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: bold;
+                        font-size: ${prop.rank <= 3 ? '16px' : '12px'};
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                        cursor: pointer;
+                    `;
+                    
+                    new mapboxgl.Marker(el)
+                        .setLngLat([prop.lng, prop.lat])
+                        .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`
+                            <div class="popup-title">Rank #${prop.rank}: ${prop.plaintiff}</div>
+                            <div class="popup-details">
+                                <strong>Case:</strong> ${prop.case_number}<br>
+                                <strong>Judgment:</strong> <span class="popup-judgment">$${prop.final_judgment.toLocaleString()}</span><br>
+                                <strong>ARV:</strong> $${prop.arv.toLocaleString()}<br>
+                                <strong>Max Bid:</strong> $${prop.max_bid.toLocaleString()}<br>
+                                <strong>ML Score:</strong> ${prop.xgboost_score}/100<br>
+                                <strong>Recommendation:</strong> ${prop.recommendation}
+                            </div>
+                        `))
+                        .addTo(map);
+                });
+                
+                // Add courthouse marker
+                const courthouse = document.createElement('div');
+                courthouse.innerHTML = '🏛️';
+                courthouse.style.cssText = 'font-size: 28px; cursor: pointer;';
+                
+                new mapboxgl.Marker(courthouse)
+                    .setLngLat([-80.8079, 28.6122])
+                    .setPopup(new mapboxgl.Popup().setHTML(`
+                        <div class="popup-title">Titusville Courthouse</div>
+                        <div class="popup-details">
+                            Auction Location<br>
+                            December 17, 2025 @ 11:00 AM<br>
+                            <strong>IN-PERSON ONLY</strong>
+                        </div>
+                    `))
+                    .addTo(map);
+                
+                map.addControl(new mapboxgl.NavigationControl());
+            });
+        } catch(e) {
+            // Fallback display
+            document.getElementById('map').innerHTML = `
+                <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; background:#1e293b;">
+                    <div style="font-size:64px; margin-bottom:20px;">🗺️</div>
+                    <h2 style="color:#60a5fa; margin-bottom:10px;">Brevard County Auction Map</h2>
+                    <p style="color:#94a3b8; text-align:center; max-width:400px;">
+                        8 properties across Brevard County<br>
+                        Total Judgments: $3.05M<br>
+                        All recommendations: BID
+                    </p>
+                    <p style="color:#64748b; font-size:12px; margin-top:20px;">
+                        Enable MAPBOX_TOKEN for interactive map
+                    </p>
+                </div>
+            `;
+        }
+        
+        // Judgment Distribution Chart
+        const ctx = document.getElementById('judgmentChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: properties.map(p => `#${p.rank}`),
+                datasets: [{
+                    label: 'Judgment ($K)',
+                    data: properties.map(p => Math.round(p.final_judgment / 1000)),
+                    backgroundColor: properties.map((p, i) => 
+                        i === 0 ? '#fbbf24' : i === 1 ? '#94a3b8' : i === 2 ? '#d97706' : '#60a5fa'
+                    ),
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Judgment Distribution ($K)',
+                        color: '#94a3b8',
+                        font: { size: 12 }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#64748b' },
+                        grid: { display: false }
+                    },
+                    y: {
+                        ticks: { 
+                            color: '#64748b',
+                            callback: val => '$' + val + 'K'
+                        },
+                        grid: { color: '#334155' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
