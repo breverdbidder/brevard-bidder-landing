@@ -1,6 +1,6 @@
 # Intellectual Property Attribution
 
-## BrevardBidderAI Landing Page
+## BidDeed.AI Landing Page
 
 **Copyright © 2025 Ariel Shapira. All Rights Reserved.**
 
@@ -19,7 +19,7 @@ Managing Member, Everest Capital of Brevard LLC
 This software, including all source code, design systems, visual assets, and associated documentation, is the exclusive intellectual property of Ariel Shapira.
 
 **Protected Elements Include:**
-- BrevardBidderAI brand, name, and logo
+- BidDeed.AI brand, name, and logo
 - BidDeedAI brand, name, and logo
 - Landing page design and implementation
 - UI/UX design patterns and aesthetic direction
@@ -36,7 +36,7 @@ Any derivative works, forks, or implementations based on this codebase must prom
 ```
 Built by Ariel Shapira
 Real Estate Developer & Founder, Everest Capital USA
-Solo Founder of BrevardBidderAI & BidDeedAI
+Solo Founder of BidDeed.AI & BidDeedAI
 ```
 
 ---
