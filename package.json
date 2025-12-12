@@ -1,7 +1,7 @@
 {
-  "name": "brevard-bidder-landing",
+  "name": "biddeed-landing",
   "version": "13.4.2",
-  "description": "BrevardBidderAI - Agentic AI Ecosystem for Foreclosure Auctions",
+  "description": "BidDeed.AI - Agentic AI Ecosystem for Foreclosure Auctions",
   "author": "Ariel Shapira, Solo Founder, Everest Capital USA",
   "private": true,
   "type": "module",
