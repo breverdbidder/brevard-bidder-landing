@@ -1,0 +1,368 @@
+name: BECA Manus V22 - Address Extraction - Anti-Detection
+
+on:
+  schedule:
+    - cron: '0 11 * * *'
+  workflow_dispatch:
+    inputs:
+      auction_date:
+        description: 'Auction date (YYYY-MM-DD)'
+        required: true
+        default: '2025-12-17'
+
+env:
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+jobs:
+  scrape-beca:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install curl_cffi pdfplumber beautifulsoup4
+
+      - name: Run BECA V21 Anti-Detection Scraper
+        run: |
+          python3 << 'PYTHON'
+          import json, os, re, time, random, tempfile
+          from datetime import datetime
+          from curl_cffi import requests as curl_requests
+          from bs4 import BeautifulSoup
+          import pdfplumber
+
+          print("=" * 70)
+          print("BECA MANUS V21 - ANTI-DETECTION SCRAPER")
+          print(f"Started: {datetime.now().isoformat()}")
+          print("=" * 70)
+
+          USER_AGENTS = [
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0",
+          ]
+
+          IMPERSONATE = ["chrome120", "chrome119", "chrome110", "safari15_5"]
+
+          PATTERNS = [
+              r'TOTAL\s+ESTIMATED\s+VALUE\s+OF\s+CLAIM[:\s]*\$?\s*([\d,]+\.?\d*)',
+              r'TOTAL\s+JUDGMENT\s+AMOUNT[:\s]*\$?\s*([\d,]+\.?\d*)',
+              r'GRAND\s+TOTAL[:\s]*\$?\s*([\d,]+\.?\d*)',
+              r'TOTAL\s+AMOUNT\s+DUE[:\s]*\$?\s*([\d,]+\.?\d*)',
+              r'FINAL\s+JUDGMENT[:\s]*\$?\s*([\d,]+\.?\d*)',
+              r'IT\s+IS.*?ORDERED.*?ADJUDGED[^$]*\$\s*([\d,]+\.\d{2})',
+              r'TOTAL\s+INDEBTEDNESS[:\s]*\$?\s*([\d,]+\.?\d*)',
+              r'TOTAL\s+SUM[:\s]*\$?\s*([\d,]+\.?\d*)',
+              r'AMOUNT\s+OF\s+FINAL\s+JUDGMENT[:\s]*\$?\s*([\d,]+\.?\d*)',
+              r'JUDGMENT\s+AMOUNT[:\s]*\$?\s*([\d,]+\.?\d*)',
+              r'PRINCIPAL\s+BALANCE[:\s]*\$?\s*([\d,]+\.?\d*)',
+              r'UNPAID\s+PRINCIPAL[:\s]*\$?\s*([\d,]+\.?\d*)',
+              r'ORDERED\s+AND\s+ADJUDGED[^$]*\$\s*([\d,]+\.\d{2})',
+              r'hereby\s+enters\s+judgment[^$]*\$\s*([\d,]+\.\d{2})',
+              r'\$\s*([\d]{2,3},[\d]{3}\.\d{2})',
+          ]
+
+          # V22: Address extraction patterns for Florida foreclosures
+          ADDRESS_PATTERNS = [
+              (r'Property\s+Address[:\s]+(\d+[^,\n]+,\s*[A-Za-z\s]+,\s*FL\s*\d{5})', 1.0),
+              (r'commonly\s+known\s+as[:\s]*(\d+[^,\n]{10,80})', 0.95),
+              (r'Property\s+at[:\s]+(\d+[^<\n,]{10,60})', 0.9),
+              (r'[Ss]treet\s+[Aa]ddress[:\s]+(\d+[^<\n]{10,80})', 0.9),
+              (r'situate[d]?\s+at[:\s]+(\d+[^<\n]{10,80})', 0.85),
+              (r'located\s+at[:\s]+(\d+[^<\n]{10,80})', 0.85),
+              (r'a/k/a[:\s]+(\d+[^<\n]{10,80})', 0.85),
+              (r'(\d+\s+[A-Za-z][^,\n]{5,50},\s*(?:Melbourne|Palm Bay|Titusville|Cocoa|Rockledge|Merritt Island|Satellite Beach|Indialantic)[^,\n]*,?\s*FL\s*32\d{3})', 0.9),
+          ]
+
+          def extract_address(text):
+              """Extract property address from text."""
+              if not text:
+                  return None
+              best_addr = None
+              best_conf = 0
+              for pattern, conf in ADDRESS_PATTERNS:
+                  for m in re.findall(pattern, text, re.IGNORECASE | re.DOTALL):
+                      addr = m.strip() if isinstance(m, str) else m[0].strip()
+                      addr = re.sub(r'\s+', ' ', addr).rstrip('.,;:')
+                      if len(addr) < 10 or len(addr) > 150:
+                          continue
+                      if not re.search(r'\d', addr):
+                          continue
+                      if 'FL 32' in addr.upper():
+                          conf = min(conf + 0.1, 1.0)
+                      if conf > best_conf:
+                          best_addr = addr
+                          best_conf = conf
+              return best_addr
+
+
+          EXCLUDE = {15000, 30000, 50000, 75000, 100000, 150000, 200000, 250000, 500000, 1000000}
+
+          def human_delay(min_s=3, max_s=8):
+              d = random.uniform(min_s, max_s)
+              time.sleep(d)
+              return d
+
+          def parse_amt(s):
+              try:
+                  v = float(s.replace(',','').replace('$',''))
+                  if int(v) in EXCLUDE or v < 10000 or v > 5000000:
+                      return None
+                  return v
+              except:
+                  return None
+
+          def extract_judgment(text):
+              for p in PATTERNS:
+                  for m in re.findall(p, text, re.IGNORECASE | re.DOTALL):
+                      amt = parse_amt(m)
+                      if amt:
+                          return amt
+              return None
+
+          def case_form(case):
+              parts = case.split("-")
+              year = int(parts[1])
+              ct = parts[2]
+              p5 = f"XX{ct}" if year >= 2024 else "XXXX"
+              p6 = "BC" if year >= 2024 else "XX"
+              return {
+                  "CaseNumber1": parts[0],
+                  "CaseNumber2": parts[1],
+                  "CaseNumber3": parts[2],
+                  "CaseNumber4": parts[3],
+                  "CaseNumber5": p5,
+                  "CaseNumber6": p6,
+                  "submit": "Search"
+              }
+
+          CASES = [
+              ("05-2018-CA-050709", "MTGLQ vs COOK"),
+              ("05-2023-CA-020534", "US BANK vs HANNON"),
+              ("05-2023-CA-044476", "NATIONSTAR vs FRAMPTON"),
+              ("05-2024-CA-014947", "LAKEVIEW vs HIVELY"),
+              ("05-2024-CA-015373", "CYPRESS HOA vs RIVERO"),
+              ("05-2024-CA-048653", "DATA MORTGAGE vs MURPHY"),
+              ("05-2024-CA-051335", "SIMEON vs CASSELL"),
+              ("05-2025-CA-013384", "HUNTINGTON vs HEVIA"),
+              ("05-2025-CA-017191", "CITIZENS vs DAVIS"),
+              ("05-2025-CA-022257", "US BANK vs KEDDOO"),
+              ("05-2025-CA-024879", "DATA MORTGAGE vs COMPTON"),
+              ("05-2025-CA-026675", "NEWREZ vs BEVEL"),
+              ("05-2025-CA-034578", "UNITED WHOLESALE vs LEHERE"),
+              ("05-2025-CC-017102", "NORTHFIELD vs MORRISON"),
+              ("05-2025-CC-027115", "REGENCY PINES vs FREDIANELLI"),
+          ]
+
+          results = []
+          successful = 0
+          browser = random.choice(IMPERSONATE)
+          ua = random.choice(USER_AGENTS)
+
+          print(f"\n🔒 Browser: {browser}, UA: {ua[:40]}...")
+
+          session = curl_requests.Session(impersonate=browser)
+          session.headers.update({
+              "User-Agent": ua,
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Accept-Encoding": "gzip, deflate, br",
+              "Connection": "keep-alive",
+              "Upgrade-Insecure-Requests": "1",
+              "Sec-Fetch-Dest": "document",
+              "Sec-Fetch-Mode": "navigate",
+              "Sec-Fetch-Site": "none",
+              "Sec-Fetch-User": "?1",
+              "Cache-Control": "max-age=0",
+          })
+
+          try:
+              print("\n🌐 Phase 1: Warm-up...")
+              r = session.get("https://brevardclerk.us/", timeout=30)
+              print(f"   Homepage: {r.status_code}")
+              human_delay(2, 4)
+
+              print("\n📋 Phase 2: BECA...")
+              r = session.get("https://vmatrix1.brevardclerk.us/beca/Beca_Splash.cfm", timeout=30)
+              print(f"   Splash: {r.status_code}")
+              human_delay(3, 5)
+
+              print("\n✅ Phase 3: Terms...")
+              session.headers.update({
+                  "Referer": "https://vmatrix1.brevardclerk.us/beca/Beca_Splash.cfm",
+                  "Origin": "https://vmatrix1.brevardclerk.us",
+                  "Content-Type": "application/x-www-form-urlencoded",
+              })
+              r = session.post(
+                  "https://vmatrix1.brevardclerk.us/beca/StartSearch.cfm",
+                  data={"RadioChk": "Yes", "Submit": "Submit"},
+                  timeout=30
+              )
+              print(f"   Accepted: {r.status_code}")
+              human_delay(2, 4)
+
+              print(f"\n🔍 Phase 4: {len(CASES)} cases...")
+              print("-" * 70)
+
+              for i, (case, party) in enumerate(CASES, 1):
+                  result = {"case_number": case, "party": party, "final_judgment": None, "property_address": None, "error": None, "scraped_at": datetime.now().isoformat()}
+                  print(f"\n[{i}/{len(CASES)}] {case} - {party}")
+
+                  try:
+                      session.headers["Referer"] = "https://vmatrix1.brevardclerk.us/beca/StartSearch.cfm"
+                      r = session.post(
+                          "https://vmatrix1.brevardclerk.us/beca/CaseNumber_Display.cfm?RequestTimeout=1000",
+                          data=case_form(case),
+                          timeout=60
+                      )
+
+                      if r.status_code != 200:
+                          result["error"] = f"HTTP {r.status_code}"
+                          print(f"   ❌ {result['error']}")
+                          results.append(result)
+                          human_delay(3, 6)
+                          continue
+
+                      page = r.text
+                      soup = BeautifulSoup(page, 'html.parser')
+
+                      if "no records" in page.lower():
+                          result["error"] = "No records"
+                          print(f"   ⚠️ No records")
+                          results.append(result)
+                          human_delay(2, 4)
+                          continue
+
+                      if "access denied" in page.lower():
+                          result["error"] = "Access denied"
+                          print(f"   🚫 Blocked")
+                          results.append(result)
+                          human_delay(8, 15)
+                          continue
+
+                      links = soup.find_all('a', href=True)
+                      print(f"   {len(links)} links")
+
+                      jdg_kw = ['final judgment', 'judgment', 'foreclosure', 'order', 'decree']
+                      jdg_links = [(a.get_text().lower().strip(), a['href']) for a in links if any(k in a.get_text().lower() for k in jdg_kw)]
+                      print(f"   {len(jdg_links)} judgment links")
+
+                      for txt, href in jdg_links[:5]:
+                          try:
+                              if not href.startswith('http'):
+                                  href = f"https://vmatrix1.brevardclerk.us/beca/{href}"
+                              print(f"   Checking: {txt[:35]}...")
+                              human_delay(1, 2)
+                              doc = session.get(href, timeout=30)
+
+                              if doc.content[:4] == b'%PDF':
+                                  with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as f:
+                                      f.write(doc.content)
+                                      path = f.name
+                                  text = ""
+                                  try:
+                                      with pdfplumber.open(path) as pdf:
+                                          for pg in pdf.pages[:10]:
+                                              t = pg.extract_text()
+                                              if t: text += t + "\n"
+                                  finally:
+                                      os.unlink(path)
+                                  amt = extract_judgment(text)
+                                  if amt:
+                                      result["final_judgment"] = amt
+                                      print(f"   ✅ PDF: ${amt:,.2f}")
+                                      successful += 1
+                                      break
+                              else:
+                                  amt = extract_judgment(doc.text)
+                                  if amt:
+                                      result["final_judgment"] = amt
+                                      print(f"   ✅ HTML: ${amt:,.2f}")
+                                      successful += 1
+                                      break
+                          except Exception as e:
+                              print(f"   Doc err: {str(e)[:25]}")
+
+                      if not result["final_judgment"]:
+                          amt = extract_judgment(page)
+                          if amt:
+                              result["final_judgment"] = amt
+                              print(f"   ✅ Page: ${amt:,.2f}")
+                              successful += 1
+
+                              # V22: Extract property address
+                              addr = extract_address(page) or extract_address(pdf_text or "")
+                              if addr:
+                                  result["property_address"] = addr
+                                  print(f"   📍 Address: {addr[:50]}...")
+
+                          else:
+                              result["error"] = "No judgment found"
+                              print(f"   ⚠️ No judgment")
+
+                  except Exception as e:
+                      result["error"] = str(e)[:80]
+                      print(f"   ❌ {result['error']}")
+
+                  results.append(result)
+                  d = human_delay(4, 12)
+                  print(f"   ⏱️ {d:.1f}s")
+
+          except Exception as e:
+              print(f"\n❌ Session: {e}")
+
+          output = {
+              "scrape_date": datetime.now().isoformat(),
+              "auction_date": "${{ inputs.auction_date || '2025-12-17' }}",
+              "version": "V22",
+              "browser": browser,
+              "total": len(CASES),
+              "successful": successful,
+              "results": results
+          }
+          with open("beca_v22_results.json", "w") as f:
+              json.dump(output, f, indent=2)
+
+          print("\n" + "=" * 70)
+          print(f"📊 RESULTS: {successful}/{len(results)}")
+          ok = [r for r in results if r.get("final_judgment")]
+          if ok:
+              total = sum(r["final_judgment"] for r in ok)
+              print(f"💰 TOTAL: ${total:,.2f}")
+              for r in sorted(ok, key=lambda x: -x["final_judgment"])[:10]:
+                  print(f"  {r['case_number']}: ${r['final_judgment']:,.2f}")
+          print("=" * 70)
+
+          if successful < len(CASES) // 3:
+              print("\n⚠️ <33% success - FAILED")
+              exit(1)
+          PYTHON
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: beca-v22-${{ github.run_number }}
+          path: beca_v22_results.json
+          retention-days: 90
+
+      - name: Commit results
+        if: success()
+        run: |
+          git config user.name "BidDeed.AI"
+          git config user.email "ai@brevardbidder.com"
+          mkdir -p data/beca_results
+          cp beca_v22_results.json data/beca_results/dec17_v22_$(date +%Y%m%d_%H%M%S).json
+          git add data/beca_results/
+          git commit -m "🤖 BECA V22 - $(date +%Y-%m-%d)" || true
+          git push || true
+
