@@ -1,4 +1,4 @@
-// BrevardBidderAI Split-Screen Layout
+// BidDeed.AI Split-Screen Layout
 // Main Application Interface
 // Author: Ariel Shapira, Everest Capital USA
 
@@ -52,7 +52,7 @@ export function SplitScreenLayout() {
       {/* Footer Attribution */}
       <div className="fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur border-t border-slate-700 px-4 py-2 flex justify-between items-center text-xs text-gray-500">
         <span>© 2025 Ariel Shapira, Everest Capital USA</span>
-        <span>BrevardBidderAI v13.4.0 • 12-Stage Agentic Pipeline</span>
+        <span>BidDeed.AI v13.4.0 • 12-Stage Agentic Pipeline</span>
       </div>
     </div>
   );
