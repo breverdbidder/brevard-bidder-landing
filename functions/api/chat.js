@@ -1,4 +1,4 @@
-// BrevardBidderAI Chat API - Smart Router V5
+// BidDeed.AI Chat API - Smart Router V5
 // DEFAULT: Gemini 2.5 Flash (1M context FREE)
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
@@ -45,7 +45,7 @@ export async function onRequest(context) {
     const flTime = now.toLocaleTimeString('en-US', { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit' });
     const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
 
-    const systemPrompt = `You are BrevardBidderAI - an Agentic AI ecosystem for foreclosure auction intelligence.
+    const systemPrompt = `You are BidDeed.AI - an Agentic AI ecosystem for foreclosure auction intelligence.
 
 CURRENT TIME: ${dateStr} | FL: ${flTime} EST
 
@@ -81,7 +81,7 @@ Be direct, action-oriented, and minimize human-in-the-loop.`;
     });
 
   } catch (error) {
-    console.error('BrevardBidderAI Error:', error);
+    console.error('BidDeed.AI Error:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
       model: 'error',
