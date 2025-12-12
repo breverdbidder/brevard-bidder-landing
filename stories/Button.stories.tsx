@@ -1,4 +1,4 @@
-// BrevardBidderAI - Button Component Stories
+// BidDeed.AI - Button Component Stories
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
 import type { Meta, StoryObj } from '@storybook/react';
