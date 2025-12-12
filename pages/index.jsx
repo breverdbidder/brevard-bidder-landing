@@ -1,4 +1,4 @@
-// BrevardBidderAI - Premium Landing Page
+// BidDeed.AI - Premium Landing Page
 // Vibe Coding Best Practices: Shadcn + Tailwind + Inter/Geist + Animations
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
@@ -19,7 +19,7 @@ const COLORS = {
 // ============================================================
 // MAIN APP COMPONENT
 // ============================================================
-export default function BrevardBidderAI() {
+export default function BidDeed.AI() {
   const [auctions, setAuctions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -108,7 +108,7 @@ export default function BrevardBidderAI() {
                 <span className="text-white font-bold text-lg">B</span>
               </div>
               <div>
-                <h1 className="text-white font-bold text-lg">BrevardBidderAI</h1>
+                <h1 className="text-white font-bold text-lg">BidDeed.AI</h1>
                 <p className="text-neutral-400 text-xs">Agentic AI Ecosystem</p>
               </div>
             </div>
@@ -334,7 +334,7 @@ export default function BrevardBidderAI() {
       <footer className="border-t border-neutral-800 mt-12">
         <div className="max-w-7xl mx-auto px-4 py-8 text-center">
           <p className="text-neutral-500 text-sm">
-            BrevardBidderAI V13.4.0 • Agentic AI Ecosystem
+            BidDeed.AI V13.4.0 • Agentic AI Ecosystem
           </p>
           <p className="text-neutral-600 text-xs mt-1">
             © 2025 Ariel Shapira, Solo Founder • Everest Capital USA
