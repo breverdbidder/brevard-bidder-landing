@@ -1,4 +1,4 @@
-// BrevardBidderAI - LangGraph Pipeline Trigger API
+// BidDeed.AI - LangGraph Pipeline Trigger API
 // Triggers GitHub Actions workflow and returns job ID for polling
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
