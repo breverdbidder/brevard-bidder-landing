@@ -1,0 +1,178 @@
+name: Smart Router V5 - Multi-Tier LLM Orchestration
+
+on:
+  workflow_dispatch:
+    inputs:
+      task_type:
+        description: 'Task type to route'
+        required: true
+        type: choice
+        options:
+          - report_generation
+          - data_enrichment
+          - bulk_scraping
+          - lien_analysis
+          - title_search
+          - max_bid_calculation
+          - investment_decision
+      prompt:
+        description: 'Prompt to process'
+        required: true
+        type: string
+      force_tier:
+        description: 'Force specific tier (optional)'
+        required: false
+        type: choice
+        options:
+          - auto
+          - free
+          - ultra_cheap
+          - budget
+          - production
+          - critical
+
+env:
+  GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+  DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  SUPABASE_URL: https://mocerqjnksmhcjzxrewo.supabase.co
+  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+jobs:
+  route-and-execute:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install httpx supabase python-dotenv
+      
+      - name: Execute Smart Router V5
+        id: router
+        run: |
+          python << 'EOF'
+          import os
+          import json
+          import asyncio
+          import httpx
+          from datetime import datetime
+
+          # Import Smart Router V5 logic
+          exec(open('src/routers/smart_router_v5.py').read())
+
+          async def run():
+              router = SmartRouterV5()
+              
+              task_type = "${{ inputs.task_type }}"
+              prompt = """${{ inputs.prompt }}"""
+              force_tier_input = "${{ inputs.force_tier }}"
+              
+              force_tier = None
+              if force_tier_input and force_tier_input != "auto":
+                  force_tier = RouterTier(force_tier_input)
+              
+              result = await router.route_and_execute(
+                  prompt=prompt,
+                  task_type=task_type,
+                  force_tier=force_tier,
+                  system="You are BidDeed.AI V13.4.0, an AI-powered foreclosure auction intelligence system."
+              )
+              
+              print(f"::set-output name=tier::{result['tier']}")
+              print(f"::set-output name=model::{result['model']}")
+              print(f"::set-output name=content::{result['content'][:500]}...")
+              
+              # Log to Supabase
+              metrics = router.get_metrics()
+              print(f"
+📊 Router Metrics:")
+              print(f"   FREE tier: {metrics['free_tier_percentage']:.1f}%")
+              print(f"   Total requests: {metrics['total_requests']}")
+              print(f"   Status: {metrics['status']}")
+              
+              return result
+          
+          asyncio.run(run())
+          EOF
+      
+      - name: Log to Supabase
+        run: |
+          curl -X POST "${{ env.SUPABASE_URL }}/rest/v1/insights" \
+            -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "category": "smart_router",
+              "subcategory": "v5_execution",
+              "title": "Smart Router V5 Task Execution",
+              "content": "Task: ${{ inputs.task_type }}, Tier: ${{ steps.router.outputs.tier }}, Model: ${{ steps.router.outputs.model }}",
+              "metadata": {
+                "task_type": "${{ inputs.task_type }}",
+                "tier": "${{ steps.router.outputs.tier }}",
+                "model": "${{ steps.router.outputs.model }}",
+                "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"
+              }
+            }'
+
+  test-free-tier:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install httpx
+      
+      - name: Test Gemini FREE tier
+        run: |
+          python << 'EOF'
+          import os
+          import httpx
+          import asyncio
+
+          async def test_gemini():
+              api_key = os.getenv("GOOGLE_API_KEY")
+              if not api_key:
+                  print("⚠️ GOOGLE_API_KEY not set - skipping Gemini test")
+                  return
+              
+              endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+              
+              async with httpx.AsyncClient(timeout=60.0) as client:
+                  response = await client.post(
+                      f"{endpoint}?key={api_key}",
+                      json={
+                          "contents": [{"role": "user", "parts": [{"text": "Say 'Gemini 2.5 Flash FREE tier working!' in exactly those words."}]}],
+                          "generationConfig": {"temperature": 0, "maxOutputTokens": 50}
+                      }
+                  )
+                  
+                  if response.status_code == 200:
+                      data = response.json()
+                      content = data["candidates"][0]["content"]["parts"][0]["text"]
+                      print(f"✅ Gemini FREE tier: {content}")
+                      
+                      usage = data.get("usageMetadata", {})
+                      print(f"   Context: {usage.get('promptTokenCount', 'N/A')} input, {usage.get('candidatesTokenCount', 'N/A')} output")
+                      print(f"   Max context: 1,000,000 tokens (FREE)")
+                  else:
+                      print(f"❌ Gemini test failed: {response.status_code}")
+                      print(response.text)
+
+          asyncio.run(test_gemini())
+          EOF
