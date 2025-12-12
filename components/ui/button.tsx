@@ -1,5 +1,5 @@
 // Shadcn UI Button Component
-// BrevardBidderAI - Vibe Coding Stack
+// BidDeed.AI - Vibe Coding Stack
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
 import * as React from "react"
