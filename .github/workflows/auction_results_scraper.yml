@@ -1,0 +1,95 @@
+# BidDeed.AI Auction Results Scraper
+# Automatically scrapes results after each Wednesday foreclosure auction
+# Author: Ariel Shapira, Solo Founder - Everest Capital USA
+
+name: Auction Results Scraper
+
+on:
+  schedule:
+    # Run every Wednesday at 6:00 PM EST (23:00 UTC) - after auction ends
+    - cron: '0 23 * * 3'
+    # Run Thursday morning for any missed updates
+    - cron: '0 14 * * 4'
+  workflow_dispatch:
+    inputs:
+      auction_date:
+        description: 'Auction date (YYYY-MM-DD) - leave blank for most recent Wednesday'
+        required: false
+        default: ''
+      case_numbers:
+        description: 'Comma-separated case numbers (optional)'
+        required: false
+        default: ''
+
+env:
+  FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+  SUPABASE_URL: https://mocerqjnksmhcjzxrewo.supabase.co
+  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+jobs:
+  scrape-results:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install httpx
+      
+      - name: Scrape Auction Results
+        run: python src/scrapers/auction_results_scraper.py
+        env:
+          AUCTION_DATE: ${{ github.event.inputs.auction_date || '' }}
+          CASE_NUMBERS: ${{ github.event.inputs.case_numbers || '' }}
+      
+      - name: Upload results artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: auction-results-${{ github.run_number }}
+          path: auction_results.json
+          retention-days: 90
+      
+      - name: Generate Summary
+        if: always()
+        run: |
+          echo "## 🏠 Auction Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f auction_results.json ]; then
+            python3 << 'EOF' >> $GITHUB_STEP_SUMMARY
+          import json
+          results = json.load(open('auction_results.json'))
+          
+          sold = [r for r in results if r.get('sold')]
+          third_party = [r for r in results if r.get('buyer_type') == 'THIRD_PARTY']
+          cancelled = [r for r in results if r.get('sale_status') == 'CANCELLED']
+          
+          print(f"| Metric | Count |")
+          print(f"|--------|-------|")
+          print(f"| Total | {len(results)} |")
+          print(f"| Sold | {len(sold)} |")
+          print(f"| Third Party | {len(third_party)} |")
+          print(f"| Cancelled | {len(cancelled)} |")
+          print()
+          
+          if third_party:
+              print("### 🏆 Third Party Purchases")
+              for r in third_party:
+                  addr = r.get('property_address', 'Unknown')[:40]
+                  amt = r.get('sale_amount', 'N/A')
+                  mkt = r.get('market_value', 'N/A')
+                  amt_str = f"${amt:,.0f}" if isinstance(amt, (int, float)) else str(amt)
+                  mkt_str = f"${mkt:,.0f}" if isinstance(mkt, (int, float)) else str(mkt)
+                  print(f"- **{r['case_number']}**: {addr}")
+                  print(f"  - Sale: {amt_str} | Market: {mkt_str}")
+          EOF
+          else
+            echo "⚠️ No results file generated" >> $GITHUB_STEP_SUMMARY
+          fi
