@@ -1,4 +1,4 @@
-// BrevardBidderAI - Shadcn-Inspired UI Component Library
+// BidDeed.AI - Shadcn-Inspired UI Component Library
 // Based on Vibe Coding Community Best Practices
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
@@ -196,7 +196,7 @@ export function Badge({ children, variant = 'default', size = 'md', className = 
     success: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
     warning: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
     danger: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    // BrevardBidderAI specific
+    // BidDeed.AI specific
     bid: 'bg-green-100 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-400',
     review: 'bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-400',
     skip: 'bg-red-100 text-red-700 border border-red-200 dark:bg-red-900/30 dark:text-red-400',
@@ -382,7 +382,7 @@ export function StatCard({
 }
 
 // ============================================================
-// PROPERTY CARD (BrevardBidderAI specific)
+// PROPERTY CARD (BidDeed.AI specific)
 // ============================================================
 export function PropertyCard({ 
   address,
