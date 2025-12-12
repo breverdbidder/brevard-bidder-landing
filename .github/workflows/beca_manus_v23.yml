@@ -1,0 +1,332 @@
+name: BECA Manus V23 - Row-Based Parsing
+
+on:
+  workflow_dispatch:
+    inputs:
+      auction_date:
+        description: 'Auction date'
+        required: true
+        default: '2025-12-17'
+
+jobs:
+  scrape-beca:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install curl_cffi pdfplumber beautifulsoup4
+
+      - name: Run BECA V23 Row-Based Parser
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          python3 << 'PYTHON'
+          import json, os, re, time, random, tempfile
+          from datetime import datetime
+          from curl_cffi import requests as curl_requests
+          from bs4 import BeautifulSoup
+          import pdfplumber
+
+          print("=" * 70)
+          print("BECA MANUS V23 - ROW-BASED PARSING")
+          print(f"Started: {datetime.now().isoformat()}")
+          print("=" * 70)
+
+          IMPERSONATE = ["chrome120", "chrome119"]
+          USER_AGENTS = [
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+          ]
+
+          PATTERNS = [
+              r'(?:TOTAL|GRAND)\s+(?:ESTIMATED\s+VALUE|JUDGMENT\s+AMOUNT|AMOUNT\s+DUE|SUM|INDEBTEDNESS)[:\s]*\$?\s*([\d,]+\.\d{2})',
+              r'IT\s+IS.*?ORDERED.*?ADJUDGED[^$]*\$\s*([\d,]+\.\d{2})',
+              r'hereby\s+(?:enters|awards)[^$]*\$\s*([\d,]+\.\d{2})',
+              r'judgment\s+(?:is\s+)?(?:entered\s+)?(?:for|in\s+favor)[^$]*\$\s*([\d,]+\.\d{2})',
+              r'(?:owe|owes|owing)[^$]*\$\s*([\d,]+\.\d{2})',
+              r'(?:plus|together\s+with)[^$]*totaling[^$]*\$\s*([\d,]+\.\d{2})',
+              r'\$\s*([\d]{2,3},[\d]{3}\.\d{2})',
+          ]
+
+          EXCLUDE = {15000, 30000, 50000, 75000, 100000, 150000, 200000, 250000, 500000, 1000000}
+
+          def human_delay(min_s=2, max_s=5):
+              d = random.uniform(min_s, max_s)
+              time.sleep(d)
+              return d
+
+          def parse_amt(s):
+              try:
+                  v = float(s.replace(',','').replace('$',''))
+                  if int(v) in EXCLUDE or v < 10000 or v > 5000000:
+                      return None
+                  return v
+              except:
+                  return None
+
+          def extract_judgment(text):
+              # Find largest valid amount (most likely total)
+              amounts = []
+              for p in PATTERNS:
+                  for m in re.findall(p, text, re.IGNORECASE | re.DOTALL):
+                      amt = parse_amt(m)
+                      if amt:
+                          amounts.append(amt)
+              return max(amounts) if amounts else None
+
+          def case_form(case):
+              parts = case.split("-")
+              year = int(parts[1])
+              ct = parts[2]
+              p5 = f"XX{ct}" if year >= 2024 else "XXXX"
+              p6 = "BC" if year >= 2024 else "XX"
+              return {
+                  "CaseNumber1": parts[0],
+                  "CaseNumber2": parts[1],
+                  "CaseNumber3": parts[2],
+                  "CaseNumber4": parts[3],
+                  "CaseNumber5": p5,
+                  "CaseNumber6": p6,
+                  "submit": "Search"
+              }
+
+          CASES = [
+              ("05-2018-CA-050709", "MTGLQ vs COOK"),
+              ("05-2023-CA-020534", "US BANK vs HANNON"),
+              ("05-2023-CA-044476", "NATIONSTAR vs FRAMPTON"),
+              ("05-2024-CA-014947", "LAKEVIEW vs HIVELY"),
+              ("05-2024-CA-015373", "CYPRESS HOA vs RIVERO"),
+              ("05-2024-CA-048653", "DATA MORTGAGE vs MURPHY"),
+              ("05-2024-CA-051335", "SIMEON vs CASSELL"),
+              ("05-2025-CA-013384", "HUNTINGTON vs HEVIA"),
+              ("05-2025-CA-017191", "CITIZENS vs DAVIS"),
+              ("05-2025-CA-022257", "US BANK vs KEDDOO"),
+              ("05-2025-CA-024879", "DATA MORTGAGE vs COMPTON"),
+              ("05-2025-CA-026675", "NEWREZ vs BEVEL"),
+              ("05-2025-CA-034578", "UNITED WHOLESALE vs LEHERE"),
+              ("05-2025-CC-017102", "NORTHFIELD vs MORRISON"),
+              ("05-2025-CC-027115", "REGENCY PINES vs FREDIANELLI"),
+          ]
+
+          results = []
+          successful = 0
+          browser = random.choice(IMPERSONATE)
+          ua = random.choice(USER_AGENTS)
+
+          print(f"\n🔒 Browser: {browser}")
+
+          session = curl_requests.Session(impersonate=browser)
+          session.headers.update({
+              "User-Agent": ua,
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.9",
+              "Upgrade-Insecure-Requests": "1",
+          })
+
+          try:
+              print("\n🌐 Warm-up...")
+              session.get("https://brevardclerk.us/", timeout=30)
+              human_delay(2, 3)
+
+              print("📋 BECA...")
+              session.get("https://vmatrix1.brevardclerk.us/beca/Beca_Splash.cfm", timeout=30)
+              human_delay(2, 3)
+
+              print("✅ Terms...")
+              session.headers.update({
+                  "Referer": "https://vmatrix1.brevardclerk.us/beca/Beca_Splash.cfm",
+                  "Content-Type": "application/x-www-form-urlencoded",
+              })
+              session.post(
+                  "https://vmatrix1.brevardclerk.us/beca/StartSearch.cfm",
+                  data={"RadioChk": "Yes", "Submit": "Submit"},
+                  timeout=30
+              )
+              human_delay(2, 3)
+
+              print(f"\n🔍 Processing {len(CASES)} cases...\n")
+
+              for i, (case, party) in enumerate(CASES, 1):
+                  result = {"case_number": case, "party": party, "final_judgment": None, "doc_num": None, "error": None, "scraped_at": datetime.now().isoformat()}
+                  print(f"[{i}/{len(CASES)}] {case} - {party}")
+
+                  try:
+                      session.headers["Referer"] = "https://vmatrix1.brevardclerk.us/beca/StartSearch.cfm"
+                      r = session.post(
+                          "https://vmatrix1.brevardclerk.us/beca/CaseNumber_Display.cfm?RequestTimeout=1000",
+                          data=case_form(case),
+                          timeout=60
+                      )
+
+                      if r.status_code != 200:
+                          result["error"] = f"HTTP {r.status_code}"
+                          results.append(result)
+                          continue
+
+                      page = r.text
+                      soup = BeautifulSoup(page, 'html.parser')
+
+                      # Strategy: Find rows with "FINAL JUDGMENT" in the text
+                      # Then find the get_document.cfm link in the same row
+                      
+                      # Find all table rows
+                      rows = soup.find_all('tr')
+                      judgment_docs = []
+                      
+                      for row in rows:
+                          row_text = row.get_text().upper()
+                          
+                          # Check for Final Judgment indicators
+                          if 'FINAL JUDGMENT' in row_text and 'FORECLOSURE' in row_text:
+                              # Find document link in this row
+                              link = row.find('a', href=lambda h: h and 'get_document.cfm' in h)
+                              if link:
+                                  href = link.get('href')
+                                  doc_num = re.search(r'doc_num=([A-F0-9-]+)', href, re.I)
+                                  if doc_num:
+                                      judgment_docs.append({
+                                          'doc_num': doc_num.group(1),
+                                          'href': href,
+                                          'row_text': row_text[:100]
+                                      })
+                      
+                      print(f"   Found {len(judgment_docs)} Final Judgment docs")
+                      
+                      # Download and parse each judgment doc
+                      for jd in judgment_docs[:2]:  # Max 2 attempts
+                          try:
+                              doc_url = f"https://vmatrix1.brevardclerk.us/beca/{jd['href']}"
+                              print(f"   📄 Fetching {jd['doc_num'][:20]}...")
+                              human_delay(1, 2)
+                              
+                              doc = session.get(doc_url, timeout=45)
+                              
+                              if doc.content[:4] == b'%PDF':
+                                  with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as f:
+                                      f.write(doc.content)
+                                      path = f.name
+                                  
+                                  pdf_text = ""
+                                  try:
+                                      with pdfplumber.open(path) as pdf:
+                                          print(f"   📑 {len(pdf.pages)} pages")
+                                          for pg in pdf.pages[:15]:
+                                              t = pg.extract_text()
+                                              if t:
+                                                  pdf_text += t + "\n"
+                                  finally:
+                                      os.unlink(path)
+                                  
+                                  amt = extract_judgment(pdf_text)
+                                  if amt:
+                                      result["final_judgment"] = amt
+                                      result["doc_num"] = jd['doc_num']
+                                      print(f"   ✅ ${amt:,.2f}")
+                                      successful += 1
+                                      break
+                                  else:
+                                      print(f"   ⚠️ No amount in PDF")
+                              else:
+                                  print(f"   ⚠️ Not a PDF")
+                          except Exception as e:
+                              print(f"   Err: {str(e)[:30]}")
+                      
+                      if not result["final_judgment"]:
+                          result["error"] = "No judgment extracted"
+                          print(f"   ⚠️ Failed")
+
+                  except Exception as e:
+                      result["error"] = str(e)[:60]
+                      print(f"   ❌ {result['error']}")
+
+                  results.append(result)
+                  human_delay(3, 7)
+
+          except Exception as e:
+              print(f"\n❌ Session: {e}")
+
+          output = {
+              "scrape_date": datetime.now().isoformat(),
+              "auction_date": "${{ inputs.auction_date }}",
+              "version": "V23",
+              "total": len(CASES),
+              "successful": successful,
+              "results": results
+          }
+          
+          with open("beca_v23_results.json", "w") as f:
+              json.dump(output, f, indent=2)
+
+          print("\n" + "=" * 70)
+          print(f"📊 RESULTS: {successful}/{len(results)}")
+          ok = [r for r in results if r.get("final_judgment")]
+          if ok:
+              total = sum(r["final_judgment"] for r in ok)
+              print(f"💰 TOTAL: ${total:,.2f}")
+              for r in sorted(ok, key=lambda x: -x["final_judgment"]):
+                  print(f"   {r['case_number']}: ${r['final_judgment']:,.2f}")
+          print("=" * 70)
+          
+          # Save to Supabase if we have results
+          if ok and os.getenv('SUPABASE_URL') and os.getenv('SUPABASE_KEY'):
+              try:
+                  import urllib.request
+                  import urllib.parse
+                  
+                  for r in ok:
+                      data = {
+                          "case_number": r["case_number"],
+                          "auction_date": "${{ inputs.auction_date }}",
+                          "final_judgment": r["final_judgment"],
+                          "doc_num": r.get("doc_num"),
+                          "scraped_at": r["scraped_at"],
+                          "source": "BECA_V23"
+                      }
+                      
+                      req = urllib.request.Request(
+                          f"{os.getenv('SUPABASE_URL')}/rest/v1/auction_results",
+                          data=json.dumps(data).encode(),
+                          headers={
+                              "apikey": os.getenv('SUPABASE_KEY'),
+                              "Authorization": f"Bearer {os.getenv('SUPABASE_KEY')}",
+                              "Content-Type": "application/json",
+                              "Prefer": "return=minimal"
+                          },
+                          method="POST"
+                      )
+                      urllib.request.urlopen(req, timeout=10)
+                  print(f"✅ Saved {len(ok)} to Supabase")
+              except Exception as e:
+                  print(f"⚠️ Supabase: {e}")
+          
+          if successful < len(CASES) // 3:
+              exit(1)
+          PYTHON
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: beca-v23-${{ github.run_number }}
+          path: beca_v23_results.json
+          retention-days: 90
+
+      - name: Commit results
+        if: success()
+        run: |
+          git config user.name "BidDeed.AI"
+          git config user.email "ai@brevardbidder.com"
+          mkdir -p data/beca_results
+          cp beca_v23_results.json data/beca_results/
+          git add data/beca_results/
+          git commit -m "🤖 BECA V23 - $(date +%Y-%m-%d)" || true
+          git push || true
