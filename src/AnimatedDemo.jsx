@@ -1,5 +1,5 @@
 // AnimatedDemo.jsx - V3.1.0 SIMPLIFIED
-// BrevardBidderAI 12-Stage Pipeline Visualization
+// BidDeed.AI 12-Stage Pipeline Visualization
 // Built by Ariel Shapira - Solo Founder
 // Real Estate Developer & Founder, Everest Capital USA
 // © 2025 All Rights Reserved - Proprietary IP
@@ -161,7 +161,7 @@ export default function AnimatedDemo({ onClose }) {
     startTimeRef.current = null;
     setTerminalLines([
       { text: '╔═══════════════════════════════════════╗', type: 'info' },
-      { text: '║  BrevardBidderAI V13.4.0              ║', type: 'info' },
+      { text: '║  BidDeed.AI V13.4.0              ║', type: 'info' },
       { text: '║  12-Stage Foreclosure Pipeline        ║', type: 'info' },
       { text: '╚═══════════════════════════════════════╝', type: 'info' },
       { text: '', type: 'info' },
@@ -225,7 +225,7 @@ export default function AnimatedDemo({ onClose }) {
 
           {/* Title */}
           <h2 className="text-4xl font-bold text-white mb-2">
-            BrevardBidder<span className="text-amber-400">AI</span>
+            BidDeed.AI<span className="text-amber-400">AI</span>
           </h2>
           <p className="text-lg text-blue-300 mb-8">
             12-Stage Foreclosure Analysis Pipeline
@@ -395,7 +395,7 @@ export default function AnimatedDemo({ onClose }) {
           </div>
 
           <p className="mt-8 text-sm text-blue-500">
-            © 2025 Ariel Shapira • BrevardBidderAI V13.4.0
+            © 2025 Ariel Shapira • BidDeed.AI V13.4.0
           </p>
         </motion.div>
       </motion.div>
@@ -494,7 +494,7 @@ export default function AnimatedDemo({ onClose }) {
 
         {/* Footer */}
         <div className="flex items-center justify-between p-3 border-t border-blue-800/50">
-          <p className="text-xs text-blue-500">© 2025 Ariel Shapira • BrevardBidderAI V13.4.0</p>
+          <p className="text-xs text-blue-500">© 2025 Ariel Shapira • BidDeed.AI V13.4.0</p>
           <p className="text-xs text-blue-400">Processing: {PROPERTY_DATA.address}</p>
         </div>
       </div>
