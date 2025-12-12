@@ -1,0 +1,254 @@
+name: LangGraph MCP Orchestrator
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action type: single or batch'
+        required: true
+        default: 'single'
+        type: choice
+        options:
+          - single
+          - batch
+      case_number:
+        description: 'Case number (for single analysis)'
+        required: false
+      address:
+        description: 'Property address (for single analysis)'
+        required: false
+      city:
+        description: 'City'
+        required: false
+        default: 'Melbourne'
+      auction_date:
+        description: 'Auction date (YYYY-MM-DD)'
+        required: false
+      is_auction_day:
+        description: 'Is this auction day?'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+
+env:
+  SUPABASE_URL: https://mocerqjnksmhcjzxrewo.supabase.co
+  SUPABASE_PROJECT_REF: mocerqjnksmhcjzxrewo
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  single_analysis:
+    if: ${{ github.event.inputs.action == 'single' }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install langgraph langchain-core langchain-mcp-adapters
+          pip install httpx pdfplumber aiohttp
+          pip install supabase
+          
+      - name: Install MCP servers
+        run: |
+          npm install -g @modelcontextprotocol/server-github
+          npm install -g @modelcontextprotocol/server-brave-search
+          pip install mcp-pdf-reader
+          
+      - name: Run single property analysis
+        env:
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+        run: |
+          echo "🚀 Running BidDeed.AI V14.0-MCP Pipeline"
+          echo "   Case: ${{ github.event.inputs.case_number }}"
+          echo "   Address: ${{ github.event.inputs.address }}"
+          echo "   City: ${{ github.event.inputs.city }}"
+          echo "   Auction Date: ${{ github.event.inputs.auction_date }}"
+          echo ""
+          
+          python -c "
+          import asyncio
+          import sys
+          sys.path.insert(0, 'src/langgraph')
+          
+          from orchestrator_mcp import create_mcp_orchestrator
+          
+          async def main():
+              orchestrator = await create_mcp_orchestrator()
+              result = await orchestrator.analyze_property(
+                  case_number='${{ github.event.inputs.case_number }}',
+                  address='${{ github.event.inputs.address }}',
+                  city='${{ github.event.inputs.city }}',
+                  auction_date='${{ github.event.inputs.auction_date }}',
+                  is_auction_day=${{ github.event.inputs.is_auction_day == 'true' }}
+              )
+              
+              print()
+              print('=' * 60)
+              print('📊 PIPELINE RESULTS')
+              print('=' * 60)
+              print(f\"Recommendation: {result.get('recommendation', 'UNKNOWN')}\")
+              print(f\"Final Judgment: \${result.get('final_judgment', 0):,.2f}\")
+              print(f\"Max Bid: \${result.get('max_bid', 0):,.2f}\")
+              print(f\"Bid/Judgment Ratio: {result.get('bid_judgment_ratio', 0):.1f}%\")
+              print(f\"ML Score: {result.get('ml_score', 0):.1f}\")
+              print(f\"Senior Mortgage Survives: {result.get('senior_mortgage_survives', False)}\")
+              print(f\"Report URL: {result.get('report_url', 'N/A')}\")
+              print()
+              
+              # Print stage timings
+              print('⏱️ Stage Timings:')
+              for stage, ms in result.get('stage_timings', {}).items():
+                  print(f\"   {stage}: {ms:.0f}ms\")
+              
+              # Print any errors
+              if result.get('errors'):
+                  print()
+                  print('⚠️ Errors:')
+                  for error in result['errors']:
+                      print(f\"   [{error.get('stage')}] {error.get('error')}\")
+          
+          asyncio.run(main())
+          "
+          
+  batch_analysis:
+    if: ${{ github.event.inputs.action == 'batch' }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install langgraph langchain-core langchain-mcp-adapters
+          pip install httpx pdfplumber aiohttp
+          pip install supabase
+          
+      - name: Install MCP servers
+        run: |
+          npm install -g @modelcontextprotocol/server-github
+          pip install mcp-pdf-reader
+          
+      - name: Fetch properties for auction date
+        env:
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          echo "📅 Fetching properties for auction date: ${{ github.event.inputs.auction_date }}"
+          
+          curl -s "https://mocerqjnksmhcjzxrewo.supabase.co/rest/v1/historical_auctions?auction_date=eq.${{ github.event.inputs.auction_date }}&select=case_number,address,city" \
+            -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}" > properties.json
+          
+          echo "Found $(cat properties.json | jq length) properties"
+          cat properties.json | jq '.[0:5]'
+          
+      - name: Run batch analysis
+        env:
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+        run: |
+          echo "🚀 Running BidDeed.AI V14.0-MCP Batch Pipeline"
+          echo "   Auction Date: ${{ github.event.inputs.auction_date }}"
+          echo "   Is Auction Day: ${{ github.event.inputs.is_auction_day }}"
+          echo ""
+          
+          python -c "
+          import asyncio
+          import json
+          import sys
+          sys.path.insert(0, 'src/langgraph')
+          
+          from orchestrator_mcp import create_mcp_orchestrator
+          
+          async def main():
+              # Load properties
+              with open('properties.json') as f:
+                  properties = json.load(f)
+              
+              print(f'Processing {len(properties)} properties...')
+              print()
+              
+              orchestrator = await create_mcp_orchestrator()
+              
+              results = {
+                  'BID': [],
+                  'REVIEW': [],
+                  'SKIP': [],
+                  'DO_NOT_BID': [],
+                  'ERROR': []
+              }
+              
+              for i, prop in enumerate(properties):
+                  case = prop.get('case_number', '')
+                  address = prop.get('address', '')
+                  city = prop.get('city', 'Melbourne')
+                  
+                  print(f'[{i+1}/{len(properties)}] Processing {case}: {address}')
+                  
+                  try:
+                      result = await orchestrator.analyze_property(
+                          case_number=case,
+                          address=address,
+                          city=city,
+                          auction_date='${{ github.event.inputs.auction_date }}',
+                          is_auction_day=${{ github.event.inputs.is_auction_day == 'true' }}
+                      )
+                      
+                      rec = result.get('recommendation', 'ERROR')
+                      results[rec].append({
+                          'case': case,
+                          'address': address,
+                          'max_bid': result.get('max_bid', 0),
+                          'ml_score': result.get('ml_score', 0)
+                      })
+                      
+                      print(f'   → {rec} (Max Bid: \${result.get(\"max_bid\", 0):,.0f})')
+                      
+                  except Exception as e:
+                      print(f'   → ERROR: {e}')
+                      results['ERROR'].append({'case': case, 'error': str(e)})
+              
+              print()
+              print('=' * 60)
+              print('📊 BATCH RESULTS SUMMARY')
+              print('=' * 60)
+              print(f\"🟢 BID: {len(results['BID'])}\")
+              print(f\"🟡 REVIEW: {len(results['REVIEW'])}\")
+              print(f\"🔴 SKIP: {len(results['SKIP'])}\")
+              print(f\"⛔ DO_NOT_BID: {len(results['DO_NOT_BID'])}\")
+              print(f\"❌ ERROR: {len(results['ERROR'])}\")
+              print()
+              
+              if results['BID']:
+                  print('Top BID Recommendations:')
+                  for prop in sorted(results['BID'], key=lambda x: x['ml_score'], reverse=True)[:5]:
+                      print(f\"   {prop['case']}: \${prop['max_bid']:,.0f} (ML: {prop['ml_score']:.0f})\")
+          
+          asyncio.run(main())
+          "
+          
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: batch-results-${{ github.event.inputs.auction_date }}
+          path: |
+            properties.json
+            reports/
