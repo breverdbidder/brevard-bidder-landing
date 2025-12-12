@@ -1,4 +1,4 @@
-// BrevardBidderAI Auction Map Component
+// BidDeed.AI Auction Map Component
 // Author: Ariel Shapira, Everest Capital USA
 
 import React, { useState, useEffect, useRef } from 'react';
