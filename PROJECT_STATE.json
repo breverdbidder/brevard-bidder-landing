@@ -1,0 +1,87 @@
+{
+  "project_name": "BidDeed.AI",
+  "version": "1.0.0",
+  "parent_company": "EVEREST CAPITAL USA",
+  "methodology": "The Everest Ascent™",
+  "last_updated": "2025-12-12T12:00:00Z",
+  "updated_by": "Claude Opus 4.5 (AI Architect)",
+  
+  "stack_status": {
+    "scrapers": {
+      "realforeclose": "deployed",
+      "bcpao": "deployed",
+      "acclaimweb": "deployed",
+      "realtdm": "deployed",
+      "census_api": "deployed",
+      "beca_v21": "deployed"
+    },
+    "smart_router": {
+      "version": "5.0",
+      "free_tier_target": 0.47,
+      "models_count": 12,
+      "status": "deployed"
+    },
+    "ml_pipeline": {
+      "model": "XGBoost",
+      "accuracy": 0.644,
+      "plaintiffs_tracked": 28,
+      "status": "deployed"
+    },
+    "langgraph": {
+      "stages": 12,
+      "checkpointing": true,
+      "status": "deployed"
+    },
+    "github_actions": {
+      "beca_v22": "deployed",
+      "insert_insight": "deployed"
+    },
+    "supabase_schema": {
+      "everest_brand": "deployed",
+      "foreclosure_auctions": "deployed",
+      "checkpoints": "deployed"
+    },
+    "frontend": {
+      "decision_panel": "deployed",
+      "pipeline_progress": "deployed",
+      "biddeed_chat": "deployed",
+      "design_tokens": "deployed"
+    }
+  },
+  
+  "repositories": {
+    "primary": "breverdbidder/brevard-bidder-scraper",
+    "landing": "breverdbidder/brevard-bidder-landing"
+  },
+  
+  "recent_decisions": [
+    {
+      "date": "2025-12-12",
+      "decision": "Full stack merge from BrevardBidderAI to BidDeed.AI",
+      "files_deployed": 76,
+      "status": "completed"
+    }
+  ],
+  
+  "pipeline_stages": [
+    {"id": "discovery", "name": "Discovery", "source": "RealForeclose"},
+    {"id": "scraping", "name": "Scraping", "source": "BECA V22"},
+    {"id": "title-search", "name": "Title Search", "source": "AcclaimWeb"},
+    {"id": "lien-priority", "name": "Lien Priority", "source": "AcclaimWeb"},
+    {"id": "tax-certs", "name": "Tax Certs", "source": "RealTDM"},
+    {"id": "demographics", "name": "Demographics", "source": "Census API"},
+    {"id": "ml-score", "name": "ML Score", "source": "XGBoost"},
+    {"id": "max-bid", "name": "Max Bid", "source": "Formula"},
+    {"id": "decision", "name": "Decision", "source": "Smart Router"},
+    {"id": "report", "name": "Report", "source": "python-docx"},
+    {"id": "disposition", "name": "Disposition", "source": "Supabase"},
+    {"id": "archive", "name": "Archive", "source": "Supabase"}
+  ],
+  
+  "valuation": {
+    "annual_value": 350000,
+    "annual_cost": 3300,
+    "roi_multiple": 100,
+    "model": "internal_alpha"
+  }
+}
