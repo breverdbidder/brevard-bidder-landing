@@ -1,4 +1,4 @@
-// BrevardBidderAI - Checkpoint API
+// BidDeed.AI - Checkpoint API
 // Manages session state for seamless resume across conversations
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
