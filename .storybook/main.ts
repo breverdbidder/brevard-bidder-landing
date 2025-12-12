@@ -1,4 +1,4 @@
-// BrevardBidderAI - Storybook Configuration
+// BidDeed.AI - Storybook Configuration
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
 import type { StorybookConfig } from '@storybook/nextjs';
