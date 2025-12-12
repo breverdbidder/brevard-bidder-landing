@@ -1,6 +1,6 @@
 // BidDeed.AI Landing Page V16.1.0 - "Crystal Clear" Edition
 // Clean navy background, no patterns
-// © 2025 Everest Capital of Brevard LLC. All Rights Reserved.
+// © 2025 Everest Capital USA. All Rights Reserved.
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -553,7 +553,7 @@ const Footer = () => (
         
         {/* Copyright */}
         <div className="text-slate-500 text-sm text-center">
-          © 2025 Everest Capital of Brevard LLC. All rights reserved.
+          © 2025 Everest Capital USA. All rights reserved.
         </div>
         
         {/* Tagline */}
