@@ -1,4 +1,4 @@
-// BrevardBidderAI - Mobile Navigation Component
+// BidDeed.AI - Mobile Navigation Component
 // Vibe Coding: Mobile-first responsive design
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
@@ -40,7 +40,7 @@ export function MobileNav({ activeTab, onTabChange, darkMode, onDarkModeToggle }
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
             <span className="text-white font-bold text-sm">B</span>
           </div>
-          <span className="text-white font-semibold">BrevardBidderAI</span>
+          <span className="text-white font-semibold">BidDeed.AI</span>
         </div>
         
         <button
@@ -124,7 +124,7 @@ export function MobileNav({ activeTab, onTabChange, darkMode, onDarkModeToggle }
             {/* Footer */}
             <div className="absolute bottom-6 left-6 right-6 text-center">
               <p className="text-neutral-500 text-xs">
-                BrevardBidderAI V13.4.0
+                BidDeed.AI V13.4.0
               </p>
               <p className="text-neutral-600 text-xs mt-1">
                 Agentic AI Ecosystem
