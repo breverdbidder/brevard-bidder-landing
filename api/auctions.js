@@ -1,4 +1,4 @@
-// BrevardBidderAI - Auctions API
+// BidDeed.AI - Auctions API
 // Dec 10, 2025 Auction Data - LIVE
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 // Last Updated: 2025-12-08 12:47 PM EST
@@ -33,7 +33,7 @@ export default async function handler(req) {
   
   return new Response(JSON.stringify({
     success: true,
-    source: "BrevardBidderAI_V13.4.0",
+    source: "BidDeed.AI_V13.4.0",
     message: "Dec 10, 2025 Foreclosure Auction - Titusville Courthouse 11:00 AM EST",
     auction_date: "2025-12-10",
     venue: "Titusville Courthouse",
@@ -49,7 +49,7 @@ export default async function handler(req) {
     headers: { 
       'Content-Type': 'application/json',
       'Cache-Control': 'public, max-age=300',
-      'X-BrevardBidderAI-Version': 'V13.4.0'
+      'X-BidDeed.AI-Version': 'V13.4.0'
     } 
   });
 }
