@@ -1,5 +1,5 @@
 // Shadcn UI Tabs Component
-// BrevardBidderAI - Navigation
+// BidDeed.AI - Navigation
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
 "use client"
