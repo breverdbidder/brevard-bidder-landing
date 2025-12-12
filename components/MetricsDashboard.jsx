@@ -1,4 +1,4 @@
-// BrevardBidderAI - KPI Metrics Dashboard
+// BidDeed.AI - KPI Metrics Dashboard
 // Based on Vibe Coding Community Best Practices
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
@@ -154,7 +154,7 @@ export default function MetricsDashboard() {
     <div className="min-h-screen bg-gray-900 text-white p-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">BrevardBidderAI Metrics Dashboard</h1>
+        <h1 className="text-3xl font-bold mb-2">BidDeed.AI Metrics Dashboard</h1>
         <p className="text-gray-400">Based on Vibe Coding Community Best Practices (53,812 messages)</p>
         <p className="text-sm text-gray-500 mt-1">Author: Ariel Shapira, Solo Founder, Everest Capital USA</p>
       </div>
@@ -340,7 +340,7 @@ export default function MetricsDashboard() {
 
       {/* Comparison Table */}
       <div className="bg-gray-800 rounded-lg p-6">
-        <h2 className="text-xl font-bold mb-4">BrevardBidderAI vs Vibe Coding Targets</h2>
+        <h2 className="text-xl font-bold mb-4">BidDeed.AI vs Vibe Coding Targets</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -349,7 +349,7 @@ export default function MetricsDashboard() {
                 <th className="p-3 text-red-400">Baseline</th>
                 <th className="p-3 text-yellow-400">Target</th>
                 <th className="p-3 text-green-400">World Class</th>
-                <th className="p-3 text-blue-400">BrevardBidderAI</th>
+                <th className="p-3 text-blue-400">BidDeed.AI</th>
                 <th className="p-3">Status</th>
               </tr>
             </thead>
@@ -417,7 +417,7 @@ export default function MetricsDashboard() {
 
       {/* Footer */}
       <div className="mt-8 text-center text-gray-500 text-sm">
-        <p>BrevardBidderAI V13.4.0 | Agentic AI Ecosystem</p>
+        <p>BidDeed.AI V13.4.0 | Agentic AI Ecosystem</p>
         <p>Dashboard updated: {new Date().toLocaleString()}</p>
       </div>
     </div>
