@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-// Scraper Status Component for BrevardBidderAI Chat Interface
+// Scraper Status Component for BidDeed.AI Chat Interface
 // Monitors: Modal (10-step) + Browserless BECA (9-step) dual scraper architecture
 // Polls every 30 seconds for status updates
 
