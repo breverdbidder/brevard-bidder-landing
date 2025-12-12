@@ -1,4 +1,4 @@
-// BrevardBidderAI - Auctions API (Next.js Pages Router)
+// BidDeed.AI - Auctions API (Next.js Pages Router)
 // Dec 10, 2025 Auction Data
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
