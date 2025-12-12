@@ -1,4 +1,4 @@
-// BrevardBidderAI - Intelligent Chat with LangGraph Pipeline Integration
+// BidDeed.AI - Intelligent Chat with LangGraph Pipeline Integration
 // Now triggers full 12-stage analysis on demand
 // Author: Ariel Shapira, Solo Founder - Everest Capital USA
 
@@ -72,7 +72,7 @@ const IntelligentChat = ({ onPropertySelect }) => {
     
     const greeting = {
       role: 'assistant',
-      text: `👋 **BrevardBidderAI V13.4.0** - LangGraph Pipeline Connected
+      text: `👋 **BidDeed.AI V13.4.0** - LangGraph Pipeline Connected
 
 📅 Today: **${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}**
 
@@ -343,7 +343,7 @@ Initializing...`,
       <div className="bg-slate-800 px-4 py-3 border-b border-slate-700 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Zap className="w-5 h-5 text-amber-400" />
-          <span className="font-semibold text-white">BrevardBidderAI Chat</span>
+          <span className="font-semibold text-white">BidDeed.AI Chat</span>
           <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
             LangGraph Connected
           </span>
