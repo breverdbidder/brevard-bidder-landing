@@ -1,5 +1,5 @@
 // Tailwind Config - Vibe Coding Stack
-// BrevardBidderAI V13.4.0
+// BidDeed.AI V13.4.0
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
 import type { Config } from "tailwindcss"
@@ -22,7 +22,7 @@ const config: Config = {
     },
     extend: {
       colors: {
-        // BrevardBidderAI Brand Colors
+        // BidDeed.AI Brand Colors
         brand: {
           primary: "#2563eb",    // Blue
           secondary: "#1e40af",  // Dark Blue
