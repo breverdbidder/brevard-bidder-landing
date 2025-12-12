@@ -1,4 +1,4 @@
-// BrevardBidderAI Landing Page V14.0.0 - "LangGraph Agentic AI Ecosystem" Edition
+// BidDeed.AI Landing Page V14.0.0 - "LangGraph Agentic AI Ecosystem" Edition
 // Built by Ariel Shapira - Solo Founder, Everest Capital USA
 // Design System: Luxury Data Terminal - Industrial Fintech Aesthetic
 // © 2025 All Rights Reserved - Proprietary IP
@@ -292,7 +292,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-2xl font-bold">
-              BrevardBidder<span className="text-amber-400">AI</span>
+              BidDeed.AI<span className="text-amber-400">AI</span>
             </span>
             <span className="px-2 py-1 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-400 text-xs font-medium">
               LangGraph
@@ -532,7 +532,7 @@ export default function App() {
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <span className="text-xl font-bold">BrevardBidder<span className="text-amber-400">AI</span></span>
+              <span className="text-xl font-bold">BidDeed.AI<span className="text-amber-400">AI</span></span>
               <span className="text-slate-600">|</span>
               <span className="text-sm text-slate-500">Agentic AI Ecosystem</span>
             </div>
