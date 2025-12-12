@@ -1,0 +1,426 @@
+name: Dec 17 HOA Lien Discovery (Direct)
+
+on:
+  workflow_dispatch:
+
+env:
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+jobs:
+  dec17-hoa-liens:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install Dependencies
+        run: |
+          pip install httpx playwright
+          playwright install chromium
+          playwright install-deps chromium
+      
+      - name: Run Dec 17 HOA Lien Discovery
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          python - << 'EOF'
+          """
+          BidDeed.AI V14.4 - Dec 17 HOA Lien Discovery
+          ==================================================
+          Direct execution for 3 known HOA foreclosures
+          
+          Author: Ariel Shapira, Solo Founder - Everest Capital USA
+          """
+          
+          import asyncio
+          import json
+          import re
+          import os
+          from datetime import datetime
+          from typing import Dict, Optional
+          import httpx
+          
+          SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://mocerqjnksmhcjzxrewo.supabase.co")
+          SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+          
+          # Dec 17, 2025 HOA Foreclosures (from Clerk's foreclosure sales list)
+          DEC17_HOA_CASES = [
+              {
+                  "case_number": "05-2024-CA-015373-XXCA-BC",
+                  "plaintiff": "CYPRESS LANDINGS HOA",
+                  "defendant": "Y RIVERO",
+                  "case_title": "CYPRESS LANDINGS VS Y RIVERO",
+                  "location": "West Melbourne 32904",
+                  "property_type": "Single-family (2018)",
+                  "estimated_value": "410000-420000"
+              },
+              {
+                  "case_number": "05-2025-CC-017102-XXCC-BC",
+                  "plaintiff": "NORTHFIELD HOA",
+                  "defendant": "RALPH MORRISON",
+                  "case_title": "NORTHFIELD VS RALPH MORRISON",
+                  "location": "Unknown",
+                  "property_type": "Unknown (CC case <$50K)",
+                  "estimated_value": "unknown"
+              },
+              {
+                  "case_number": "05-2025-CC-027115-XXCC-BC",
+                  "plaintiff": "REGENCY PINES COA",
+                  "defendant": "M FREDIANELLI",
+                  "case_title": "REGENCY PINES VS M FREDIANELLI",
+                  "location": "Rockledge 32955",
+                  "property_type": "Condo (830-978 sf)",
+                  "estimated_value": "140000-200000"
+              }
+          ]
+          
+          
+          def parse_amount(s: str) -> Optional[float]:
+              if not s:
+                  return None
+              cleaned = re.sub(r'[^\d.]', '', s)
+              try:
+                  return float(cleaned) if cleaned else None
+              except:
+                  return None
+          
+          
+          async def search_acclaimweb(party_name: str, case_number: str) -> Dict:
+              """Search AcclaimWeb for mortgages"""
+              from playwright.async_api import async_playwright
+              
+              result = {
+                  "case_number": case_number,
+                  "search_party": party_name,
+                  "search_timestamp": datetime.utcnow().isoformat(),
+                  "records_found": 0,
+                  "mortgages": [],
+                  "satisfactions": [],
+                  "active_mortgages": [],
+                  "total_active_mortgage_amount": 0.0,
+                  "success": False,
+                  "error": None,
+                  "page_content_sample": ""
+              }
+              
+              # Extract last name
+              parts = party_name.strip().split()
+              search_name = parts[-1] if len(parts) > 1 else parts[0] if parts else party_name
+              print(f"  Searching AcclaimWeb for: '{search_name}' (from '{party_name}')")
+              
+              async with async_playwright() as p:
+                  browser = await p.chromium.launch(
+                      headless=True,
+                      args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
+                  )
+                  
+                  context = await browser.new_context(
+                      viewport={"width": 1920, "height": 1080},
+                      user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+                  )
+                  
+                  page = await context.new_page()
+                  
+                  try:
+                      # Step 1: Load disclaimer
+                      print("  [1/5] Loading disclaimer...")
+                      await page.goto(
+                          "https://vaclmweb1.brevardclerk.us/AcclaimWeb/search/Disclaimer?st=/AcclaimWeb/search/SearchTypeName",
+                          wait_until="networkidle",
+                          timeout=60000
+                      )
+                      await asyncio.sleep(2)
+                      
+                      # Step 2: Accept
+                      print("  [2/5] Accepting terms...")
+                      accept_btn = page.locator("input[value='I accept the conditions above.']")
+                      if await accept_btn.count() > 0:
+                          await accept_btn.click()
+                          await page.wait_for_load_state("networkidle")
+                          await asyncio.sleep(2)
+                      else:
+                          # Fallback
+                          for sel in ["input[type='submit']", "button:has-text('accept')"]:
+                              btn = page.locator(sel)
+                              if await btn.count() > 0:
+                                  await btn.first.click()
+                                  await asyncio.sleep(2)
+                                  break
+                      
+                      # Step 3: Navigate to search
+                      print("  [3/5] Navigating to search...")
+                      if "SearchTypeName" not in page.url:
+                          await page.goto(
+                              "https://vaclmweb1.brevardclerk.us/AcclaimWeb/search/SearchTypeName",
+                              wait_until="networkidle",
+                              timeout=60000
+                          )
+                          await asyncio.sleep(2)
+                      
+                      # Step 4: Fill search
+                      print(f"  [4/5] Searching for '{search_name}'...")
+                      
+                      # Try to find Grantee input
+                      filled = False
+                      for sel in ["input[name='GranteeName']", "input#GranteeName", "input[placeholder*='Grantee']"]:
+                          inp = page.locator(sel)
+                          if await inp.count() > 0:
+                              await inp.fill(search_name)
+                              filled = True
+                              print(f"    Filled using: {sel}")
+                              break
+                      
+                      if not filled:
+                          # Try all text inputs
+                          inputs = await page.locator("input[type='text']").all()
+                          for inp in inputs:
+                              name = await inp.get_attribute("name") or ""
+                              if "grantee" in name.lower():
+                                  await inp.fill(search_name)
+                                  filled = True
+                                  print(f"    Filled Grantee field")
+                                  break
+                      
+                      if not filled:
+                          result["error"] = "Could not find Grantee search field"
+                          return result
+                      
+                      await asyncio.sleep(1)
+                      
+                      # Submit
+                      for sel in ["input[type='submit']", "button[type='submit']", "input[value='Search']"]:
+                          btn = page.locator(sel)
+                          if await btn.count() > 0 and await btn.first.is_visible():
+                              await btn.first.click()
+                              await page.wait_for_load_state("networkidle")
+                              await asyncio.sleep(3)
+                              break
+                      
+                      # Step 5: Parse results
+                      print("  [5/5] Parsing results...")
+                      content = await page.content()
+                      result["page_content_sample"] = content[:500]
+                      
+                      # Screenshot for debugging
+                      await page.screenshot(path=f"{case_number.replace('/', '_')}_results.png")
+                      
+                      if "No records found" in content or "no results" in content.lower():
+                          result["success"] = True
+                          result["error"] = "No records found"
+                          print("    No records found")
+                          return result
+                      
+                      # Parse table rows
+                      rows = await page.locator("table tr").all()
+                      print(f"    Found {len(rows)} table rows")
+                      
+                      for row in rows[1:]:  # Skip header
+                          cols = await row.locator("td").all()
+                          if len(cols) < 5:
+                              continue
+                          
+                          try:
+                              doc_type = (await cols[1].inner_text()).strip() if len(cols) > 1 else ""
+                              
+                              if doc_type not in ["MTG", "SMTG", "AMTG"]:
+                                  continue
+                              
+                              record = {
+                                  "document_number": (await cols[0].inner_text()).strip() if len(cols) > 0 else "",
+                                  "document_type": doc_type,
+                                  "recording_date": (await cols[2].inner_text()).strip() if len(cols) > 2 else "",
+                                  "book_page": (await cols[3].inner_text()).strip() if len(cols) > 3 else "",
+                                  "amount": parse_amount((await cols[6].inner_text()).strip()) if len(cols) > 6 else None
+                              }
+                              
+                              result["records_found"] += 1
+                              
+                              if doc_type in ["MTG", "AMTG"]:
+                                  result["mortgages"].append(record)
+                                  print(f"    Found mortgage: {record['book_page']} - ${record['amount'] or 0:,.0f}")
+                              elif doc_type == "SMTG":
+                                  result["satisfactions"].append(record)
+                          except Exception as e:
+                              print(f"    Row parse error: {e}")
+                      
+                      # Determine active mortgages
+                      satisfied_refs = {s.get("book_page") for s in result["satisfactions"] if s.get("book_page")}
+                      
+                      for mtg in result["mortgages"]:
+                          if mtg.get("book_page") not in satisfied_refs:
+                              result["active_mortgages"].append(mtg)
+                              if mtg.get("amount"):
+                                  result["total_active_mortgage_amount"] += mtg["amount"]
+                      
+                      result["success"] = True
+                      print(f"    Done: {result['records_found']} records, {len(result['active_mortgages'])} active mortgages")
+                      
+                  except Exception as e:
+                      result["error"] = str(e)
+                      print(f"    ERROR: {e}")
+                      try:
+                          await page.screenshot(path=f"{case_number.replace('/', '_')}_error.png")
+                      except:
+                          pass
+                  
+                  finally:
+                      await browser.close()
+              
+              return result
+          
+          
+          async def save_to_supabase(results: list):
+              """Save results to Supabase insights"""
+              if not SUPABASE_KEY:
+                  print("No SUPABASE_KEY - skipping save")
+                  return
+              
+              headers = {
+                  "apikey": SUPABASE_KEY,
+                  "Authorization": f"Bearer {SUPABASE_KEY}",
+                  "Content-Type": "application/json"
+              }
+              
+              insight = {
+                  "type": "hoa_lien_discovery",
+                  "title": "Dec 17 2025 HOA Lien Discovery",
+                  "content": json.dumps({
+                      "auction_date": "2025-12-17",
+                      "cases_analyzed": len(results),
+                      "results": results,
+                      "timestamp": datetime.utcnow().isoformat()
+                  }),
+                  "created_at": datetime.utcnow().isoformat()
+              }
+              
+              async with httpx.AsyncClient(timeout=30) as client:
+                  url = f"{SUPABASE_URL}/rest/v1/insights"
+                  resp = await client.post(url, headers=headers, json=insight)
+                  print(f"Saved to Supabase insights: {resp.status_code}")
+          
+          
+          async def main():
+              """Main execution"""
+              print("="*70)
+              print("BidDeed.AI V14.4 - Dec 17 HOA Lien Discovery")
+              print("="*70)
+              print(f"\nAnalyzing {len(DEC17_HOA_CASES)} HOA foreclosures:\n")
+              
+              results = []
+              
+              for i, case in enumerate(DEC17_HOA_CASES):
+                  print(f"\n[{i+1}/{len(DEC17_HOA_CASES)}] {case['case_number']}")
+                  print(f"    {case['plaintiff']} vs {case['defendant']}")
+                  print(f"    Location: {case['location']}")
+                  
+                  lien_result = await search_acclaimweb(case["defendant"], case["case_number"])
+                  
+                  surviving = lien_result.get("total_active_mortgage_amount", 0)
+                  
+                  if surviving > 0:
+                      rec = "DO_NOT_BID"
+                      reason = f"HOA foreclosure - ${surviving:,.0f} senior mortgage survives"
+                  elif lien_result.get("success") and not lien_result.get("error"):
+                      rec = "REVIEW"
+                      reason = "HOA foreclosure - no mortgage found in AcclaimWeb (verify manually)"
+                  elif lien_result.get("error") == "No records found":
+                      rec = "REVIEW"
+                      reason = "HOA foreclosure - no Grantee records found (may be clear or search name issue)"
+                  else:
+                      rec = "MANUAL_REVIEW"
+                      reason = f"Search error: {lien_result.get('error', 'unknown')}"
+                  
+                  result_entry = {
+                      **case,
+                      "search_success": lien_result.get("success", False),
+                      "records_found": lien_result.get("records_found", 0),
+                      "mortgages": lien_result.get("mortgages", []),
+                      "satisfactions": lien_result.get("satisfactions", []),
+                      "active_mortgages": lien_result.get("active_mortgages", []),
+                      "surviving_amount": surviving,
+                      "recommendation": rec,
+                      "reason": reason
+                  }
+                  results.append(result_entry)
+                  
+                  print(f"\n    📋 RESULT: {rec}")
+                  print(f"    📝 Reason: {reason}")
+                  
+                  # Rate limit between searches
+                  if i < len(DEC17_HOA_CASES) - 1:
+                      print("\n    Waiting 5 seconds...")
+                      await asyncio.sleep(5)
+              
+              # Save to Supabase
+              await save_to_supabase(results)
+              
+              # Summary
+              print("\n" + "="*70)
+              print("SUMMARY - Dec 17 HOA Foreclosures")
+              print("="*70)
+              print(f"\n{'Case':<30} {'Defendant':<15} {'Surviving':<12} {'Recommendation'}")
+              print("-"*70)
+              
+              for r in results:
+                  case_short = r["case_number"].split("-")[2] + "-" + r["case_number"].split("-")[3][:2]
+                  print(f"{case_short:<30} {r['defendant']:<15} ${r['surviving_amount']:>10,.0f} {r['recommendation']}")
+              
+              print("-"*70)
+              total_surviving = sum(r["surviving_amount"] for r in results)
+              do_not_bid = sum(1 for r in results if r["recommendation"] == "DO_NOT_BID")
+              review = sum(1 for r in results if r["recommendation"] == "REVIEW")
+              manual = sum(1 for r in results if r["recommendation"] == "MANUAL_REVIEW")
+              
+              print(f"\nTotal Surviving Liens: ${total_surviving:,.0f}")
+              print(f"DO_NOT_BID: {do_not_bid} | REVIEW: {review} | MANUAL_REVIEW: {manual}")
+              
+              # Save JSON
+              with open("dec17_hoa_lien_results.json", "w") as f:
+                  json.dump({
+                      "auction_date": "2025-12-17",
+                      "analyzed_at": datetime.utcnow().isoformat(),
+                      "cases": results,
+                      "summary": {
+                          "total_cases": len(results),
+                          "do_not_bid": do_not_bid,
+                          "review": review,
+                          "manual_review": manual,
+                          "total_surviving_liens": total_surviving
+                      }
+                  }, f, indent=2, default=str)
+              
+              print("\n✅ Results saved to dec17_hoa_lien_results.json")
+              
+              return results
+          
+          
+          if __name__ == "__main__":
+              asyncio.run(main())
+          EOF
+      
+      - name: Upload Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dec17-hoa-liens-${{ github.run_id }}
+          path: |
+            dec17_hoa_lien_results.json
+            *.png
+          retention-days: 30
+      
+      - name: Post Summary
+        if: always()
+        run: |
+          echo "## Dec 17 HOA Lien Discovery Results" >> $GITHUB_STEP_SUMMARY
+          if [ -f dec17_hoa_lien_results.json ]; then
+            cat dec17_hoa_lien_results.json >> $GITHUB_STEP_SUMMARY
+          fi
