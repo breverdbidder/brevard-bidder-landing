@@ -1,4 +1,4 @@
-// BrevardBidderAI - Real-Time Analysis API
+// BidDeed.AI - Real-Time Analysis API
 // Connected to Supabase for live auction intelligence
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
