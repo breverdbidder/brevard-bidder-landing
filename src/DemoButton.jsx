@@ -1,4 +1,4 @@
-// BrevardBidderAI Demo Button
+// BidDeed.AI Demo Button
 // Floating CTA to access agentic interface demo
 // Author: Ariel Shapira, Everest Capital USA
 
