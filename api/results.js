@@ -1,4 +1,4 @@
-// BrevardBidderAI - Auction Results API
+// BidDeed.AI - Auction Results API
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
 export const config = {
