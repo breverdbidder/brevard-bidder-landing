@@ -1,0 +1,72 @@
+name: Generate Dec 10 DOCX Reports
+on:
+  workflow_dispatch:
+    inputs:
+      auction_date:
+        description: 'Auction date (YYYY-MM-DD)'
+        required: false
+        default: '2025-12-10'
+      include_ai:
+        description: 'Include AI analysis'
+        required: false
+        default: 'true'
+
+env:
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+jobs:
+  generate-reports:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          npm install docx
+          pip install httpx
+      
+      - name: Run Dec 10 Pipeline
+        if: ${{ github.event.inputs.include_ai == 'true' }}
+        run: |
+          cd src/pipeline
+          python dec10_auction_pipeline.py --date ${{ github.event.inputs.auction_date }}
+      
+      - name: Generate DOCX Reports
+        run: |
+          cd src/reports
+          OUTPUT_DIR=${{ github.workspace }}/reports AUCTION_DATE=${{ github.event.inputs.auction_date }} node docx_report_generator.js
+      
+      - name: Upload Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: dec10-docx-reports-${{ github.run_number }}
+          path: |
+            reports/*.docx
+            ${{ github.workspace }}/reports/*.docx
+          retention-days: 30
+      
+      - name: Summary
+        run: |
+          echo "## 📄 DOCX Reports Generated" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Report | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|------|" >> $GITHUB_STEP_SUMMARY
+          for f in reports/*.docx ${{ github.workspace }}/reports/*.docx 2>/dev/null; do
+            if [ -f "$f" ]; then
+              name=$(basename "$f")
+              size=$(du -h "$f" | cut -f1)
+              echo "| $name | $size |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Download the artifact above to get all reports." >> $GITHUB_STEP_SUMMARY
