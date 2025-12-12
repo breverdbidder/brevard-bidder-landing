@@ -1,4 +1,4 @@
-// BrevardBidderAI - Search & Filter Component
+// BidDeed.AI - Search & Filter Component
 // Vibe Coding Best Practice: Interactive filtering
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
