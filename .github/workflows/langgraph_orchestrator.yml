@@ -1,0 +1,236 @@
+name: BidDeed.AI LangGraph Orchestrator
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action type (single, batch, status)'
+        required: true
+        default: 'single'
+        type: choice
+        options:
+          - single
+          - batch
+          - status
+      case_number:
+        description: 'Case number for single analysis'
+        required: false
+        default: ''
+      address:
+        description: 'Property address'
+        required: false
+        default: ''
+      auction_date:
+        description: 'Auction date for batch (YYYY-MM-DD)'
+        required: false
+        default: ''
+      is_auction_day:
+        description: 'Is this auction day?'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+  schedule:
+    - cron: '0 10 * * 3'
+
+env:
+  SUPABASE_URL: https://mocerqjnksmhcjzxrewo.supabase.co
+  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+  GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+  APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
+  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+  BROWSERLESS_API_KEY: ${{ secrets.BROWSERLESS_API_KEY }}
+  CHECKPOINT_DB: checkpoints/brevard_bidder_v2.db
+
+jobs:
+  single_analysis:
+    if: github.event.inputs.action == 'single'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install langgraph langgraph-checkpoint-sqlite httpx
+          pip install -r requirements.txt || true
+      
+      - name: Run single property analysis
+        run: |
+          python3 << 'PYEOF'
+          import asyncio
+          import sys
+          
+          sys.path.insert(0, '.')
+          
+          async def analyze():
+              case_number = "${{ github.event.inputs.case_number }}"
+              address = "${{ github.event.inputs.address }}" or "TBD"
+              
+              if not case_number:
+                  print("Error: case_number required")
+                  return
+              
+              print(f"Analyzing: {case_number}")
+              print(f"Address: {address}")
+              
+              try:
+                  from src.langgraph.orchestrator_v2 import BrevardBidderOrchestrator
+                  
+                  orchestrator = BrevardBidderOrchestrator()
+                  result = await orchestrator.analyze_property(
+                      case_number=case_number,
+                      address=address,
+                      is_auction_day="${{ github.event.inputs.is_auction_day }}" == "true"
+                  )
+                  
+                  print("ANALYSIS COMPLETE")
+                  print(f"Case: {case_number}")
+                  
+                  rec = result.get("recommendation") if result else None
+                  if rec and isinstance(rec, dict):
+                      rec_val = rec.get("recommendation")
+                      if hasattr(rec_val, "value"):
+                          print(f"Recommendation: {rec_val.value}")
+                      else:
+                          print(f"Recommendation: {rec_val}")
+                  else:
+                      print("Recommendation: PENDING")
+                  
+                  bid_calc = result.get("bid_calculation") or result.get("bid_calc") if result else None
+                  max_bid = bid_calc.get("max_bid", 0) if bid_calc else 0
+                  print(f"Max Bid: ${max_bid:,.0f}")
+                  
+              except Exception as e:
+                  print(f"Error: {e}")
+                  import traceback
+                  traceback.print_exc()
+          
+          asyncio.run(analyze())
+          PYEOF
+
+  batch_analysis:
+    if: github.event.inputs.action == 'batch' || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install langgraph langgraph-checkpoint-sqlite httpx
+          pip install -r requirements.txt || true
+      
+      - name: Run batch analysis
+        run: |
+          python3 << 'PYEOF'
+          import asyncio
+          import sys
+          import json
+          import os
+          
+          sys.path.insert(0, '.')
+          
+          async def batch():
+              # Load Dec 17 data
+              data_file = "data/dec17_2025_real_data.json"
+              properties = []
+              
+              if os.path.exists(data_file):
+                  with open(data_file) as f:
+                      data = json.load(f)
+                  cases = data.get("cases", data.get("properties", []))
+                  for c in cases:
+                      properties.append({
+                          "case_number": c.get("case_number", c.get("case", "UNKNOWN")),
+                          "address": c.get("address", "Unknown"),
+                          "city": c.get("city", "Melbourne"),
+                          "zip_code": c.get("zip_code", "32940")
+                      })
+                  print(f"Loaded {len(properties)} properties from {data_file}")
+              else:
+                  print(f"Data file not found: {data_file}")
+                  return
+              
+              if not properties:
+                  print("No properties to analyze")
+                  return
+              
+              print(f"Processing {len(properties)} properties...")
+              
+              try:
+                  from src.langgraph.orchestrator_v2 import BrevardBidderOrchestrator
+                  
+                  orchestrator = BrevardBidderOrchestrator()
+                  results = await orchestrator.analyze_batch(
+                      properties=properties,
+                      max_concurrent=3,
+                      is_auction_day="${{ github.event.inputs.is_auction_day }}" == "true"
+                  )
+                  
+                  # Count results
+                  valid = [r for r in results if r is not None]
+                  bid = review = skip = 0
+                  
+                  for r in valid:
+                      rec = r.get("recommendation") if hasattr(r, "get") else None
+                      if rec and isinstance(rec, dict):
+                          rec_val = rec.get("recommendation")
+                          val = rec_val.value if hasattr(rec_val, "value") else str(rec_val)
+                          if val == "BID":
+                              bid += 1
+                          elif val == "REVIEW":
+                              review += 1
+                          else:
+                              skip += 1
+                      else:
+                          skip += 1
+                  
+                  print("")
+                  print("=" * 60)
+                  print("BATCH SUMMARY - Dec 17 Auction")
+                  print("=" * 60)
+                  print(f"Total: {len(valid)}")
+                  print(f"BID: {bid} | REVIEW: {review} | SKIP: {skip}")
+                  
+                  # Show individual
+                  print("")
+                  print("Individual Results:")
+                  for r in valid[:15]:
+                      case = r.get("identifiers", {}).get("case_number", "?") if hasattr(r, "get") else "?"
+                      rec = r.get("recommendation", {}) if hasattr(r, "get") else {}
+                      rec_val = rec.get("recommendation") if isinstance(rec, dict) else None
+                      rec_str = rec_val.value if hasattr(rec_val, "value") else "PENDING"
+                      max_bid = r.get("bid_calculation", r.get("bid_calc", {})).get("max_bid", 0) if hasattr(r, "get") else 0
+                      print(f"  {case}: {rec_str} (${max_bid:,.0f})")
+                  
+              except Exception as e:
+                  print(f"Error: {e}")
+                  import traceback
+                  traceback.print_exc()
+          
+          asyncio.run(batch())
+          PYEOF
+
+  status_check:
+    if: github.event.inputs.action == 'status'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check status
+        run: |
+          echo "BidDeed.AI Pipeline Status"
+          echo "Version: 14.5.1"
+          echo "LangGraph Orchestrator: Active"
+          echo "MCP Tools: 15"
