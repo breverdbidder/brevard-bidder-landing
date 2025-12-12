@@ -1,0 +1,48 @@
+name: Insert Supabase Insight
+
+on:
+  workflow_dispatch:
+    inputs:
+      title:
+        description: 'Insight title'
+        required: true
+      description:
+        description: 'Insight description'
+        required: true
+      insight_type:
+        description: 'Type: ARCHITECTURE, PROCESS_IMPROVEMENT, LEARNING, etc'
+        required: true
+        default: 'ARCHITECTURE'
+      source:
+        description: 'Source reference'
+        required: false
+        default: 'github_workflow'
+
+jobs:
+  insert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Insert insight to Supabase
+        run: |
+          RESPONSE=$(curl -s -X POST "https://mocerqjnksmhcjzxrewo.supabase.co/rest/v1/insights" \
+            -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=representation" \
+            -d '{
+              "user_id": 1,
+              "insight_type": "${{ inputs.insight_type }}",
+              "title": "${{ inputs.title }}",
+              "description": "${{ inputs.description }}",
+              "source": "${{ inputs.source }}",
+              "priority": "Medium",
+              "status": "Active"
+            }')
+          
+          echo "Response: $RESPONSE"
+          
+          if echo "$RESPONSE" | grep -q '"id"'; then
+            echo "✅ Insight logged successfully!"
+          else
+            echo "⚠️ Check response above"
+          fi
