@@ -1,5 +1,5 @@
 // Shadcn UI Skeleton Component
-// BrevardBidderAI - Loading States
+// BidDeed.AI - Loading States
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
 import { cn } from "@/lib/utils"
