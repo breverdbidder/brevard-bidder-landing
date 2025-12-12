@@ -1,4 +1,4 @@
-// BrevardBidderAI Property Drawer Component
+// BidDeed.AI Property Drawer Component
 // Author: Ariel Shapira, Everest Capital USA
 
 import React from 'react';
