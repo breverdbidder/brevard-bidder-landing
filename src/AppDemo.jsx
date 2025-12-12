@@ -1,4 +1,4 @@
-// BrevardBidderAI Application Demo
+// BidDeed.AI Application Demo
 // Standalone split-screen interface demo
 // Author: Ariel Shapira, Everest Capital USA
 
@@ -22,7 +22,7 @@ const SUGGESTED_PROMPTS = ["Show all BID properties", "Analyze Dec 17 auction", 
 
 export function AppDemo() {
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "👋 Welcome to BrevardBidderAI. I'm your Agentic AI Copilot for Brevard County foreclosure auctions." }
+    { role: 'assistant', content: "👋 Welcome to BidDeed.AI. I'm your Agentic AI Copilot for Brevard County foreclosure auctions." }
   ]);
   const [input, setInput] = useState('');
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -51,7 +51,7 @@ Found ${MOCK_PROPERTIES.filter(p => p.recommendation === 'BID').length} BID reco
               <span className="text-white font-bold">BB</span>
             </div>
             <div>
-              <h1 className="text-white font-semibold">BrevardBidderAI</h1>
+              <h1 className="text-white font-semibold">BidDeed.AI</h1>
               <p className="text-xs text-gray-400">Agentic AI Copilot</p>
             </div>
           </div>
@@ -166,7 +166,7 @@ Found ${MOCK_PROPERTIES.filter(p => p.recommendation === 'BID').length} BID reco
 
       <div className="fixed bottom-0 left-0 right-0 bg-slate-900/80 backdrop-blur border-t border-slate-700 px-4 py-2 flex justify-between text-xs text-gray-500">
         <span>© 2025 Ariel Shapira, Everest Capital USA</span>
-        <span>BrevardBidderAI v13.4.0</span>
+        <span>BidDeed.AI v13.4.0</span>
       </div>
     </div>
   );
