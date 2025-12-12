@@ -1,5 +1,5 @@
-// Premium Hero Section - Obsidian Vault Design
-// Elevated luxury fintech aesthetic with dramatic visual presence
+// Premium Hero Section - BidDeed.AI V15.0.0
+// An Everest Company | The Everest Ascent™
 
 import React from 'react';
 import { motion } from 'framer-motion';
@@ -51,17 +51,9 @@ const PremiumHero = ({ heroOpacity, heroScale, heroY, stats, WaitlistForm }) => 
         <div className="absolute top-0 right-1/3 w-px h-[50vh] opacity-10" style={{ background: 'linear-gradient(to bottom, transparent, rgba(16,185,129,0.5) 40%, transparent)' }} />
       </div>
 
-      {/* Diagonal accent lines */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.03]" preserveAspectRatio="none">
-        <line x1="0" y1="100%" x2="100%" y2="0" stroke="url(#goldGrad)" strokeWidth="1" />
-        <line x1="20%" y1="100%" x2="100%" y2="20%" stroke="url(#goldGrad)" strokeWidth="0.5" />
-        <defs>
-          <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="transparent" />
-            <stop offset="50%" stopColor="#f59e0b" />
-            <stop offset="100%" stopColor="transparent" />
-          </linearGradient>
-        </defs>
+      {/* Mountain silhouette accent */}
+      <svg className="absolute bottom-0 left-0 w-full h-32 pointer-events-none opacity-[0.03]" preserveAspectRatio="none" viewBox="0 0 1200 120">
+        <polygon fill="#f59e0b" points="0,120 200,60 400,90 600,30 800,70 1000,20 1200,50 1200,120" />
       </svg>
 
       <div className="max-w-7xl mx-auto w-full relative z-10">
@@ -73,6 +65,16 @@ const PremiumHero = ({ heroOpacity, heroScale, heroY, stats, WaitlistForm }) => 
             variants={staggerContainer}
             className="lg:col-span-7 relative"
           >
+            {/* Everest Company Badge */}
+            <motion.div variants={fadeInUp} className="mb-6">
+              <span className="inline-flex items-center gap-2 text-xs font-medium text-blue-400/60 tracking-widest uppercase">
+                <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2L2 22h20L12 2zm0 4l7.53 14H4.47L12 6z"/>
+                </svg>
+                An Everest Company
+              </span>
+            </motion.div>
+
             {/* Premium floating badge */}
             <motion.div variants={fadeInUp} className="mb-10">
               <motion.span
@@ -94,22 +96,37 @@ const PremiumHero = ({ heroOpacity, heroScale, heroY, stats, WaitlistForm }) => 
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-gradient-to-br from-amber-400 to-amber-500"></span>
                 </span>
-                <span className="text-amber-300/90">Agentic AI Ecosystem</span>
+                <span className="text-amber-300/90">The Everest Ascent™</span>
                 <span className="w-px h-4 bg-amber-500/30" />
-                <span className="text-amber-400/70 font-mono text-xs tracking-wider">V13.4.0</span>
+                <span className="text-amber-400/70 font-mono text-xs tracking-wider">12 Stages</span>
               </motion.span>
             </motion.div>
 
-            {/* Premium headline with editorial weight contrast */}
+            {/* Product Name - BidDeed.AI */}
+            <motion.div variants={fadeInUp} className="mb-4">
+              <span 
+                className="text-4xl sm:text-5xl font-bold tracking-tight"
+                style={{
+                  background: 'linear-gradient(135deg, #fcd34d 0%, #f59e0b 50%, #d97706 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                BidDeed.AI
+              </span>
+            </motion.div>
+
+            {/* Premium headline */}
             <motion.h1 variants={fadeInUp} className="mb-8">
-              <span className="block text-[3.5rem] sm:text-[4.5rem] lg:text-[5.5rem] xl:text-[6rem] font-medium tracking-[-0.04em] leading-[0.9] text-white/90">
+              <span className="block text-[3rem] sm:text-[4rem] lg:text-[5rem] xl:text-[5.5rem] font-medium tracking-[-0.04em] leading-[0.9] text-white/90">
                 Distressed
               </span>
-              <span className="block text-[3.5rem] sm:text-[4.5rem] lg:text-[5.5rem] xl:text-[6rem] font-medium tracking-[-0.04em] leading-[0.9] text-white/90">
+              <span className="block text-[3rem] sm:text-[4rem] lg:text-[5rem] xl:text-[5.5rem] font-medium tracking-[-0.04em] leading-[0.9] text-white/90">
                 Assets.
               </span>
               <motion.span
-                className="block text-[4rem] sm:text-[5rem] lg:text-[6rem] xl:text-[7rem] font-bold tracking-[-0.05em] leading-[0.85] mt-2"
+                className="block text-[3.5rem] sm:text-[4.5rem] lg:text-[5.5rem] xl:text-[6.5rem] font-bold tracking-[-0.05em] leading-[0.85] mt-2"
                 style={{
                   background: 'linear-gradient(135deg, #fcd34d 0%, #f59e0b 30%, #d97706 60%, #f59e0b 100%)',
                   backgroundSize: '200% 200%',
@@ -125,7 +142,7 @@ const PremiumHero = ({ heroOpacity, heroScale, heroY, stats, WaitlistForm }) => 
               </motion.span>
             </motion.h1>
 
-            {/* Mission statement with premium styling */}
+            {/* Mission statement */}
             <motion.div variants={fadeInUp} className="mb-8 relative">
               <div className="absolute -left-4 top-0 bottom-0 w-1 rounded-full bg-gradient-to-b from-emerald-400 via-emerald-500 to-transparent" />
               <p className="text-2xl md:text-3xl lg:text-4xl font-semibold tracking-tight"
@@ -143,26 +160,25 @@ const PremiumHero = ({ heroOpacity, heroScale, heroY, stats, WaitlistForm }) => 
               </p>
             </motion.div>
 
-            {/* Value proposition with refined typography */}
+            {/* Value proposition */}
             <motion.p
               variants={fadeInUp}
               className="text-lg md:text-xl lg:text-2xl text-blue-100/50 mb-12 max-w-2xl leading-relaxed font-light"
             >
-              Your on-ramp to America's highest-yield real estate market.{' '}
-              <span className="text-white/90 font-medium">Local courthouse expertise</span>,{' '}
+              35 years of courthouse expertise, encoded.{' '}
+              <span className="text-white/90 font-medium">The Everest Ascent™</span> transforms{' '}
               <motion.span
                 className="font-semibold relative inline-block"
                 style={{ color: '#fbbf24' }}
               >
-                encoded for global capital
+                4-hour research into 23-second intelligence
                 <motion.span
                   className="absolute -bottom-1 left-0 right-0 h-px"
                   style={{ background: 'linear-gradient(90deg, transparent, #f59e0b, transparent)' }}
                   animate={{ opacity: [0.3, 1, 0.3] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 />
-              </motion.span>.{' '}
-              <span className="text-blue-200/70">BID, REVIEW, or SKIP with ML-powered confidence.</span>
+              </motion.span>.
             </motion.p>
 
             {/* CTA Section */}
@@ -176,25 +192,35 @@ const PremiumHero = ({ heroOpacity, heroScale, heroY, stats, WaitlistForm }) => 
               className="mt-10 flex flex-wrap items-center gap-6 text-sm"
             >
               <div className="flex items-center gap-2 text-blue-300/50">
-                <svg className="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2L2 22h20L12 2zm0 4l7.53 14H4.47L12 6z"/>
                 </svg>
-                <span>AES-256 Encrypted</span>
+                <span>12-Stage Pipeline</span>
               </div>
               <div className="w-px h-4 bg-blue-800" />
               <div className="flex items-center gap-2 text-blue-300/50">
+                <svg className="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span>LienLogic™ Protected</span>
+              </div>
+              <div className="w-px h-4 bg-blue-800 hidden sm:block" />
+              <div className="flex items-center gap-2 text-blue-300/50 hidden sm:flex">
                 <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span>Invest from Anywhere</span>
               </div>
-              <div className="w-px h-4 bg-blue-800 hidden sm:block" />
-              <div className="flex items-center gap-2 text-blue-300/50 hidden sm:flex">
-                <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-                <span>1,393+ Auctions Analyzed</span>
-              </div>
+            </motion.div>
+
+            {/* Founder Attribution */}
+            <motion.div
+              variants={fadeInUp}
+              className="mt-8 pt-6 border-t border-blue-800/30"
+            >
+              <p className="text-sm text-blue-400/50">
+                Founded by <span className="text-blue-300/70 font-medium">Ariel Shapira</span> · 35 Years · 3 Continents · Florida Broker & GC
+              </p>
             </motion.div>
           </motion.div>
 
@@ -210,12 +236,6 @@ const PremiumHero = ({ heroOpacity, heroScale, heroY, stats, WaitlistForm }) => 
               animate={{ rotate: 360 }}
               transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
             />
-            <motion.div
-              className="absolute -bottom-8 -left-8 w-48 h-48 rounded-full pointer-events-none hidden lg:block"
-              style={{ border: '1px dashed rgba(16,185,129,0.2)' }}
-              animate={{ rotate: -360 }}
-              transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
-            />
 
             {/* Premium glass card container */}
             <motion.div
@@ -224,7 +244,7 @@ const PremiumHero = ({ heroOpacity, heroScale, heroY, stats, WaitlistForm }) => 
               transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
               className="relative"
             >
-              {/* Main stats card with glass effect */}
+              {/* Main stats card */}
               <div
                 className="relative p-6 sm:p-8 rounded-3xl overflow-hidden"
                 style={{
@@ -244,7 +264,7 @@ const PremiumHero = ({ heroOpacity, heroScale, heroY, stats, WaitlistForm }) => 
                 <div className="flex items-center justify-between mb-6 sm:mb-8">
                   <div className="flex items-center gap-3">
                     <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-sm font-medium text-blue-300/70 tracking-wide">LIVE METRICS</span>
+                    <span className="text-sm font-medium text-blue-300/70 tracking-wide">THE EVEREST ASCENT™</span>
                   </div>
                   <span className="text-xs font-mono text-blue-500/50 hidden sm:inline">USA • FLORIDA</span>
                 </div>
@@ -365,7 +385,7 @@ const PremiumHero = ({ heroOpacity, heroScale, heroY, stats, WaitlistForm }) => 
             onClick={() => document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' })}
           >
             <span className="text-xs font-medium text-blue-400/40 tracking-widest uppercase group-hover:text-amber-400/60 transition-colors">
-              Explore
+              Explore The Ascent
             </span>
             <div
               className="w-6 h-10 rounded-full flex justify-center pt-2 group-hover:border-amber-500/50 transition-colors"
