@@ -1,6 +1,6 @@
 // BidDeed.AI V16 - Tailwind Configuration
 // Crystal Clear Edition
-// © 2025 Everest Capital of Brevard LLC
+// © 2025 Everest Capital USA
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
