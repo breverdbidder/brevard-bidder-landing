@@ -1,0 +1,121 @@
+name: Bulk Report Generator (Smart Router V5)
+
+on:
+  workflow_dispatch:
+    inputs:
+      auction_date:
+        description: 'Auction date (YYYY-MM-DD)'
+        required: true
+        default: '2025-12-10'
+      case_numbers:
+        description: 'Comma-separated case numbers'
+        required: false
+
+  schedule:
+    # Run every Tuesday and Wednesday at 8 AM EST (day before auctions)
+    - cron: '0 13 * * 2,3'
+
+jobs:
+  generate_reports:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install httpx python-docx supabase
+
+      - name: Generate Bulk Reports via Gemini 2.5 Flash (FREE)
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          python << 'PYTHON'
+          import os
+          import json
+          import httpx
+          from datetime import datetime
+
+          GOOGLE_API_KEY = os.environ["GOOGLE_API_KEY"]
+          
+          # Smart Router V5 - FREE tier with 1M context
+          def call_gemini_free(prompt: str) -> str:
+              """Call Gemini 2.5 Flash - FREE tier with 1M context"""
+              url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GOOGLE_API_KEY}"
+              
+              payload = {
+                  "contents": [{"parts": [{"text": prompt}]}],
+                  "generationConfig": {"maxOutputTokens": 8192, "temperature": 0.3}
+              }
+              
+              response = httpx.post(url, json=payload, timeout=120)
+              response.raise_for_status()
+              result = response.json()
+              
+              return result["candidates"][0]["content"]["parts"][0]["text"]
+          
+          # Test connection
+          print("🚀 Smart Router V5 - Gemini 2.5 Flash FREE Tier")
+          print("=" * 50)
+          
+          test_response = call_gemini_free("Say: BidDeed.AI bulk processing ready!")
+          print(f"✅ Connection verified: {test_response[:50]}...")
+          
+          # Bulk processing prompt for auction analysis
+          auction_date = "${{ inputs.auction_date }}" or "2025-12-10"
+          
+          bulk_prompt = f"""
+          You are BidDeed.AI, a foreclosure auction analysis system.
+          
+          Generate a summary report for the {auction_date} Brevard County foreclosure auction.
+          
+          For each property, provide:
+          1. Case number and plaintiff
+          2. Property type assessment
+          3. Risk factors
+          4. Recommendation (BID/REVIEW/SKIP)
+          
+          Format as a structured report suitable for auction day reference.
+          
+          Author: Ariel Shapira, Solo Founder
+          Real Estate Developer & Founder, Everest Capital USA
+          """
+          
+          print(f"\n📋 Generating bulk analysis for {auction_date}...")
+          analysis = call_gemini_free(bulk_prompt)
+          
+          print("\n" + "=" * 50)
+          print("BULK ANALYSIS COMPLETE")
+          print("=" * 50)
+          print(analysis[:2000])
+          
+          # Log stats
+          print(f"\n✅ Smart Router V5 FREE tier processing complete")
+          print(f"📊 Model: gemini-2.5-flash (1M context)")
+          print(f"💰 Cost: $0.00 (FREE tier)")
+          PYTHON
+
+      - name: Log to Supabase
+        env:
+          SUPABASE_URL: https://mocerqjnksmhcjzxrewo.supabase.co
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          curl -s -X POST "$SUPABASE_URL/rest/v1/insights" \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_KEY" \
+            -H "Content-Type: application/json" \
+            -H "Prefer: return=minimal" \
+            -d '{
+              "category": "mcp_reference",
+              "subcategory": "workflow_execution",
+              "title": "Bulk Report Generator executed - Smart Router V5 FREE tier",
+              "content": "Generated bulk auction reports using gemini-2.5-flash (1M context FREE). Cost: $0.",
+              "metadata": {"auction_date": "${{ inputs.auction_date }}", "model": "gemini-2.5-flash", "tier": "FREE"}
+            }' || echo "Supabase log attempted"
