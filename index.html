@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
     
     <!-- Primary Meta Tags -->
     <title>BidDeed.AI | Distressed Assets Decoded. For Everyone. Everywhere.</title>
@@ -25,104 +25,143 @@
     <meta name="twitter:title" content="BidDeed.AI | The Everest Ascent™" />
     <meta name="twitter:description" content="12 stages to the summit of distressed real estate. Global investors access US auctions with AI-powered intelligence. Founded by Ariel Shapira." />
     
-    <!-- Mapbox GL JS for CMA Heat Maps -->
-    <script src='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js'></script>
-    <link href='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css' rel='stylesheet' />
-    
-    <!-- Premium Fonts: Clash Display (headlines) + DM Sans (body) -->
+    <!-- Premium Fonts: DM Sans (body) + Plus Jakarta Sans (headlines) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Fontshare Clash Display - Premium Display Font -->
-    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@200,300,400,500,600,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     
     <style>
-      /* Premium Typography System */
+      /* ============ FONT RENDERING - CRISP & CLEAR ============ */
       :root {
-        --font-display: 'Clash Display', 'DM Sans', system-ui, sans-serif;
+        --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
         
-        /* Everest Brand Colors */
-        --everest-gold: #f59e0b;
-        --everest-gold-light: #fcd34d;
-        --everest-gold-dark: #d97706;
-        --everest-summit: #10b981;
-        --everest-night: #0f172a;
+        /* Brand Colors */
+        --amber-400: #fbbf24;
+        --amber-500: #f59e0b;
+        --emerald-400: #34d399;
+        --emerald-500: #10b981;
+        --slate-900: #0f172a;
+        --slate-800: #1e293b;
+      }
+      
+      /* Critical: Force crisp font rendering */
+      html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        font-feature-settings: "kern" 1;
+        scroll-behavior: smooth;
       }
       
       body {
         font-family: var(--font-body);
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
+        background-color: var(--slate-900);
+        color: white;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        /* Prevent any subpixel blurriness */
+        transform: translateZ(0);
+        backface-visibility: hidden;
       }
       
+      /* Headlines - use display font */
       h1, h2, h3, h4, h5, h6 {
         font-family: var(--font-display);
+        font-weight: 700;
+        /* Ensure sharp text */
+        -webkit-font-smoothing: antialiased;
+        transform: translateZ(0);
       }
       
+      /* Monospace */
       code, pre, .font-mono {
         font-family: var(--font-mono);
       }
       
-      /* Smooth scrolling */
-      html {
-        scroll-behavior: smooth;
+      /* ============ ANTI-BLUR FOR ANIMATIONS ============ */
+      * {
+        /* Prevent blurry transforms */
+        transform-style: preserve-3d;
       }
       
-      /* Custom selection - Everest Gold */
+      /* Force GPU acceleration for smooth animations without blur */
+      .motion-safe {
+        will-change: transform, opacity;
+        transform: translateZ(0);
+      }
+      
+      /* Selection color */
       ::selection {
-        background: var(--everest-gold);
+        background: var(--amber-500);
         color: black;
       }
       
-      /* Prevent FOUC */
-      html {
-        visibility: visible;
-        opacity: 1;
-      }
-      
-      /* Custom scrollbar - Everest themed */
+      /* ============ SCROLLBAR (Clean) ============ */
       ::-webkit-scrollbar {
-        width: 10px;
+        width: 8px;
       }
       
       ::-webkit-scrollbar-track {
-        background: var(--everest-night);
+        background: var(--slate-900);
       }
       
       ::-webkit-scrollbar-thumb {
-        background: rgb(51, 65, 85);
-        border-radius: 5px;
+        background: #334155;
+        border-radius: 4px;
       }
       
       ::-webkit-scrollbar-thumb:hover {
-        background: var(--everest-gold);
+        background: #475569;
       }
       
-      /* Mapbox popup styling */
-      .mapboxgl-popup-content {
-        background: rgba(15, 23, 42, 0.95) !important;
-        border: 1px solid #334155 !important;
-        border-radius: 8px !important;
-        padding: 0 !important;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5) !important;
+      /* ============ FOCUS STATES (Accessibility) ============ */
+      *:focus-visible {
+        outline: 2px solid var(--amber-500);
+        outline-offset: 2px;
       }
       
-      .mapboxgl-popup-tip {
-        border-top-color: rgba(15, 23, 42, 0.95) !important;
+      /* ============ RESPONSIVE IMAGES ============ */
+      img {
+        max-width: 100%;
+        height: auto;
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
       }
       
-      .mapboxgl-popup-close-button {
-        color: #64748b !important;
-        font-size: 18px !important;
-        padding: 4px 8px !important;
+      /* ============ PREVENT ZOOM ON INPUT (iOS) ============ */
+      @media screen and (max-width: 768px) {
+        input[type="email"],
+        input[type="text"],
+        input[type="tel"],
+        select,
+        textarea {
+          font-size: 16px !important;
+        }
       }
       
-      .mapboxgl-popup-close-button:hover {
-        color: var(--everest-summit) !important;
-        background: transparent !important;
+      /* ============ LOADING STATE ============ */
+      #root:empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+      }
+      
+      #root:empty::after {
+        content: '';
+        width: 40px;
+        height: 40px;
+        border: 3px solid #1e293b;
+        border-top-color: var(--amber-500);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
       }
     </style>
   </head>
