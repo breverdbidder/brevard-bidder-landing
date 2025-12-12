@@ -1,4 +1,4 @@
-// BrevardBidderAI - Tailwind Configuration
+// BidDeed.AI - Tailwind Configuration
 // Based on Vibe Coding Community Best Practices
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
@@ -32,7 +32,7 @@ module.exports = {
           800: '#1e40af',
           900: '#1e3a8a',
         },
-        // BrevardBidderAI specific
+        // BidDeed.AI specific
         bid: {
           light: '#dcfce7',
           DEFAULT: '#22c55e',
