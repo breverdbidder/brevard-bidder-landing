@@ -10,7 +10,7 @@
 **Ariel Shapira**  
 Real Estate Developer & Founder  
 Everest Capital USA  
-Managing Member, Everest Capital of Brevard LLC
+Managing Member, Everest Capital USA
 
 ---
 
@@ -57,7 +57,7 @@ This project was developed using AI-assisted tools including:
 
 For licensing inquiries or permissions:
 - LinkedIn: https://linkedin.com/in/ariel-shapira-533a776
-- Company: Everest Capital of Brevard LLC
+- Company: Everest Capital USA
 
 ---
 
