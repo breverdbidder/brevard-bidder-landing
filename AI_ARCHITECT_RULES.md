@@ -1,4 +1,4 @@
-# BrevardBidderAI - AI Architect Rules
+# BidDeed.AI - AI Architect Rules
 ## Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
 ## NEW SESSION PROTOCOL (MANDATORY)
@@ -86,7 +86,7 @@ CREATE TABLE session_checkpoints (
 ## MEMORY RULES
 
 Always remember:
-- BrevardBidderAI = foreclosure auctions (NOT SaaS)
+- BidDeed.AI = foreclosure auctions (NOT SaaS)
 - BidDeedAI = tax deed auctions
 - Credit: "Ariel Shapira, Solo Founder, Everest Capital USA"
 - NEVER use Google Drive - GitHub only
