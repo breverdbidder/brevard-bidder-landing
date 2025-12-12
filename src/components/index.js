@@ -1,4 +1,4 @@
-// BrevardBidderAI Component Exports
+// BidDeed.AI Component Exports
 // Author: Ariel Shapira, Everest Capital USA
 
 export { AuctionMap } from "./AuctionMap";
