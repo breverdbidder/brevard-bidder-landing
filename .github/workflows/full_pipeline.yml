@@ -1,0 +1,48 @@
+name: Full Analysis Pipeline
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Properties to analyze'
+        required: false
+        default: '5'
+        type: string
+  schedule:
+    # Run Wed 7PM EST (after 6PM auction results scraper)
+    - cron: '0 0 * * 4'
+
+env:
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install httpx
+      
+      - name: Run Full Pipeline
+        run: |
+          LIMIT="${{ inputs.limit }}"
+          LIMIT="${LIMIT:-5}"
+          python src/integrations/full_pipeline.py --limit $LIMIT
+      
+      - name: Generate Summary
+        run: |
+          echo "## 🏠 BidDeed.AI Full Pipeline Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Pipeline includes:" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Fara V8 AI Analysis (TinyLlama on T4)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ XGBoost ML Predictions (64.4% accuracy)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Max Bid Calculation (70% ARV formula)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ BID/REVIEW/SKIP Recommendations" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Results saved to Supabase insights (FULL_PROPERTY_ANALYSIS)" >> $GITHUB_STEP_SUMMARY
