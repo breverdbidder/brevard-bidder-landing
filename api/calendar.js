@@ -1,4 +1,4 @@
-// BrevardBidderAI - Auction Calendar API
+// BidDeed.AI - Auction Calendar API
 // Returns upcoming and past auction dates
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
