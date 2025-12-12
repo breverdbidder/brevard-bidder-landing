@@ -1,0 +1,223 @@
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#10B981', 'primaryTextColor': '#fff', 'primaryBorderColor': '#059669', 'lineColor': '#6B7280', 'secondaryColor': '#3B82F6', 'tertiaryColor': '#1F2937'}}}%%
+
+%% =============================================================================
+%% BIDDEED.AI ARCHITECTURE DIAGRAMS
+%% =============================================================================
+
+%% -----------------------------------------------------------------------------
+%% DIAGRAM 1: SYSTEM CONTEXT (C4 Level 1)
+%% -----------------------------------------------------------------------------
+flowchart TB
+    subgraph EXTERNAL["External Systems"]
+        BECA[("BECA<br/>Court Records")]
+        BCPAO[("BCPAO<br/>Property Data")]
+        ACCLAIM[("AcclaimWeb<br/>Title Records")]
+        REALTDM[("RealTDM<br/>Tax Certs")]
+        CENSUS[("Census API<br/>Demographics")]
+        LLM[("LLM Providers<br/>Anthropic/Google")]
+    end
+
+    USER((Ariel Shapira<br/>Primary User))
+    
+    subgraph BIDDEED["BidDeed.AI System"]
+        PLATFORM[["🏔️ BidDeed.AI<br/>Foreclosure Intelligence<br/>Platform"]]
+    end
+
+    USER -->|"Reviews recommendations<br/>Makes bid decisions"| PLATFORM
+    PLATFORM -->|"Scrapes court data"| BECA
+    PLATFORM -->|"Fetches property info"| BCPAO
+    PLATFORM -->|"Searches liens"| ACCLAIM
+    PLATFORM -->|"Checks tax certs"| REALTDM
+    PLATFORM -->|"Gets demographics"| CENSUS
+    PLATFORM -->|"AI analysis"| LLM
+
+    classDef external fill:#374151,stroke:#6B7280,color:#fff
+    classDef user fill:#8B5CF6,stroke:#7C3AED,color:#fff
+    classDef system fill:#10B981,stroke:#059669,color:#fff
+    
+    class BECA,BCPAO,ACCLAIM,REALTDM,CENSUS,LLM external
+    class USER user
+    class PLATFORM system
+
+---
+
+%% -----------------------------------------------------------------------------
+%% DIAGRAM 2: THE EVEREST ASCENT™ PIPELINE
+%% -----------------------------------------------------------------------------
+flowchart LR
+    subgraph BASECAMP["🏕️ Base Camp"]
+        S1[1. Discovery<br/>AuctionRadar™]
+        S2[2. Scraping<br/>BECA V22]
+    end
+
+    subgraph APPROACH["🥾 The Approach"]
+        S3[3. Title Search<br/>TitleTrack™]
+        S4[4. Lien Priority<br/>LienLogic™ ⭐]
+        S5[5. Tax Certs]
+    end
+
+    subgraph CLIMB["🧗 The Climb"]
+        S6[6. Demographics<br/>MarketPulse™]
+        S7[7. ML Score<br/>BidScore™ ⭐]
+        S8[8. Max Bid<br/>Shapira Formula™ ⭐]
+    end
+
+    subgraph SUMMIT["🏔️ Summit Push"]
+        S9[9. Decision Log]
+        S10[10. Report]
+    end
+
+    subgraph DESCENT["🎿 The Descent"]
+        S11[11. Disposition<br/>ExitPath™]
+        S12[12. Archive]
+    end
+
+    S1 --> S2 --> S3 --> S4
+    S4 -->|"DO_NOT_BID"| S9
+    S4 -->|"Continue"| S5 --> S6 --> S7 --> S8 --> S9
+    S9 --> S10 --> S11 --> S12 --> END((END))
+
+    classDef basecamp fill:#6B7280,stroke:#4B5563,color:#fff
+    classDef approach fill:#3B82F6,stroke:#2563EB,color:#fff
+    classDef climb fill:#F59E0B,stroke:#D97706,color:#fff
+    classDef summit fill:#10B981,stroke:#059669,color:#fff
+    classDef descent fill:#8B5CF6,stroke:#7C3AED,color:#fff
+    classDef flagship fill:#EF4444,stroke:#DC2626,color:#fff
+
+    class S1,S2 basecamp
+    class S3,S5 approach
+    class S4 flagship
+    class S6 climb
+    class S7,S8 flagship
+    class S9,S10 summit
+    class S11,S12 descent
+
+---
+
+%% -----------------------------------------------------------------------------
+%% DIAGRAM 3: SMART ROUTER V5 TIER SELECTION
+%% -----------------------------------------------------------------------------
+flowchart TD
+    INPUT[/"Incoming Request<br/>task_type, complexity, tokens"/]
+    
+    INPUT --> SELECTOR{Tier Selector}
+    
+    SELECTOR -->|"complexity ≤ 3"| FREE[🆓 FREE<br/>Gemini 2.5 Flash<br/>$0/M tokens<br/>Target: 45%]
+    SELECTOR -->|"complexity 4-5"| ULTRA[💸 ULTRA_CHEAP<br/>DeepSeek V3.2<br/>$0.28/M in<br/>Target: 25%]
+    SELECTOR -->|"complexity 6-7"| CHEAP[💰 CHEAP<br/>Claude Haiku<br/>$0.25/M in<br/>Target: 20%]
+    SELECTOR -->|"complexity 8-9"| QUALITY[⭐ QUALITY<br/>Claude Sonnet<br/>$3/M in<br/>Target: 8%]
+    SELECTOR -->|"complexity 10"| PREMIUM[👑 PREMIUM<br/>Claude Opus<br/>$15/M in<br/>Target: 2%]
+
+    FREE --> FALLBACK
+    ULTRA --> FALLBACK
+    CHEAP --> FALLBACK
+    QUALITY --> FALLBACK
+    PREMIUM --> FALLBACK
+
+    FALLBACK{Fallback Chain}
+    FALLBACK -->|"Success"| OUTPUT[/"Response"/]
+    FALLBACK -->|"Fail"| LOWER[Try Lower Tier]
+    LOWER --> FALLBACK
+
+    classDef free fill:#22C55E,stroke:#16A34A,color:#fff
+    classDef cheap fill:#3B82F6,stroke:#2563EB,color:#fff
+    classDef quality fill:#F59E0B,stroke:#D97706,color:#fff
+    classDef premium fill:#8B5CF6,stroke:#7C3AED,color:#fff
+
+    class FREE free
+    class ULTRA,CHEAP cheap
+    class QUALITY quality
+    class PREMIUM premium
+
+---
+
+%% -----------------------------------------------------------------------------
+%% DIAGRAM 4: DEPLOYMENT ARCHITECTURE
+%% -----------------------------------------------------------------------------
+flowchart TB
+    subgraph DEV["Development"]
+        CODE[Local Code]
+        PUSH[Git Push]
+    end
+
+    subgraph CI["GitHub Actions"]
+        TEST[Tests & Lint]
+        BUILD[Build Next.js]
+        WORKFLOWS[Python Workflows<br/>BECA, Router, etc.]
+    end
+
+    subgraph DEPLOY["Deployment Targets"]
+        CF[Cloudflare Pages<br/>Frontend]
+        GHA[GitHub Actions<br/>Backend Compute]
+        SB[(Supabase<br/>Database)]
+    end
+
+    CODE --> PUSH --> TEST --> BUILD
+    BUILD --> CF
+    PUSH --> WORKFLOWS --> GHA
+    GHA --> SB
+    CF --> SB
+
+    classDef dev fill:#374151,stroke:#4B5563,color:#fff
+    classDef ci fill:#F59E0B,stroke:#D97706,color:#fff
+    classDef deploy fill:#10B981,stroke:#059669,color:#fff
+
+    class CODE,PUSH dev
+    class TEST,BUILD,WORKFLOWS ci
+    class CF,GHA,SB deploy
+
+---
+
+%% -----------------------------------------------------------------------------
+%% DIAGRAM 5: DATA FLOW
+%% -----------------------------------------------------------------------------
+flowchart LR
+    subgraph SOURCES["External Sources"]
+        S1[(BECA)]
+        S2[(BCPAO)]
+        S3[(AcclaimWeb)]
+        S4[(RealTDM)]
+        S5[(Census)]
+    end
+
+    subgraph SCRAPERS["Scraper Layer"]
+        SC1[BECA Scraper]
+        SC2[BCPAO Scraper]
+        SC3[ACW Scraper]
+        SC4[TDM Scraper]
+        SC5[Census API]
+    end
+
+    subgraph PIPELINE["LangGraph Pipeline"]
+        ORCH[Orchestrator]
+        STATE[State Manager]
+        ML[ML Engine]
+    end
+
+    subgraph STORAGE["Data Storage"]
+        DB[(Supabase)]
+        FILES[(File Storage)]
+    end
+
+    S1 --> SC1 --> ORCH
+    S2 --> SC2 --> ORCH
+    S3 --> SC3 --> ORCH
+    S4 --> SC4 --> ORCH
+    S5 --> SC5 --> ORCH
+
+    ORCH <--> STATE
+    ORCH --> ML
+    ML --> ORCH
+
+    ORCH --> DB
+    ORCH --> FILES
+
+    classDef source fill:#374151,stroke:#6B7280,color:#fff
+    classDef scraper fill:#3B82F6,stroke:#2563EB,color:#fff
+    classDef pipeline fill:#10B981,stroke:#059669,color:#fff
+    classDef storage fill:#8B5CF6,stroke:#7C3AED,color:#fff
+
+    class S1,S2,S3,S4,S5 source
+    class SC1,SC2,SC3,SC4,SC5 scraper
+    class ORCH,STATE,ML pipeline
+    class DB,FILES storage
