@@ -1,4 +1,4 @@
-// BrevardBidderAI - Chat API
+// BidDeed.AI - Chat API
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
 const DEC3_RESULTS = [
@@ -39,7 +39,7 @@ export default function handler(req, res) {
   } else if (isUpcoming) {
     responseText = '📅 **Next: Dec 10, 2025**\nForeclosure @ Titusville Courthouse 11AM';
   } else {
-    responseText = '🏠 **BrevardBidderAI**\n\nTry: "Dec 3 results", "Upcoming", or "Calendar"';
+    responseText = '🏠 **BidDeed.AI**\n\nTry: "Dec 3 results", "Upcoming", or "Calendar"';
   }
 
   return res.status(200).json({
