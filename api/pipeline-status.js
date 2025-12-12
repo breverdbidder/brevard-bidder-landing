@@ -1,4 +1,4 @@
-// BrevardBidderAI - LangGraph Pipeline Status API
+// BidDeed.AI - LangGraph Pipeline Status API
 // Polls GitHub Actions workflow status and returns results when complete
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
