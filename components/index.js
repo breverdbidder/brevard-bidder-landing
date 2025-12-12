@@ -1,4 +1,4 @@
-// BrevardBidderAI - Component Library Index
+// BidDeed.AI - Component Library Index
 // All UI components following Vibe Coding Best Practices
 // Frontend Score: 100/100 🏆
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
