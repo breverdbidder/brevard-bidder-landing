@@ -603,7 +603,7 @@ export default function PipelineDemo() {
 
       {/* Footer */}
       <div style={{ textAlign: 'center', marginTop: '24px', color: '#475569', fontSize: '12px', position: 'relative', zIndex: 10 }}>
-        Everest Capital of Brevard LLC • 10 hours → 10 minutes • 100x ROI
+        Everest Capital USA • 10 hours → 10 minutes • 100x ROI
       </div>
 
       <style>{`
