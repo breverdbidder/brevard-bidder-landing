@@ -1,5 +1,5 @@
 // LangGraphDemo.jsx - V14.0.0 "Agentic AI Ecosystem" Edition
-// BrevardBidderAI 12-Stage LangGraph Pipeline Visualization
+// BidDeed.AI 12-Stage LangGraph Pipeline Visualization
 // Built by Ariel Shapira - Solo Founder, Everest Capital USA
 // © 2025 All Rights Reserved - Proprietary IP
 
@@ -483,7 +483,7 @@ export default function LangGraphDemo({ onClose }) {
     setStartTime(Date.now());
     setTerminalLines([
       { text: '╔═══════════════════════════════════════════════╗', type: 'system' },
-      { text: '║  BrevardBidderAI V14.0 - LangGraph Pipeline   ║', type: 'system' },
+      { text: '║  BidDeed.AI V14.0 - LangGraph Pipeline   ║', type: 'system' },
       { text: '║  Agentic AI Ecosystem for Foreclosure Intel   ║', type: 'system' },
       { text: '╚═══════════════════════════════════════════════╝', type: 'system' },
       { text: '', type: '' },
@@ -556,7 +556,7 @@ export default function LangGraphDemo({ onClose }) {
           </div>
 
           <h2 className="text-4xl font-bold text-white mb-2">
-            BrevardBidder<span className="text-amber-400">AI</span>
+            BidDeed.AI<span className="text-amber-400">AI</span>
           </h2>
           <p className="text-xl text-blue-300 mb-6">
             Agentic AI Ecosystem for Foreclosure Intelligence
@@ -648,7 +648,7 @@ export default function LangGraphDemo({ onClose }) {
       <div className="absolute top-0 left-0 right-0 h-16 bg-slate-900/80 backdrop-blur border-b border-slate-700 flex items-center justify-between px-6 z-20">
         <div className="flex items-center gap-4">
           <div className="text-xl font-bold text-white">
-            BrevardBidder<span className="text-amber-400">AI</span>
+            BidDeed.AI<span className="text-amber-400">AI</span>
           </div>
           <div className="px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-400 text-sm">
             LangGraph V14.0
