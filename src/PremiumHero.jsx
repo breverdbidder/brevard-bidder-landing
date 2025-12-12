@@ -139,7 +139,7 @@ const PremiumHero = ({ heroOpacity, heroScale, heroY, stats, WaitlistForm }) => 
                 For Everyone. Everywhere.
               </p>
               <p className="text-lg md:text-xl text-blue-300/60 mt-2 font-light italic tracking-wide">
-                Democratizing USA distressed asset auctions
+                Global investors access US distressed asset auctions
               </p>
             </motion.div>
 
@@ -148,13 +148,13 @@ const PremiumHero = ({ heroOpacity, heroScale, heroY, stats, WaitlistForm }) => 
               variants={fadeInUp}
               className="text-lg md:text-xl lg:text-2xl text-blue-100/50 mb-12 max-w-2xl leading-relaxed font-light"
             >
-              12-stage AI pipeline transforms{' '}
-              <span className="text-white/90 font-medium">4-hour research</span> into{' '}
+              Your on-ramp to America's highest-yield real estate market.{' '}
+              <span className="text-white/90 font-medium">Local courthouse expertise</span>,{' '}
               <motion.span
                 className="font-semibold relative inline-block"
                 style={{ color: '#fbbf24' }}
               >
-                23-second intelligence
+                encoded for global capital
                 <motion.span
                   className="absolute -bottom-1 left-0 right-0 h-px"
                   style={{ background: 'linear-gradient(90deg, transparent, #f59e0b, transparent)' }}
@@ -183,15 +183,17 @@ const PremiumHero = ({ heroOpacity, heroScale, heroY, stats, WaitlistForm }) => 
               </div>
               <div className="w-px h-4 bg-blue-800" />
               <div className="flex items-center gap-2 text-blue-300/50">
+                <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Invest from Anywhere</span>
+              </div>
+              <div className="w-px h-4 bg-blue-800 hidden sm:block" />
+              <div className="flex items-center gap-2 text-blue-300/50 hidden sm:flex">
                 <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
                 <span>1,393+ Auctions Analyzed</span>
-              </div>
-              <div className="w-px h-4 bg-blue-800 hidden sm:block" />
-              <div className="flex items-center gap-2 text-blue-300/50 hidden sm:flex">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                <span>50+ on waitlist</span>
               </div>
             </motion.div>
           </motion.div>
@@ -244,7 +246,7 @@ const PremiumHero = ({ heroOpacity, heroScale, heroY, stats, WaitlistForm }) => 
                     <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
                     <span className="text-sm font-medium text-blue-300/70 tracking-wide">LIVE METRICS</span>
                   </div>
-                  <span className="text-xs font-mono text-blue-500/50 hidden sm:inline">BREVARD COUNTY</span>
+                  <span className="text-xs font-mono text-blue-500/50 hidden sm:inline">USA • FLORIDA</span>
                 </div>
 
                 {/* Premium stat grid */}
@@ -325,7 +327,7 @@ const PremiumHero = ({ heroOpacity, heroScale, heroY, stats, WaitlistForm }) => 
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
                       </span>
-                      <span className="text-emerald-300 font-medium text-xs sm:text-sm tracking-wide">Live in Brevard County</span>
+                      <span className="text-emerald-300 font-medium text-xs sm:text-sm tracking-wide">Live in Brevard County, FL</span>
                     </motion.div>
                   </div>
                 </motion.div>
