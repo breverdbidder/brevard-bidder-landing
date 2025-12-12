@@ -1,4 +1,4 @@
-# BrevardBidderAI Design System
+# BidDeed.AI Design System
 ## Based on Vibe Coding Community Best Practices
 ## Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
@@ -127,7 +127,7 @@ xl:   1.25rem  (20px)
 />
 ```
 
-### PropertyCard (BrevardBidderAI specific)
+### PropertyCard (BidDeed.AI specific)
 ```jsx
 <PropertyCard
   address="123 Main St"
