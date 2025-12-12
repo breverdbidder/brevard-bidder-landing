@@ -1,4 +1,4 @@
-// BrevardBidderAI App Router
+// BidDeed.AI App Router
 // Routes: / = Landing, #demo = Real Data Demo, #pipeline = 12-Stage Pipeline Demo
 import React from 'react';
 import { useState, useEffect } from 'react';
