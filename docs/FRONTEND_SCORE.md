@@ -1,4 +1,4 @@
-# BrevardBidderAI Frontend Score: 100/100 🏆
+# BidDeed.AI Frontend Score: 100/100 🏆
 ## Date: December 8, 2025
 
 ---
@@ -147,6 +147,6 @@ npm run build-storybook
 
 ---
 
-*BrevardBidderAI V13.4.0*
+*BidDeed.AI V13.4.0*
 *Author: Ariel Shapira, Solo Founder, Everest Capital USA*
 *Frontend Score: 100/100 🏆*
