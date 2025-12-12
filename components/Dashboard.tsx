@@ -1,4 +1,4 @@
-// BrevardBidderAI Premium Dashboard
+// BidDeed.AI Premium Dashboard
 // Score Target: 95/100
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
@@ -187,7 +187,7 @@ export default function Dashboard() {
                   <Gavel className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="font-bold text-white">BrevardBidderAI</h1>
+                  <h1 className="font-bold text-white">BidDeed.AI</h1>
                   <p className="text-xs text-gray-500">V13.4.0</p>
                 </div>
               </motion.div>
@@ -612,7 +612,7 @@ export default function Dashboard() {
         {/* Footer */}
         <footer className="px-6 py-4 border-t border-gray-800 mt-6">
           <div className="flex items-center justify-between text-sm text-gray-500">
-            <p>© 2025 BrevardBidderAI • Ariel Shapira, Everest Capital USA</p>
+            <p>© 2025 BidDeed.AI • Ariel Shapira, Everest Capital USA</p>
             <p>V13.4.0 • Agentic AI Ecosystem</p>
           </div>
         </footer>
