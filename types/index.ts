@@ -1,4 +1,4 @@
-// BrevardBidderAI - TypeScript Type Definitions
+// BidDeed.AI - TypeScript Type Definitions
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
 // ============================================================
