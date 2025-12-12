@@ -1,4 +1,4 @@
-# BrevardBidderAI Landing Page
+# BidDeed.AI Landing Page
 
 V13.4.0 - Intelligent NLP with Smart Router
 
