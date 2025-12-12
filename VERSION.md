@@ -1,4 +1,4 @@
-# BrevardBidderAI Landing Page
+# BidDeed.AI Landing Page
 
 ## Version 3.5.0
 **Date:** December 7, 2025
