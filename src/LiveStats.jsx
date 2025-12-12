@@ -1,4 +1,4 @@
-// BrevardBidderAI - Live Stats Dashboard Component
+// BidDeed.AI - Live Stats Dashboard Component
 // Shows real-time platform statistics
 // Author: Ariel Shapira, Solo Founder - Everest Capital USA
 
