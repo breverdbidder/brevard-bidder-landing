@@ -1,4 +1,4 @@
-// BrevardBidderAI - REAL DATA Integration Demo
+// BidDeed.AI - REAL DATA Integration Demo
 // Uses actual Dec 3, 2025 Brevard County foreclosure auction data
 // 12-Stage Pipeline with live ML predictions
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
@@ -124,7 +124,7 @@ const REAL_AUCTION_DATA = {
   ]
 };
 
-// 12-Stage Pipeline Definition - REAL stages from BrevardBidderAI V13.4.0
+// 12-Stage Pipeline Definition - REAL stages from BidDeed.AI V13.4.0
 const PIPELINE_STAGES = [
   { id: 1, name: "Discovery", emoji: "🔍", desc: "Auction calendar sync", detail: "BECA PDF parsing", duration: 800 },
   { id: 2, name: "Scraping", emoji: "⚡", desc: "BECA V2.0 extraction", detail: "12 regex patterns", duration: 1200 },
@@ -152,7 +152,7 @@ export default function AgenticDemo() {
   const [pipelineOutput, setPipelineOutput] = useState([]);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: `🏠 **BrevardBidderAI V13.4.0** - REAL DATA\n\n📅 Dec 3, 2025 Auction • Titusville Courthouse\n\n**${REAL_AUCTION_DATA.summary.total_properties} Properties Analyzed:**\n• ${REAL_AUCTION_DATA.summary.recommendations.BID} BID\n• ${REAL_AUCTION_DATA.summary.recommendations.REVIEW} REVIEW\n• ${REAL_AUCTION_DATA.summary.recommendations.SKIP} SKIP\n\n💵 Total Judgment: $${(REAL_AUCTION_DATA.summary.total_judgment_value/1000000).toFixed(2)}M\n\nClick any property or use chat commands!` }
+    { role: 'assistant', content: `🏠 **BidDeed.AI V13.4.0** - REAL DATA\n\n📅 Dec 3, 2025 Auction • Titusville Courthouse\n\n**${REAL_AUCTION_DATA.summary.total_properties} Properties Analyzed:**\n• ${REAL_AUCTION_DATA.summary.recommendations.BID} BID\n• ${REAL_AUCTION_DATA.summary.recommendations.REVIEW} REVIEW\n• ${REAL_AUCTION_DATA.summary.recommendations.SKIP} SKIP\n\n💵 Total Judgment: $${(REAL_AUCTION_DATA.summary.total_judgment_value/1000000).toFixed(2)}M\n\nClick any property or use chat commands!` }
   ]);
   const [input, setInput] = useState('');
   const mapContainer = useRef(null);
@@ -210,7 +210,7 @@ export default function AgenticDemo() {
     setCurrentStage(0);
     setPipelineOutput([
       { text: "╔═══════════════════════════════════════╗", type: "info" },
-      { text: "║  BrevardBidderAI V13.4.0              ║", type: "info" },
+      { text: "║  BidDeed.AI V13.4.0              ║", type: "info" },
       { text: "║  12-Stage Foreclosure Pipeline        ║", type: "info" },
       { text: "╚═══════════════════════════════════════╝", type: "info" },
       { text: "", type: "info" },
@@ -335,7 +335,7 @@ export default function AgenticDemo() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ width: 44, height: 44, background: 'linear-gradient(135deg, #10b981, #059669)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 18 }}>B</div>
             <div>
-              <div style={{ fontWeight: 700, fontSize: 16 }}>BrevardBidderAI</div>
+              <div style={{ fontWeight: 700, fontSize: 16 }}>BidDeed.AI</div>
               <div style={{ fontSize: 12, color: '#10b981' }}>V13.4.0 • REAL DATA</div>
             </div>
           </div>
@@ -439,7 +439,7 @@ export default function AgenticDemo() {
       {/* Footer */}
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#0f172ae0', borderTop: '1px solid #334155', padding: '8px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 12, color: '#64748b', zIndex: 10 }}>
         <span>© 2025 Ariel Shapira, Solo Founder • Everest Capital USA</span>
-        <span style={{ color: '#10b981' }}>BrevardBidderAI V13.4.0 • REAL Dec 3, 2025 Auction Data</span>
+        <span style={{ color: '#10b981' }}>BidDeed.AI V13.4.0 • REAL Dec 3, 2025 Auction Data</span>
       </div>
     </div>
   );
