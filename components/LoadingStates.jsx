@@ -1,4 +1,4 @@
-// BrevardBidderAI - Loading States & Error Handling
+// BidDeed.AI - Loading States & Error Handling
 // Vibe Coding: Always show loading/error states
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
