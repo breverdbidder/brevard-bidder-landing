@@ -1,0 +1,89 @@
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#10B981', 'primaryTextColor': '#fff', 'primaryBorderColor': '#059669', 'lineColor': '#6B7280', 'secondaryColor': '#3B82F6', 'tertiaryColor': '#1F2937'}}}%%
+
+flowchart TB
+    subgraph PRESENTATION["🖥️ PRESENTATION LAYER (Independent)"]
+        direction LR
+        UI[React/Next.js]
+        Chat[BidDeedChat]
+        Decision[DecisionPanel]
+        Progress[PipelineProgress]
+        UI --> Chat
+        UI --> Decision
+        UI --> Progress
+    end
+
+    subgraph API["🔌 API LAYER (Bridge)"]
+        REST[REST Endpoints]
+        WS[WebSocket Events]
+    end
+
+    subgraph LANGGRAPH["⚡ LANGGRAPH ORCHESTRATOR (Full Control)"]
+        direction TB
+        State[EverestAscentState]
+        
+        subgraph PIPELINE["12-Stage Pipeline"]
+            direction LR
+            S1[1.Discovery]
+            S2[2.Scraping]
+            S3[3.Title]
+            S4[4.Liens]
+            S5[5.TaxCerts]
+            S6[6.Demo]
+            S7[7.ML]
+            S8[8.MaxBid]
+            S9[9.Decision]
+            S10[10.Report]
+            S11[11.Dispo]
+            S12[12.Archive]
+            
+            S1 --> S2 --> S3 --> S4
+            S4 -->|DO_NOT_BID| S9
+            S4 -->|Continue| S5 --> S6 --> S7 --> S8 --> S9
+            S9 --> S10 --> S11 --> S12
+        end
+        
+        Checkpoint[(SQLite Checkpoints)]
+        State --> PIPELINE
+        PIPELINE --> Checkpoint
+    end
+
+    subgraph SERVICES["🛠️ SERVICES LAYER (Invoked)"]
+        direction LR
+        SR[Smart Router V5]
+        ML[XGBoost ML]
+        BECA[BECA Scraper]
+        BCPAO[BCPAO]
+        ACW[AcclaimWeb]
+    end
+
+    subgraph INFRA["☁️ INFRASTRUCTURE (Independent)"]
+        direction LR
+        GHA[GitHub Actions]
+        SB[(Supabase)]
+        CF[Cloudflare Pages]
+    end
+
+    %% Connections
+    PRESENTATION -->|"Reads State"| API
+    API -->|"Triggers"| LANGGRAPH
+    LANGGRAPH -->|"Returns State"| API
+    
+    LANGGRAPH -->|"Invokes"| SERVICES
+    SERVICES -->|"Returns Data"| LANGGRAPH
+    
+    GHA -->|"Triggers Workflows"| LANGGRAPH
+    LANGGRAPH -->|"Persists State"| SB
+    CF -->|"Serves"| PRESENTATION
+
+    %% Styling
+    classDef presentation fill:#8B5CF6,stroke:#7C3AED,color:#fff
+    classDef api fill:#F59E0B,stroke:#D97706,color:#fff
+    classDef langgraph fill:#10B981,stroke:#059669,color:#fff
+    classDef services fill:#3B82F6,stroke:#2563EB,color:#fff
+    classDef infra fill:#6B7280,stroke:#4B5563,color:#fff
+    
+    class PRESENTATION presentation
+    class API api
+    class LANGGRAPH langgraph
+    class SERVICES services
+    class INFRA infra
