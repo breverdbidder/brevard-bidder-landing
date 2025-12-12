@@ -1,4 +1,4 @@
-// BrevardBidderAI - Property Detail Modal
+// BidDeed.AI - Property Detail Modal
 // Vibe Coding: Detailed views with smooth transitions
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
