@@ -1,4 +1,4 @@
-// BrevardBidderAI - Card Component Stories
+// BidDeed.AI - Card Component Stories
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
 import type { Meta, StoryObj } from '@storybook/react';
