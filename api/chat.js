@@ -1,4 +1,4 @@
-// BrevardBidderAI - Live NLP Chat API
+// BidDeed.AI - Live NLP Chat API
 // Real Anthropic Claude integration + Supabase data
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 // Dec 10, 2025 Live Demo
@@ -45,7 +45,7 @@ function buildContext(auctionData, upcomingAuctions) {
   const enriched = auctionData.filter(a => a.address);
   const dec10 = auctionData.filter(a => a.auction_date === '2025-12-10');
   
-  return `You are BrevardBidderAI, an Agentic AI Copilot for Brevard County foreclosure auctions.
+  return `You are BidDeed.AI, an Agentic AI Copilot for Brevard County foreclosure auctions.
 
 CURRENT DATE: ${new Date().toLocaleDateString()}
 NEXT AUCTION: December 10, 2025 @ Titusville Courthouse 11AM (IN-PERSON)
@@ -253,7 +253,7 @@ Max Bid = (ARV × 70%) - Repairs - $10K - MIN($25K, 15% × ARV)
 • **HOA foreclosure:** Senior mortgage SURVIVES - you inherit it!
 • **Tax deed:** Wipes everything except government liens
 
-**BrevardBidderAI checks:**
+**BidDeed.AI checks:**
 1. Plaintiff type (bank vs HOA vs condo)
 2. Recording dates of all liens
 3. Super-lien status for HOAs
@@ -262,7 +262,7 @@ Max Bid = (ARV × 70%) - Repairs - $10K - MIN($25K, 15% × ARV)
   }
 
   // Default
-  return `👋 I'm BrevardBidderAI, your foreclosure auction copilot.
+  return `👋 I'm BidDeed.AI, your foreclosure auction copilot.
 
 **Next Auction:** Dec 10, 2025 @ Titusville 11AM (${dec10.length} properties)
 
