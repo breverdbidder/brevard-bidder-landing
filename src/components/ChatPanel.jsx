@@ -1,4 +1,4 @@
-// BrevardBidderAI Chat Panel Component
+// BidDeed.AI Chat Panel Component
 // NLP-powered Agentic AI Interface
 // Author: Ariel Shapira, Everest Capital USA
 
@@ -33,7 +33,7 @@ Best opportunity: 321 Harbor View (91 ML Score)",
 
 export function ChatPanel({ onPropertyCommand }) {
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "👋 Welcome to BrevardBidderAI. I'm your Agentic AI Copilot for Brevard County foreclosure auctions. Ask me anything about properties, liens, or auction strategy." }
+    { role: 'assistant', content: "👋 Welcome to BidDeed.AI. I'm your Agentic AI Copilot for Brevard County foreclosure auctions. Ask me anything about properties, liens, or auction strategy." }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -76,7 +76,7 @@ export function ChatPanel({ onPropertyCommand }) {
             <span className="text-white font-bold">BB</span>
           </div>
           <div>
-            <h1 className="text-white font-semibold">BrevardBidderAI</h1>
+            <h1 className="text-white font-semibold">BidDeed.AI</h1>
             <p className="text-xs text-gray-400">Agentic AI Copilot</p>
           </div>
         </div>
