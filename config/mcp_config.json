@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=mocerqjnksmhcjzxrewo&read_only=false",
+      "description": "BidDeed.AI Supabase database"
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {"GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"},
+      "description": "GitHub repository operations"
+    },
+    "pdf-ocr": {
+      "command": "uvx",
+      "args": ["mcp-pdf-reader"],
+      "description": "PDF text extraction and OCR"
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {"BRAVE_API_KEY": "${BRAVE_API_KEY}"},
+      "description": "Web search for research"
+    }
+  },
+  "defaults": {
+    "timeout_ms": 60000,
+    "retry_count": 3
+  }
+}
