@@ -1,4 +1,4 @@
-// BrevardBidderAI - Framer Motion Animation Library
+// BidDeed.AI - Framer Motion Animation Library
 // Premium animations for world-class UI
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
