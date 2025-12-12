@@ -1,4 +1,4 @@
-// BrevardBidderAI V13.4.0 - LIVE Supabase Integration
+// BidDeed.AI V13.4.0 - LIVE Supabase Integration
 // Fetches REAL auction data from Supabase database
 // Smart Router + Calendar + NLP with actual data
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
@@ -140,7 +140,7 @@ Ask me anything! Try:
 • "Calendar"`, 'FREE');
       } else {
         setSupabaseStatus('fallback');
-        addMessage('assistant', `👋 **Welcome to BrevardBidderAI V13.4.0**
+        addMessage('assistant', `👋 **Welcome to BidDeed.AI V13.4.0**
 
 📅 Today is **${formatDate(TODAY)}**
 
@@ -390,7 +390,7 @@ Try: "Show Dec 3 results" to load auction data first!`;
     }
     // Help
     else if (intent.wantsHelp || intent.isGreeting) {
-      response = `👋 **BrevardBidderAI V13.4.0** - Connected to Supabase!
+      response = `👋 **BidDeed.AI V13.4.0** - Connected to Supabase!
 
 **Commands:**
 • "Show Dec 3 results" - Past auction data
@@ -468,7 +468,7 @@ What would you like to know?`;
     setPipelineStage(0);
     setPipelineLog([
       { text: '╔══════════════════════════════════════╗', type: 'info' },
-      { text: '║  BrevardBidderAI V13.4.0 Pipeline    ║', type: 'info' },
+      { text: '║  BidDeed.AI V13.4.0 Pipeline    ║', type: 'info' },
       { text: '╚══════════════════════════════════════╝', type: 'info' },
       { text: `📍 ${prop.address}, ${prop.city}`, type: 'info' },
       { text: `📋 Case: ${prop.case_number}`, type: 'info' },
@@ -538,7 +538,7 @@ What would you like to know?`;
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ width: 44, height: 44, background: 'linear-gradient(135deg, #10b981, #059669)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 18 }}>B</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 700, fontSize: 16 }}>BrevardBidderAI</div>
+              <div style={{ fontWeight: 700, fontSize: 16 }}>BidDeed.AI</div>
               <div style={{ fontSize: 11, color: supabaseStatus === 'connected' ? '#10b981' : '#f59e0b' }}>
                 V13.4.0 • Supabase {supabaseStatus === 'connected' ? '✅ LIVE' : '⏳ Loading'}
               </div>
@@ -660,7 +660,7 @@ What would you like to know?`;
       {/* Footer */}
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#0f172ae0', borderTop: '1px solid #334155', padding: '8px 20px', display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#64748b', zIndex: 5 }}>
         <span>© 2025 Ariel Shapira, Solo Founder • Everest Capital USA</span>
-        <span style={{ color: '#10b981' }}>BrevardBidderAI V13.4.0 • Supabase LIVE • Smart Router Active</span>
+        <span style={{ color: '#10b981' }}>BidDeed.AI V13.4.0 • Supabase LIVE • Smart Router Active</span>
       </div>
     </div>
   );
