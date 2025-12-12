@@ -6,24 +6,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <!-- Primary Meta Tags -->
-    <title>BrevardBidderAI | Distressed Assets Decoded. For Everyone. Everywhere.</title>
-    <meta name="title" content="BrevardBidderAI | Distressed Assets Decoded. For Everyone. Everywhere." />
-    <meta name="description" content="Global investors access US distressed asset auctions. 12-stage AI pipeline transforms local courthouse expertise into 23-second intelligence. BID, REVIEW, or SKIP with 64.4% ML accuracy." />
-    <meta name="author" content="Ariel Shapira" />
-    <meta name="keywords" content="foreclosure auction, US real estate investment, international investors, Brevard County, foreclosure investing, AI analysis, global capital, distressed assets, American real estate" />
+    <title>BidDeed.AI | Distressed Assets Decoded. For Everyone. Everywhere.</title>
+    <meta name="title" content="BidDeed.AI | Distressed Assets Decoded. For Everyone. Everywhere." />
+    <meta name="description" content="The Everest Ascent™ - 12-stage AI pipeline transforms 4-hour research into 23-second intelligence for distressed asset auctions. Global investors access US foreclosure and tax deed markets. An Everest Company." />
+    <meta name="author" content="Ariel Shapira, Founder of Everest" />
+    <meta name="keywords" content="distressed assets, foreclosure auction, tax deed auction, US real estate investment, AI analysis, LienLogic, BidScore, The Shapira Formula, Everest, international investors, global capital" />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://brevard-bidder-landing.pages.dev/" />
-    <meta property="og:title" content="BrevardBidderAI | Distressed Assets Decoded. For Everyone. Everywhere." />
-    <meta property="og:description" content="Your on-ramp to America's highest-yield real estate market. Local courthouse expertise, encoded for global capital." />
-    <meta property="og:site_name" content="BrevardBidderAI" />
+    <meta property="og:url" content="https://biddeed.ai/" />
+    <meta property="og:title" content="BidDeed.AI | Distressed Assets Decoded" />
+    <meta property="og:description" content="The Everest Ascent™ - 35 years of courthouse expertise, encoded into a 12-stage AI pipeline. Your on-ramp to America's highest-yield real estate market." />
+    <meta property="og:site_name" content="BidDeed.AI - An Everest Company" />
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://brevard-bidder-landing.pages.dev/" />
-    <meta name="twitter:title" content="BrevardBidderAI | Global Access to US Distressed Assets" />
-    <meta name="twitter:description" content="Agentic AI ecosystem for foreclosure auctions. Global investors access US distressed asset markets. 100x ROI. Built by investors, for investors." />
+    <meta name="twitter:url" content="https://biddeed.ai/" />
+    <meta name="twitter:title" content="BidDeed.AI | The Everest Ascent™" />
+    <meta name="twitter:description" content="12 stages to the summit of distressed real estate. Global investors access US auctions with AI-powered intelligence. Founded by Ariel Shapira." />
     
     <!-- Mapbox GL JS for CMA Heat Maps -->
     <script src='https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js'></script>
@@ -43,6 +43,13 @@
         --font-display: 'Clash Display', 'DM Sans', system-ui, sans-serif;
         --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        
+        /* Everest Brand Colors */
+        --everest-gold: #f59e0b;
+        --everest-gold-light: #fcd34d;
+        --everest-gold-dark: #d97706;
+        --everest-summit: #10b981;
+        --everest-night: #0f172a;
       }
       
       body {
@@ -64,9 +71,9 @@
         scroll-behavior: smooth;
       }
       
-      /* Custom selection */
+      /* Custom selection - Everest Gold */
       ::selection {
-        background: rgb(245, 158, 11);
+        background: var(--everest-gold);
         color: black;
       }
       
@@ -76,13 +83,13 @@
         opacity: 1;
       }
       
-      /* Custom scrollbar */
+      /* Custom scrollbar - Everest themed */
       ::-webkit-scrollbar {
         width: 10px;
       }
       
       ::-webkit-scrollbar-track {
-        background: rgb(15, 23, 42);
+        background: var(--everest-night);
       }
       
       ::-webkit-scrollbar-thumb {
@@ -91,7 +98,7 @@
       }
       
       ::-webkit-scrollbar-thumb:hover {
-        background: rgb(245, 158, 11);
+        background: var(--everest-gold);
       }
       
       /* Mapbox popup styling */
@@ -114,7 +121,7 @@
       }
       
       .mapboxgl-popup-close-button:hover {
-        color: #10b981 !important;
+        color: var(--everest-summit) !important;
         background: transparent !important;
       }
     </style>
