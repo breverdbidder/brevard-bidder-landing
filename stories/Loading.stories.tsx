@@ -1,4 +1,4 @@
-// BrevardBidderAI - Loading States Stories
+// BidDeed.AI - Loading States Stories
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
 import type { Meta, StoryObj } from '@storybook/react';
