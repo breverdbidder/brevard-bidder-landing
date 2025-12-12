@@ -1,4 +1,4 @@
-// BrevardBidderAI - AI Live Demo Component
+// BidDeed.AI - AI Live Demo Component
 // REAL Dec 10, 2025 Auction Properties
 // Author: Ariel Shapira, Solo Founder - Everest Capital USA
 
@@ -6,8 +6,8 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Fara V8 Endpoints
-const FARA_HEALTH = "https://brevardbidderai--brevardbidderai-fara-v8-health.modal.run";
-const FARA_ANALYZE = "https://brevardbidderai--brevardbidderai-fara-v8-analyze.modal.run";
+const FARA_HEALTH = "https://biddeed.ai--biddeed.ai-fara-v8-health.modal.run";
+const FARA_ANALYZE = "https://biddeed.ai--biddeed.ai-fara-v8-analyze.modal.run";
 
 // REAL Dec 10, 2025 Auction Properties - 12 Total
 const DEC10_PROPERTIES = [
@@ -203,7 +203,7 @@ const AILiveDemo = () => {
             
             {analysis.our_decision && (
               <div className="mt-3 pt-3 border-t border-slate-700 flex justify-between items-center">
-                <span className="text-slate-400 text-sm">BrevardBidderAI Recommendation:</span>
+                <span className="text-slate-400 text-sm">BidDeed.AI Recommendation:</span>
                 <span className={`px-3 py-1 rounded-full font-bold ${analysis.our_decision === 'BID' ? 'bg-green-500 text-black' : 'bg-red-500 text-white'}`}>
                   {analysis.our_decision} @ ${analysis.our_max_bid.toLocaleString()}
                 </span>
@@ -221,7 +221,7 @@ const AILiveDemo = () => {
       
       {/* Footer */}
       <div className="mt-4 text-center text-xs text-slate-500">
-        © 2025 Ariel Shapira, Everest Capital USA | BrevardBidderAI V13.4.0
+        © 2025 Ariel Shapira, Everest Capital USA | BidDeed.AI V13.4.0
       </div>
     </div>
   );
