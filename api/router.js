@@ -1,4 +1,4 @@
-// BrevardBidderAI - Smart Router V5 API
+// BidDeed.AI - Smart Router V5 API
 // Routes requests to optimal LLM tier based on complexity
 // DEFAULT: gemini-2.5-flash (1M context FREE)
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
