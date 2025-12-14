@@ -1,128 +1,164 @@
-import type { Config } from 'tailwindcss';
+import type { Config } from "tailwindcss";
 
 const config: Config = {
-  darkMode: ['class'],
+  darkMode: ["class"],
   content: [
-    './src/**/*.{js,ts,jsx,tsx,mdx}',
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
   ],
+  prefix: "",
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
-      // BidDeed.AI Design Tokens
+      /* BidDeed.AI Brand Colors - Direct Access */
       colors: {
-        // Brand colors
-        brand: {
-          primary: '#10B981',    // Emerald-500
-          secondary: '#06B6D4',  // Cyan-500
-          accent: '#8B5CF6',     // Violet-500
+        /* Core Brand */
+        navy: {
+          50: "#e6edf4",
+          100: "#c0d0e3",
+          200: "#96b1d0",
+          300: "#6b91bc",
+          400: "#4b79ad",
+          500: "#2b619e",
+          600: "#265996",
+          700: "#1e4f8c",
+          800: "#1e3a5f", /* PRIMARY - Brand Navy */
+          900: "#142640",
+          950: "#0d1824",
         },
-        // Decision colors
-        decision: {
-          bid: {
-            DEFAULT: '#22C55E',  // Green-500
-            light: '#4ADE80',    // Green-400
-            dark: '#16A34A',     // Green-600
-          },
-          review: {
-            DEFAULT: '#EAB308',  // Yellow-500
-            light: '#FACC15',    // Yellow-400
-            dark: '#CA8A04',     // Yellow-600
-          },
-          skip: {
-            DEFAULT: '#EF4444',  // Red-500
-            light: '#F87171',    // Red-400
-            dark: '#DC2626',     // Red-600
-          },
+        orange: {
+          50: "#fff7ed",
+          100: "#ffedd5",
+          200: "#fed7aa",
+          300: "#fdba74",
+          400: "#fb923c",
+          500: "#f97316", /* ACCENT - Brand Orange */
+          600: "#ea580c",
+          700: "#c2410c",
+          800: "#9a3412",
+          900: "#7c2d12",
+          950: "#431407",
         },
-        // Pipeline status colors
-        pipeline: {
-          pending: '#64748B',    // Slate-500
-          running: '#3B82F6',    // Blue-500
-          complete: '#22C55E',   // Green-500
-          error: '#EF4444',      // Red-500
-          skipped: '#94A3B8',    // Slate-400
+        teal: {
+          50: "#f0fdfa",
+          100: "#ccfbf1",
+          200: "#99f6e4",
+          300: "#5eead4", /* SECONDARY - Brand Teal Pastel */
+          400: "#2dd4bf",
+          500: "#14b8a6",
+          600: "#0d9488",
+          700: "#0f766e",
+          800: "#115e59",
+          900: "#134e4a",
+          950: "#042f2e",
         },
-        // Dark theme base
-        surface: {
-          50: '#F8FAFC',
-          100: '#F1F5F9',
-          200: '#E2E8F0',
-          300: '#CBD5E1',
-          400: '#94A3B8',
-          500: '#64748B',
-          600: '#475569',
-          700: '#334155',
-          800: '#1E293B',
-          900: '#0F172A',
-          950: '#020617',
+        
+        /* shadcn/ui variable mappings */
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
         },
-      },
-      fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Menlo', 'monospace'],
-      },
-      fontSize: {
-        // Financial data sizes
-        'data-sm': ['0.75rem', { lineHeight: '1rem' }],
-        'data-md': ['0.875rem', { lineHeight: '1.25rem' }],
-        'data-lg': ['1rem', { lineHeight: '1.5rem' }],
-        'data-xl': ['1.25rem', { lineHeight: '1.75rem' }],
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+        },
+        chart: {
+          "1": "hsl(var(--chart-1))",
+          "2": "hsl(var(--chart-2))",
+          "3": "hsl(var(--chart-3))",
+          "4": "hsl(var(--chart-4))",
+          "5": "hsl(var(--chart-5))",
+        },
       },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
       },
       keyframes: {
-        // Pipeline progress animation
-        'progress-pulse': {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.6' },
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
-        // Stage running spinner
-        'spin-slow': {
-          '0%': { transform: 'rotate(0deg)' },
-          '100%': { transform: 'rotate(360deg)' },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
-        // Decision panel reveal
-        'slide-down': {
-          '0%': { opacity: '0', transform: 'translateY(-10px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
+        "pulse-teal": {
+          "0%, 100%": { boxShadow: "0 0 0 0 hsl(166 84% 63% / 0.4)" },
+          "50%": { boxShadow: "0 0 20px 10px hsl(166 84% 63% / 0)" },
         },
-        // Accordion expand
-        'accordion-down': {
-          from: { height: '0' },
-          to: { height: 'var(--radix-accordion-content-height)' },
+        "slide-up-fade": {
+          from: { opacity: "0", transform: "translateY(20px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
         },
-        'accordion-up': {
-          from: { height: 'var(--radix-accordion-content-height)' },
-          to: { height: '0' },
-        },
-        // ML factor bar fill
-        'bar-fill': {
-          '0%': { width: '0%' },
-          '100%': { width: 'var(--bar-width)' },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
         },
       },
       animation: {
-        'progress-pulse': 'progress-pulse 2s ease-in-out infinite',
-        'spin-slow': 'spin-slow 3s linear infinite',
-        'slide-down': 'slide-down 0.3s ease-out',
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
-        'bar-fill': 'bar-fill 0.5s ease-out forwards',
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-teal": "pulse-teal 2s ease-in-out infinite",
+        "slide-up": "slide-up-fade 0.5s ease-out forwards",
+        shimmer: "shimmer 2s linear infinite",
       },
-      // Gradient utilities for decision cards
       backgroundImage: {
-        'gradient-bid': 'linear-gradient(to right, #22C55E, #10B981)',
-        'gradient-review': 'linear-gradient(to right, #EAB308, #F59E0B)',
-        'gradient-skip': 'linear-gradient(to right, #EF4444, #F43F5E)',
-        'gradient-brand': 'linear-gradient(to right, #10B981, #06B6D4)',
+        "brand-gradient": "linear-gradient(135deg, hsl(213 52% 24%) 0%, hsl(213 52% 35%) 50%, hsl(166 84% 63%) 100%)",
+        "cta-gradient": "linear-gradient(135deg, hsl(25 95% 53%) 0%, hsl(30 95% 58%) 100%)",
+        "navy-overlay": "linear-gradient(180deg, hsl(213 52% 8% / 0.95) 0%, hsl(213 52% 12% / 0.85) 100%)",
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [require("tailwindcss-animate")],
 };
 
 export default config;
