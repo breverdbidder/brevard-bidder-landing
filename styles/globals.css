@@ -1,114 +1,216 @@
-/* BidDeed.AI - Clean Global Styles V15 */
-/* Mobile-First • No Blur Effects • Sharp Design */
-/* © 2025 Everest Capital USA */
+/* 
+ * BidDeed.AI Brand Theme for shadcn/ui
+ * Everest Capital USA - Agentic AI Ecosystem
+ * 
+ * Brand Colors:
+ * - Navy Blue (Primary): #1e3a5f
+ * - Orange (Accent): #f97316
+ * - Teal Pastel (Secondary): #5eead4
+ * - Black: #0a0a0a
+ * - White: #fafafa
+ */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================================
-   CSS VARIABLES
-   ============================================================ */
-:root {
-  --color-gold: #F59E0B;
-  --color-emerald: #10B981;
-  --color-purple: #8B5CF6;
-  --color-slate-900: #0F172A;
-  --color-slate-800: #1E293B;
-  --color-slate-700: #334155;
-  --color-slate-400: #94A3B8;
+@layer base {
+  :root {
+    /* Background & Foreground */
+    --background: 0 0% 98%;           /* #fafafa - off-white */
+    --foreground: 0 0% 4%;            /* #0a0a0a - near-black */
+    
+    /* Card surfaces */
+    --card: 0 0% 100%;                /* pure white */
+    --card-foreground: 0 0% 4%;
+    
+    /* Popover */
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 4%;
+    
+    /* Primary - Navy Blue */
+    --primary: 213 52% 24%;           /* #1e3a5f - navy blue */
+    --primary-foreground: 0 0% 98%;   /* white text on navy */
+    
+    /* Secondary - Teal Pastel */
+    --secondary: 166 84% 63%;         /* #5eead4 - teal pastel */
+    --secondary-foreground: 166 65% 15%; /* dark teal for contrast */
+    
+    /* Muted */
+    --muted: 210 20% 96%;             /* light grayish blue */
+    --muted-foreground: 213 20% 40%;  /* muted navy */
+    
+    /* Accent - Orange */
+    --accent: 25 95% 53%;             /* #f97316 - vivid orange */
+    --accent-foreground: 0 0% 98%;    /* white text on orange */
+    
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    
+    /* Border & Input */
+    --border: 213 20% 88%;            /* subtle navy-tinted border */
+    --input: 213 20% 88%;
+    --ring: 25 95% 53%;               /* orange focus ring */
+    
+    /* Chart colors - brand-aligned */
+    --chart-1: 213 52% 24%;           /* navy */
+    --chart-2: 25 95% 53%;            /* orange */
+    --chart-3: 166 84% 63%;           /* teal */
+    --chart-4: 213 52% 40%;           /* lighter navy */
+    --chart-5: 25 95% 70%;            /* lighter orange */
+    
+    /* Radius */
+    --radius: 0.625rem;
+    
+    /* Sidebar - Navy dominant */
+    --sidebar-background: 213 52% 20%;    /* darker navy */
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 25 95% 53%;        /* orange accent */
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 166 84% 63%;        /* teal */
+    --sidebar-accent-foreground: 166 65% 15%;
+    --sidebar-border: 213 40% 30%;
+    --sidebar-ring: 25 95% 53%;
+  }
+
+  .dark {
+    /* Dark mode - Navy base with vibrant accents */
+    --background: 213 52% 8%;         /* very dark navy */
+    --foreground: 0 0% 95%;           /* off-white text */
+    
+    --card: 213 52% 12%;              /* dark navy card */
+    --card-foreground: 0 0% 95%;
+    
+    --popover: 213 52% 10%;
+    --popover-foreground: 0 0% 95%;
+    
+    /* Primary - Lighter navy for dark mode visibility */
+    --primary: 213 52% 50%;           /* brighter navy */
+    --primary-foreground: 0 0% 98%;
+    
+    /* Secondary - Teal (slightly muted for dark) */
+    --secondary: 166 70% 45%;         /* teal, adjusted */
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 213 40% 18%;
+    --muted-foreground: 213 20% 65%;
+    
+    /* Accent - Orange pops in dark mode */
+    --accent: 25 95% 55%;
+    --accent-foreground: 0 0% 98%;
+    
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 213 40% 22%;
+    --input: 213 40% 22%;
+    --ring: 25 95% 55%;
+    
+    /* Charts - dark mode adjusted */
+    --chart-1: 213 52% 55%;
+    --chart-2: 25 95% 55%;
+    --chart-3: 166 70% 50%;
+    --chart-4: 213 52% 70%;
+    --chart-5: 25 95% 70%;
+    
+    /* Sidebar dark */
+    --sidebar-background: 213 52% 6%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 25 95% 55%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 166 70% 45%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 213 40% 18%;
+    --sidebar-ring: 25 95% 55%;
+  }
 }
 
-/* ============================================================
-   BASE STYLES
-   ============================================================ */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Headings use Plus Jakarta Sans bold */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-weight: 700;
+  }
+  
+  /* Code/mono uses JetBrains Mono */
+  code, pre, kbd, samp, .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
 }
 
-html {
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
+/* BidDeed.AI Custom Utility Classes */
+@layer utilities {
+  /* Brand gradient - Navy to Teal with Orange accent */
+  .bg-brand-gradient {
+    background: linear-gradient(135deg, 
+      hsl(213 52% 24%) 0%, 
+      hsl(213 52% 35%) 50%, 
+      hsl(166 84% 63%) 100%
+    );
+  }
+  
+  /* Orange CTA gradient */
+  .bg-cta-gradient {
+    background: linear-gradient(135deg, 
+      hsl(25 95% 53%) 0%, 
+      hsl(30 95% 58%) 100%
+    );
+  }
+  
+  /* Navy overlay for hero sections */
+  .bg-navy-overlay {
+    background: linear-gradient(
+      180deg,
+      hsl(213 52% 8% / 0.95) 0%,
+      hsl(213 52% 12% / 0.85) 100%
+    );
+  }
+  
+  /* Teal glow effect */
+  .glow-teal {
+    box-shadow: 0 0 30px hsl(166 84% 63% / 0.3);
+  }
+  
+  /* Orange glow for CTAs */
+  .glow-orange {
+    box-shadow: 0 0 20px hsl(25 95% 53% / 0.4);
+  }
+  
+  /* Text gradient - Navy to Orange */
+  .text-brand-gradient {
+    background: linear-gradient(90deg, 
+      hsl(213 52% 30%) 0%, 
+      hsl(25 95% 53%) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 }
 
-body {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background-color: var(--color-slate-900);
-  color: #fff;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  line-height: 1.6;
+/* Animation keyframes for BidDeed.AI */
+@keyframes pulse-teal {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(166 84% 63% / 0.4); }
+  50% { box-shadow: 0 0 20px 10px hsl(166 84% 63% / 0); }
 }
 
-/* ============================================================
-   TYPOGRAPHY
-   ============================================================ */
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-}
-
-/* ============================================================
-   SCROLLBAR (Clean, Thin)
-   ============================================================ */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
-}
-
-/* ============================================================
-   FOCUS STATES (Accessibility)
-   ============================================================ */
-*:focus-visible {
-  outline: 2px solid var(--color-gold);
-  outline-offset: 2px;
-}
-
-button:focus-visible,
-a:focus-visible,
-input:focus-visible {
-  outline: 2px solid var(--color-gold);
-  outline-offset: 2px;
-}
-
-/* ============================================================
-   SELECTION
-   ============================================================ */
-::selection {
-  background: var(--color-gold);
-  color: #000;
-}
-
-/* ============================================================
-   ANIMATIONS (Subtle, No Blur)
-   ============================================================ */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
+@keyframes slide-up-fade {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -116,112 +218,10 @@ input:focus-visible {
   }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.4s ease-out forwards;
+.animate-pulse-teal {
+  animation: pulse-teal 2s ease-in-out infinite;
 }
 
 .animate-slide-up {
-  animation: slideUp 0.4s ease-out forwards;
-}
-
-/* ============================================================
-   UTILITY CLASSES
-   ============================================================ */
-.text-balance {
-  text-wrap: balance;
-}
-
-/* Responsive Text */
-.text-responsive-sm {
-  font-size: clamp(0.875rem, 2vw, 1rem);
-}
-
-.text-responsive-base {
-  font-size: clamp(1rem, 2.5vw, 1.125rem);
-}
-
-.text-responsive-lg {
-  font-size: clamp(1.125rem, 3vw, 1.5rem);
-}
-
-.text-responsive-xl {
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
-}
-
-.text-responsive-2xl {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-}
-
-/* ============================================================
-   BIDDEED.AI SPECIFIC STYLES
-   ============================================================ */
-
-/* Recommendation Badges - Sharp, No Blur */
-.badge-bid {
-  @apply bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-lg px-3 py-1 text-sm font-semibold;
-}
-
-.badge-review {
-  @apply bg-amber-500/15 text-amber-400 border border-amber-500/30 rounded-lg px-3 py-1 text-sm font-semibold;
-}
-
-.badge-skip {
-  @apply bg-red-500/15 text-red-400 border border-red-500/30 rounded-lg px-3 py-1 text-sm font-semibold;
-}
-
-/* Cards - Clean, Solid Backgrounds */
-.card {
-  @apply bg-slate-800 border border-slate-700 rounded-2xl p-6;
-  @apply transition-colors duration-200;
-}
-
-.card:hover {
-  @apply border-slate-600;
-}
-
-.card-elevated {
-  @apply bg-slate-800 border border-slate-700 rounded-2xl p-6;
-  @apply shadow-xl shadow-black/20;
-}
-
-/* Buttons - Solid, No Effects */
-.btn-primary {
-  @apply bg-amber-500 text-black font-bold rounded-xl px-6 py-3;
-  @apply hover:bg-amber-400 transition-colors;
-}
-
-.btn-secondary {
-  @apply bg-slate-800 text-white font-semibold rounded-xl px-6 py-3;
-  @apply border border-slate-700 hover:bg-slate-700 hover:border-slate-600 transition-colors;
-}
-
-/* Inputs - Clean Focus */
-.input {
-  @apply bg-slate-900 border-2 border-slate-700 rounded-xl px-5 py-4;
-  @apply text-white placeholder-slate-500;
-  @apply focus:outline-none focus:border-amber-500 transition-colors;
-}
-
-/* ============================================================
-   RESPONSIVE HELPERS
-   ============================================================ */
-@media (max-width: 640px) {
-  .container-padding {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
-
-@media (min-width: 641px) {
-  .container-padding {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .container-padding {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
+  animation: slide-up-fade 0.5s ease-out forwards;
 }
