@@ -1,15 +1,13 @@
 {
   "name": "BidDeed.AI - Foreclosure Intelligence",
   "short_name": "BidDeed.AI",
-  "description": "AI-powered foreclosure auction analysis platform by Everest Capital USA",
-  "start_url": "/",
+  "description": "AI-powered foreclosure auction analysis platform. Get instant property valuations, lien analysis, and bidding recommendations.",
+  "start_url": "/chat",
   "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#6366f1",
+  "background_color": "#1a1a2e",
+  "theme_color": "#667eea",
   "orientation": "portrait-primary",
   "scope": "/",
-  "lang": "en",
-  "categories": ["business", "finance", "productivity"],
   "icons": [
     {
       "src": "/icons/icon-72x72.png",
@@ -60,59 +58,39 @@
       "purpose": "maskable any"
     }
   ],
+  "categories": ["business", "finance", "productivity"],
   "screenshots": [
     {
-      "src": "/screenshots/desktop-dashboard.png",
-      "sizes": "1920x1080",
+      "src": "/screenshots/chat-desktop.png",
+      "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "BidDeed.AI Dashboard"
+      "label": "BidDeed.AI Chat Interface"
     },
     {
-      "src": "/screenshots/mobile-properties.png",
+      "src": "/screenshots/chat-mobile.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Property Analysis on Mobile"
+      "label": "BidDeed.AI Mobile Chat"
     }
   ],
   "shortcuts": [
     {
-      "name": "Today's Auctions",
-      "short_name": "Auctions",
-      "description": "View today's foreclosure auction properties",
-      "url": "/auctions/today",
-      "icons": [{ "src": "/icons/shortcut-auctions.png", "sizes": "96x96" }]
+      "name": "New Analysis",
+      "short_name": "Analyze",
+      "description": "Start a new property analysis",
+      "url": "/chat?action=new",
+      "icons": [{ "src": "/icons/shortcut-analyze.png", "sizes": "96x96" }]
     },
     {
-      "name": "My Reports",
-      "short_name": "Reports",
-      "description": "Access generated property reports",
-      "url": "/reports",
-      "icons": [{ "src": "/icons/shortcut-reports.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "Pipeline Status",
-      "short_name": "Pipeline",
-      "description": "Check analysis pipeline progress",
-      "url": "/pipeline",
-      "icons": [{ "src": "/icons/shortcut-pipeline.png", "sizes": "96x96" }]
+      "name": "Auction Calendar",
+      "short_name": "Calendar",
+      "description": "View upcoming auctions",
+      "url": "/chat?action=calendar",
+      "icons": [{ "src": "/icons/shortcut-calendar.png", "sizes": "96x96" }]
     }
   ],
   "related_applications": [],
-  "prefer_related_applications": false,
-  "share_target": {
-    "action": "/share",
-    "method": "POST",
-    "enctype": "multipart/form-data",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  },
-  "handle_links": "preferred",
-  "launch_handler": {
-    "client_mode": ["navigate-existing", "auto"]
-  }
+  "prefer_related_applications": false
 }
