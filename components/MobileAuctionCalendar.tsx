@@ -7,6 +7,12 @@ import listPlugin from "@fullcalendar/list";
 import interactionPlugin from "@fullcalendar/interaction";
 import { createClient } from "@supabase/supabase-js";
 
+// Import FullCalendar CSS
+import "@fullcalendar/core/main.css";
+import "@fullcalendar/daygrid/main.css";
+import "@fullcalendar/list/main.css";
+import "../styles/fullcalendar-dark.css";
+
 // Initialize Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://mocerqjnksmhcjzxrewo.supabase.co";
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -194,7 +200,7 @@ export default function MobileAuctionCalendar() {
           <div className="bg-gray-800 rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[80vh] overflow-y-auto border border-gray-700">
             {/* Modal Header */}
             <div 
-              className="sticky top-0 px-4 py-3 border-b border-gray-700 flex items-center justify-between"
+              className="sticky top-0 px-4 py-3 border-b border-gray-700 flex items-center justify-between rounded-t-2xl"
               style={{ backgroundColor: selectedEvent.backgroundColor }}
             >
               <span className="font-bold text-white">{selectedEvent.extendedProps.recommendation}</span>
@@ -267,7 +273,7 @@ export default function MobileAuctionCalendar() {
             </div>
 
             {/* Modal Footer */}
-            <div className="sticky bottom-0 p-4 border-t border-gray-700 bg-gray-800">
+            <div className="sticky bottom-0 p-4 border-t border-gray-700 bg-gray-800 rounded-b-2xl">
               <button
                 onClick={closeModal}
                 className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
