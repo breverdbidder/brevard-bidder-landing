@@ -1,9 +1,10 @@
-// BidDeed.AI Landing Page V16.1.0 - "Crystal Clear" Edition
-// Clean navy background, no patterns
+// BidDeed.AI Landing Page V16.2.0 - "Demo Integrated" Edition
+// Clean navy background + AnimatedDemo integration
 // © 2025 Everest Capital USA. All Rights Reserved.
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import AnimatedDemo from './AnimatedDemo';
 
 // ============ ANIMATION VARIANTS ============
 const fadeIn = {
@@ -125,7 +126,7 @@ const Nav = () => {
 };
 
 // ============ HERO SECTION ============
-const Hero = () => (
+const Hero = ({ onOpenDemo }) => (
   <section className="relative min-h-screen flex items-center pt-20 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
     {/* Clean Navy Background - No Patterns */}
     <div className="absolute inset-0 bg-slate-900" />
@@ -185,6 +186,15 @@ const Hero = () => (
           >
             Join the Waitlist
           </a>
+          <button 
+            onClick={onOpenDemo}
+            className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded-xl text-lg hover:from-emerald-500 hover:to-emerald-400 transition-all shadow-xl shadow-emerald-500/25 transform hover:scale-[1.02] flex items-center justify-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+            </svg>
+            Watch Demo
+          </button>
           <a 
             href="#stages"
             className="w-full sm:w-auto px-8 py-4 bg-white/5 text-white font-semibold rounded-xl text-lg border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all backdrop-blur-sm"
@@ -569,15 +579,31 @@ const Footer = () => (
 
 // ============ MAIN APP ============
 export default function App() {
+  const [showDemo, setShowDemo] = useState(false);
+
   return (
     <div className="min-h-screen bg-slate-900 text-white antialiased">
       <Nav />
-      <Hero />
+      <Hero onOpenDemo={() => setShowDemo(true)} />
       <Methodology />
       <Stages />
       <Founder />
       <Waitlist />
       <Footer />
+      
+      {/* Animated Demo Modal */}
+      <AnimatePresence>
+        {showDemo && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100]"
+          >
+            <AnimatedDemo onClose={() => setShowDemo(false)} />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
