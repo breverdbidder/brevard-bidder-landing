@@ -1,6 +1,6 @@
 {
   "project_name": "BidDeed.AI",
-  "version": "1.0.0",
+  "version": "16.2.0",
   "parent_company": "EVEREST CAPITAL USA",
   "methodology": "The Everest Ascent™",
   "last_updated": "2025-12-12T12:00:00Z",
@@ -52,6 +52,12 @@
     "landing": "breverdbidder/brevard-bidder-landing"
   },
   "recent_decisions": [
+    {
+      "date": "2025-12-15",
+      "decision": "AnimatedDemo integrated into landing page V16.2.0",
+      "rationale": "Watch Demo button in hero launches 12-stage pipeline animation",
+      "outcome": "deployed"
+    },
     {
       "date": "2025-12-15",
       "decision": "Mobile Auction Calendar deployed",
