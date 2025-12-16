@@ -2,7 +2,7 @@
   "name": "BidDeed.AI - Foreclosure Intelligence",
   "short_name": "BidDeed.AI",
   "description": "AI-powered foreclosure auction analysis platform. Get instant property valuations, lien analysis, and bidding recommendations.",
-  "start_url": "/chat",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1a2e",
   "theme_color": "#667eea",
@@ -77,17 +77,17 @@
   ],
   "shortcuts": [
     {
-      "name": "New Analysis",
-      "short_name": "Analyze",
-      "description": "Start a new property analysis",
-      "url": "/chat?action=new",
+      "name": "AI Chat",
+      "short_name": "Chat",
+      "description": "Start AI-powered property analysis",
+      "url": "/chat",
       "icons": [{ "src": "/icons/shortcut-analyze.png", "sizes": "96x96" }]
     },
     {
       "name": "Auction Calendar",
       "short_name": "Calendar",
-      "description": "View upcoming auctions",
-      "url": "/chat?action=calendar",
+      "description": "View upcoming foreclosure auctions",
+      "url": "/calendar",
       "icons": [{ "src": "/icons/shortcut-calendar.png", "sizes": "96x96" }]
     }
   ],
