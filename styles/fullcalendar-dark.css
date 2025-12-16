@@ -1,0 +1,121 @@
+/* FullCalendar Dark Theme for BidDeed.AI */
+
+/* Core FullCalendar overrides */
+.fc {
+  --fc-border-color: #374151;
+  --fc-button-bg-color: #4f46e5;
+  --fc-button-border-color: #4f46e5;
+  --fc-button-hover-bg-color: #4338ca;
+  --fc-button-hover-border-color: #4338ca;
+  --fc-button-active-bg-color: #3730a3;
+  --fc-button-active-border-color: #3730a3;
+  --fc-page-bg-color: #1f2937;
+  --fc-neutral-bg-color: #374151;
+  --fc-list-event-hover-bg-color: #374151;
+  --fc-today-bg-color: rgba(99, 102, 241, 0.1);
+}
+
+/* Header toolbar */
+.fc .fc-toolbar-title {
+  color: #e5e7eb;
+  font-size: 1.1rem;
+}
+
+/* Day headers */
+.fc .fc-col-header-cell-cushion {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+/* Day numbers */
+.fc .fc-daygrid-day-number {
+  color: #d1d5db;
+}
+
+/* Today highlight */
+.fc .fc-day-today {
+  background-color: rgba(99, 102, 241, 0.1) !important;
+}
+
+/* Event styling */
+.fc-event {
+  border-radius: 4px;
+  font-size: 0.75rem;
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+.fc-event:hover {
+  filter: brightness(1.1);
+}
+
+/* List view */
+.fc-list {
+  border-color: #374151;
+}
+
+.fc-list-day-cushion {
+  background-color: #374151 !important;
+}
+
+.fc-list-day-text,
+.fc-list-day-side-text {
+  color: #e5e7eb !important;
+}
+
+.fc-list-event-title {
+  color: #e5e7eb;
+}
+
+.fc-list-event-time {
+  color: #9ca3af;
+}
+
+/* Buttons */
+.fc .fc-button {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.8rem;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  background-color: #3730a3;
+  border-color: #3730a3;
+}
+
+/* Mobile adjustments */
+@media (max-width: 640px) {
+  .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .fc .fc-toolbar-title {
+    font-size: 1rem;
+  }
+  
+  .fc .fc-button {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+  }
+  
+  .fc-event {
+    font-size: 0.65rem;
+  }
+}
+
+/* More events link */
+.fc .fc-more-link {
+  color: #818cf8;
+}
+
+/* Popover */
+.fc .fc-popover {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.fc .fc-popover-header {
+  background-color: #374151;
+  color: #e5e7eb;
+}
