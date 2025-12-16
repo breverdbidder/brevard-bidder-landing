@@ -4,6 +4,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import dynamic from 'next/dynamic';
+
+// Dynamic import for AnimatedDemo (avoid SSR issues)
+const AnimatedDemo = dynamic(() => import('../src/AnimatedDemo'), { ssr: false });
 
 // ============================================================
 // DESIGN SYSTEM CONSTANTS
@@ -24,6 +28,7 @@ export default function BidDeed.AI() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [darkMode, setDarkMode] = useState(true);
+  const [showDemo, setShowDemo] = useState(false);
 
   useEffect(() => {
     fetchAuctions();
@@ -138,6 +143,56 @@ export default function BidDeed.AI() {
           </div>
         </div>
       </nav>
+
+      {/* AnimatedDemo Modal */}
+      {showDemo && (
+        <AnimatedDemo onClose={() => setShowDemo(false)} />
+      )}
+
+      {/* Hero Section */}
+      <section className="relative py-20 px-4 overflow-hidden">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-neutral-950"></div>
+        <div className="absolute top-20 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+        
+        <div className="relative max-w-5xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 mb-6">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span className="text-blue-300 text-sm font-medium">Agentic AI Ecosystem</span>
+          </div>
+          
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
+            <span className="gradient-text">BidDeed.AI</span>
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-neutral-300 mb-4 max-w-3xl mx-auto">
+            12-Stage Foreclosure Auction Intelligence Pipeline
+          </p>
+          
+          <p className="text-neutral-400 mb-8 max-w-2xl mx-auto">
+            Built by <span className="text-blue-400">Ariel Shapira</span> • Solo Founder, Everest Capital USA
+            <br/>
+            <span className="text-emerald-400">64.4% ML Accuracy</span> • <span className="text-amber-400">100x ROI</span> • <span className="text-purple-400">7 Hours → 23 Seconds</span>
+          </p>
+          
+          {/* Demo Button */}
+          <button
+            onClick={() => setShowDemo(true)}
+            className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold text-lg rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all duration-300 shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-105"
+          >
+            <span className="text-2xl">🎬</span>
+            <span>Watch 12-Stage Pipeline Demo</span>
+            <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
+          
+          <p className="mt-4 text-neutral-500 text-sm">
+            47-second interactive walkthrough • Real auction data
+          </p>
+        </div>
+      </section>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
