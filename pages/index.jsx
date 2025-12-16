@@ -176,20 +176,25 @@ export default function BidDeed.AI() {
             <span className="text-emerald-400">64.4% ML Accuracy</span> • <span className="text-amber-400">100x ROI</span> • <span className="text-purple-400">7 Hours → 23 Seconds</span>
           </p>
           
-          {/* Demo Button */}
+          {/* PLAY DEMO Button - Primary CTA */}
           <button
             onClick={() => setShowDemo(true)}
-            className="group relative inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white font-bold text-lg rounded-xl hover:from-amber-600 hover:to-orange-700 transition-all duration-300 shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:scale-105"
+            className="group relative inline-flex items-center gap-4 px-12 py-6 bg-gradient-to-r from-red-600 to-red-700 text-white font-black text-2xl rounded-2xl hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-2xl shadow-red-500/40 hover:shadow-red-500/60 hover:scale-105 border-2 border-red-400/30"
           >
-            <span className="text-2xl">🎬</span>
-            <span>Watch 12-Stage Pipeline Demo</span>
-            <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
+            {/* Play Icon */}
+            <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center">
+              <svg className="w-8 h-8 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
+            <div className="text-left">
+              <div className="text-3xl tracking-wide">PLAY DEMO</div>
+              <div className="text-sm font-normal text-red-200">See the 12-Stage AI Pipeline in Action</div>
+            </div>
           </button>
           
-          <p className="mt-4 text-neutral-500 text-sm">
-            47-second interactive walkthrough • Real auction data
+          <p className="mt-6 text-neutral-400 text-sm">
+            ⏱️ 47 seconds • Real Brevard County auction data • Interactive walkthrough
           </p>
         </div>
       </section>
