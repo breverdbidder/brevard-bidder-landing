@@ -186,15 +186,24 @@ const Hero = ({ onOpenDemo }) => (
           >
             Join the Waitlist
           </a>
+          
+          {/* PLAY DEMO - Primary CTA Button */}
           <button 
             onClick={onOpenDemo}
-            className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-bold rounded-xl text-lg hover:from-emerald-500 hover:to-emerald-400 transition-all shadow-xl shadow-emerald-500/25 transform hover:scale-[1.02] flex items-center justify-center gap-2"
+            className="w-full sm:w-auto group relative px-10 py-5 bg-gradient-to-r from-red-600 to-red-500 text-white font-black rounded-2xl text-xl hover:from-red-500 hover:to-red-400 transition-all shadow-2xl shadow-red-500/40 hover:shadow-red-500/60 transform hover:scale-105 flex items-center justify-center gap-4 border-2 border-red-400/30"
           >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-            </svg>
-            Watch Demo
+            {/* Play Icon Circle */}
+            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+              <svg className="w-6 h-6 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </div>
+            <div className="text-left">
+              <div className="text-2xl tracking-wide">▶ PLAY DEMO</div>
+              <div className="text-xs font-normal text-red-200 opacity-90">47-sec AI Pipeline Walkthrough</div>
+            </div>
           </button>
+          
           <a 
             href="#stages"
             className="w-full sm:w-auto px-8 py-4 bg-white/5 text-white font-semibold rounded-xl text-lg border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all backdrop-blur-sm"
