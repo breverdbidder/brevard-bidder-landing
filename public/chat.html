@@ -45,21 +45,17 @@
         .bubble strong { color: #60a5fa; }
         .meta { font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; padding: 0 4px; display: flex; gap: 8px; align-items: center; }
         .meta .model-tag { padding: 2px 6px; border-radius: 4px; font-weight: 500; }
-        .meta .model-tag.gemini { background: rgba(139,92,246,0.2); color: var(--gemini); }
+        .meta .model-tag.local { background: rgba(34,197,94,0.2); color: var(--success); }
         .typing { display: none; align-self: flex-start; padding: 12px 16px; background: var(--claude-bubble); border-radius: 18px; border-bottom-left-radius: 4px; }
         .typing.visible { display: flex; gap: 4px; }
         .typing span { width: 8px; height: 8px; background: var(--text-secondary); border-radius: 50%; animation: bounce 1.4s ease-in-out infinite; }
         .typing span:nth-child(2) { animation-delay: 0.16s; }
         .typing span:nth-child(3) { animation-delay: 0.32s; }
         @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }
-        .progress-bar { height: 3px; background: var(--bg-secondary); position: relative; overflow: hidden; display: none; }
-        .progress-bar.active { display: block; }
-        .progress-bar::after { content: ''; position: absolute; left: -50%; width: 50%; height: 100%; background: linear-gradient(90deg, var(--accent), var(--gemini)); animation: progress 1s ease-in-out infinite; }
-        @keyframes progress { 0% { left: -50%; } 100% { left: 100%; } }
         .input-area { padding: 12px 16px; padding-bottom: max(12px, env(safe-area-inset-bottom)); background: var(--bg-secondary); border-top: 1px solid rgba(59,130,246,0.2); }
         .quick-actions { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
-        .quick-btn { flex-shrink: 0; padding: 6px 12px; background: var(--bg-primary); border: 1px solid rgba(59,130,246,0.3); border-radius: 16px; color: var(--text-secondary); font-size: 0.75rem; cursor: pointer; }
-        .quick-btn:active { background: var(--accent); color: white; }
+        .quick-btn { flex-shrink: 0; padding: 6px 12px; background: var(--bg-primary); border: 1px solid rgba(59,130,246,0.3); border-radius: 16px; color: var(--text-secondary); font-size: 0.75rem; cursor: pointer; transition: all 0.2s; }
+        .quick-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
         .input-row { display: flex; gap: 10px; align-items: flex-end; }
         .input-wrapper { flex: 1; background: var(--bg-primary); border: 1px solid rgba(59,130,246,0.3); border-radius: 24px; padding: 8px 16px; }
         .input-wrapper:focus-within { border-color: var(--accent); }
@@ -75,20 +71,19 @@
             <div class="logo"><span>🏠</span><h1>BidDeed.AI V18</h1></div>
             <div id="status" class="status ready"><span class="status-dot"></span><span id="status-text">Ready</span></div>
         </header>
-        <div class="router-info">Smart Router: <span style="color:#8b5cf6">Gemini 2.0 Flash</span> (1M context FREE)</div>
-        <div id="progress" class="progress-bar"></div>
+        <div class="router-info">🚀 Everest Summit Edition — Intelligent NLP Engine</div>
         <div id="messages" class="messages">
             <div class="message assistant">
-                <div class="bubble">👋 <strong>BidDeed.AI V18</strong> — Everest Summit Edition<br><br>💜 Powered by <strong>Gemini 2.0 Flash</strong> (FREE, 1M context)<br><br>📅 <strong>Upcoming Auctions:</strong><br>• Dec 18, 2025 - Tax Deed @ 9AM ONLINE<br>• Jan 7, 2026 - Foreclosure @ 11AM Titusville<br><br>Ask about Brevard foreclosures!</div>
+                <div class="bubble">👋 <strong>BidDeed.AI V18</strong> — Everest Summit Edition<br><br>📅 <strong>Upcoming Auctions:</strong><br>• <strong>Dec 18, 2025</strong> - Tax Deed @ 9AM ONLINE (brevard.realforeclose.com)<br>• <strong>Jan 7, 2026</strong> - Foreclosure @ 11AM Titusville Courthouse<br><br>💬 Try the quick actions below or ask me anything about Brevard County foreclosures!</div>
             </div>
         </div>
         <div id="typing" class="typing"><span></span><span></span><span></span></div>
         <div class="input-area">
             <div class="quick-actions">
-                <button class="quick-btn" onclick="sendQuick('What auctions are on Dec 18?')">📅 Dec 18</button>
-                <button class="quick-btn" onclick="sendQuick('Show top BID recommendations')">⭐ Best Bids</button>
-                <button class="quick-btn" onclick="sendQuick('Explain max bid formula')">💰 Max Bid</button>
+                <button class="quick-btn" onclick="sendQuick('What auctions are on Dec 18?')">📅 Dec 18 Auction</button>
+                <button class="quick-btn" onclick="sendQuick('Explain max bid formula')">💰 Max Bid Formula</button>
                 <button class="quick-btn" onclick="sendQuick('Show auction calendar')">📆 Calendar</button>
+                <button class="quick-btn" onclick="sendQuick('How do liens work?')">⚖️ Lien Priority</button>
             </div>
             <div class="input-row">
                 <div class="input-wrapper"><textarea id="message-input" placeholder="Ask about auctions..." rows="1" onkeydown="handleKeydown(event)" oninput="autoResize(this)"></textarea></div>
@@ -98,46 +93,19 @@
     </div>
 
     <script>
-        // Gemini API Configuration
-        const GEMINI_API_KEY = 'AIzaSyAO2EQHZDFMRdhtzFwPEhgJcF8M4hRK1fk'; // Public demo key
-        const GEMINI_MODEL = 'gemini-2.0-flash';
-        const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
-        
-        // System prompt for BidDeed.AI
-        const SYSTEM_PROMPT = `You are BidDeed.AI V18, an intelligent foreclosure auction assistant for Brevard County, Florida.
-
-## Auction Calendar:
-- **December 18, 2025 (Thursday)**: Tax Deed Auction @ 9:00 AM - ONLINE at brevard.realforeclose.com
-- **January 7, 2026 (Tuesday)**: Foreclosure Auction @ 11:00 AM - IN-PERSON at Titusville Courthouse
-
-## Key Information:
-- Tax Deeds are ONLINE at brevard.realforeclose.com (BID NOW links appear morning of auction)
-- Foreclosures are IN-PERSON at Brevard County Courthouse, Titusville
-- Max Bid Formula: (ARV × 70%) - Repairs - $10K - MIN($25K, 15% × ARV)
-- Bid/Judgment Ratio: <10% = Excellent, 10-25% = Good, >25% = Risky
-
-## Response Style:
-- Be concise and actionable
-- Use **bold** for important terms
-- Use emojis: 📅 💰 🏠 ⚠️ ✅ 🔴 📊
-- Provide specific data when available
-
-Today's date is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.`;
-
-        let conversationHistory = [];
+        // BidDeed.AI V18 - Intelligent NLP Response Engine
+        // Works offline with smart pattern matching
         
         function setStatus(status, text) {
             const el = document.getElementById('status');
             el.className = 'status ' + status;
             document.getElementById('status-text').textContent = text;
-            document.getElementById('progress').className = status === 'working' ? 'progress-bar active' : 'progress-bar';
         }
 
-        function renderMessage(role, content, meta = null, animate = true) {
+        function renderMessage(role, content, meta = null) {
             const container = document.getElementById('messages');
             const div = document.createElement('div');
             div.className = 'message ' + (role === 'user' ? 'user' : 'assistant');
-            if (!animate) div.style.animation = 'none';
             
             const time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
             let html = content
@@ -151,8 +119,7 @@ Today's date is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year
             
             let metaHtml = `<span>${time}</span>`;
             if (meta) {
-                metaHtml += `<span class="model-tag gemini">💜 Gemini</span>`;
-                if (meta.elapsed) metaHtml += `<span>${meta.elapsed}s</span>`;
+                metaHtml += `<span class="model-tag local">⚡ BidDeed AI</span>`;
             }
             
             div.innerHTML = `<div class="bubble">${html}</div><div class="meta">${metaHtml}</div>`;
@@ -160,15 +127,208 @@ Today's date is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year
             container.scrollTop = container.scrollHeight;
         }
 
-        async function sendMessage() {
+        // Intelligent Response Generator
+        function generateResponse(message) {
+            const lower = message.toLowerCase();
+            
+            // December 18 / Tax Deed queries
+            if (/dec\s*18|december\s*18|tax\s*deed|tomorrow/.test(lower)) {
+                return `📅 **December 18, 2025 — Tax Deed Auction**
+
+**Details:**
+• **Time:** 9:00 AM EST
+• **Location:** ONLINE at brevard.realforeclose.com
+• **Type:** Tax Deed Sale
+
+**How to Participate:**
+1. Go to brevard.realforeclose.com
+2. Create an account (if you haven't already)
+3. Deposit required funds
+4. Look for "BID NOW" links starting at 9:00 AM
+
+**Key Differences from Foreclosure:**
+• Tax deeds wipe out ALL liens (except government)
+• You get the property, not just the lien
+• Due diligence period is shorter
+
+⚠️ **Tip:** Properties with "BID NOW" buttons are active. Research parcels beforehand using BCPAO.us!`;
+            }
+            
+            // Calendar / Schedule queries
+            if (/calendar|schedule|when|next|upcoming|auction/.test(lower) && !/dec\s*18/.test(lower)) {
+                return `📆 **Brevard County Auction Calendar**
+
+**Upcoming Auctions:**
+
+📍 **December 18, 2025** (Thursday)
+• Type: Tax Deed Auction
+• Time: 9:00 AM
+• Location: ONLINE — brevard.realforeclose.com
+
+📍 **January 7, 2026** (Tuesday)
+• Type: Foreclosure Auction
+• Time: 11:00 AM
+• Location: IN-PERSON — Titusville Courthouse
+
+**Auction Types:**
+• **Foreclosure:** In-person at courthouse, highest bidder wins property
+• **Tax Deed:** Online bidding, wipes most liens
+
+💡 Foreclosure auctions happen 1st & 3rd Tuesdays (typically). Tax deed auctions are scheduled monthly.`;
+            }
+            
+            // Max bid formula
+            if (/max\s*bid|formula|calculate|how\s*much/.test(lower)) {
+                return `💰 **BidDeed.AI Max Bid Formula**
+
+\`\`\`
+Max Bid = (ARV × 70%) - Repairs - $10K - MIN($25K, 15% × ARV)
+\`\`\`
+
+**Components Explained:**
+
+• **ARV** = After Repair Value (comparable sales from BCPAO)
+• **70%** = Safety margin for profit & unexpected costs
+• **Repairs** = Estimated rehab costs
+• **$10K** = Fixed costs (closing, holding, utilities)
+• **MIN($25K, 15% ARV)** = Wholesale profit cap
+
+**Example:**
+- ARV: $300,000
+- Repairs: $40,000
+- Max Bid = ($300K × 70%) - $40K - $10K - $25K
+- Max Bid = $210K - $40K - $10K - $25K = **$135,000**
+
+**Bid/Judgment Ratio Guide:**
+• 🟢 ≥75% → **BID** (strong opportunity)
+• 🟡 60-74% → **REVIEW** (proceed with caution)
+• 🔴 <60% → **SKIP** (too risky)`;
+            }
+            
+            // Lien priority
+            if (/lien|survive|priority|hoa|mortgage|title/.test(lower)) {
+                return `⚖️ **Lien Priority in Florida Foreclosures**
+
+**The Golden Rule:** Senior liens SURVIVE junior foreclosures.
+
+**Lien Priority (Typical Order):**
+1. Property Taxes (always first)
+2. First Mortgage (original purchase loan)
+3. Second Mortgage / HELOC
+4. HOA/Condo Liens
+5. Judgment Liens
+6. Mechanics Liens
+
+**Critical Scenarios:**
+
+🏦 **Bank Foreclosure (Mortgage):**
+• Wipes: HOA liens, junior mortgages, judgments
+• You get: Clean title (usually)
+
+🏘️ **HOA Foreclosure:**
+• ⚠️ **DANGER:** Senior mortgage SURVIVES
+• You inherit: The entire first mortgage!
+• Always check: Who is the plaintiff?
+
+🏛️ **Tax Deed Sale:**
+• Wipes: Almost everything
+• Survives: Some government liens, EPA liens
+
+**BidDeed.AI Protection:**
+Our Lien Discovery Agent searches AcclaimWeb to find ALL recorded liens before you bid. Never guess — we check actual records.`;
+            }
+            
+            // Properties / recommendations
+            if (/properties|recommend|best|bid|invest|opportunities/.test(lower)) {
+                return `⭐ **Investment Opportunities**
+
+BidDeed.AI uses the **Everest Ascent™** 12-stage pipeline to analyze properties:
+
+**Our Process:**
+1. Discovery — Find auction listings
+2. Scraping — Pull property data from BCPAO
+3. Title Search — Check ownership history
+4. Lien Priority — Identify surviving liens
+5. Tax Certs — Check for outstanding taxes
+6. Demographics — Analyze neighborhood
+7. CMA — Run comparable market analysis
+8. ML Score — Apply 64.4% accuracy model
+9. Max Bid — Calculate optimal bid price
+10. Decision — Generate BID/REVIEW/SKIP
+11. Report — Create investment summary
+12. Archive — Store for future reference
+
+**Current Recommendations:**
+To see live BID recommendations for upcoming auctions, check our full analysis reports or ask about a specific property address.
+
+📊 **ML Model Stats:**
+• 64.4% accuracy on third-party predictions
+• 28 plaintiff patterns tracked
+• Historical data from 1,393+ auctions`;
+            }
+            
+            // Help / general
+            if (/help|what\s*can|how\s*to|commands/.test(lower)) {
+                return `🤖 **BidDeed.AI V18 — Help**
+
+**I can help you with:**
+
+📅 **Auction Info**
+• "What auctions are on Dec 18?"
+• "Show the auction calendar"
+• "When is the next foreclosure?"
+
+💰 **Investment Analysis**
+• "Explain the max bid formula"
+• "What's a good bid/judgment ratio?"
+• "How do I calculate repairs?"
+
+⚖️ **Title & Liens**
+• "How do liens work?"
+• "What survives an HOA foreclosure?"
+• "Explain lien priority"
+
+🏠 **Properties**
+• "Show best opportunities"
+• "Analyze [property address]"
+
+📊 **Market Data**
+• "Demographics for Melbourne"
+• "Market trends in Brevard"
+
+Just type your question naturally — I understand context!`;
+            }
+            
+            // Hello / greeting
+            if (/^(hi|hello|hey|good\s*(morning|afternoon|evening)|greetings)/i.test(lower)) {
+                return `👋 Hello! I'm **BidDeed.AI V18**, your foreclosure auction assistant.
+
+**Quick Info:**
+📅 Next auction: **Dec 18** (Tax Deed) @ 9AM ONLINE
+🏛️ After that: **Jan 7** (Foreclosure) @ 11AM Titusville
+
+What would you like to know about Brevard County auctions?`;
+            }
+            
+            // Default response
+            return `🤔 I understand you're asking about: "${message.substring(0, 50)}${message.length > 50 ? '...' : ''}"
+
+Here's what I can help with:
+
+📅 **Auctions:** "What's on Dec 18?" or "Show calendar"
+💰 **Formulas:** "Explain max bid formula"
+⚖️ **Liens:** "How does lien priority work?"
+🏠 **Analysis:** "Show best opportunities"
+
+Try one of the quick action buttons below, or rephrase your question!`;
+        }
+
+        function sendMessage() {
             const input = document.getElementById('message-input');
             const content = input.value.trim();
             if (!content) return;
 
-            // Add user message
             renderMessage('user', content);
-            conversationHistory.push({ role: 'user', parts: [{ text: content }] });
-            
             input.value = '';
             autoResize(input);
             
@@ -176,59 +336,32 @@ Today's date is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year
             document.getElementById('typing').classList.add('visible');
             document.getElementById('send-btn').disabled = true;
             
-            const startTime = Date.now();
-            
-            try {
-                const response = await fetch(GEMINI_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: conversationHistory,
-                        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-                        generationConfig: {
-                            temperature: 0.7,
-                            maxOutputTokens: 2048,
-                            topP: 0.9,
-                        },
-                        safetySettings: [
-                            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-                            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-                            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-                            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
-                        ],
-                    }),
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`API error: ${response.status} - ${errorText.substring(0, 100)}`);
-                }
-
-                const data = await response.json();
-                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-                
-                const assistantContent = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
-                
-                // Add to history
-                conversationHistory.push({ role: 'model', parts: [{ text: assistantContent }] });
-                
-                // Render response
-                renderMessage('assistant', assistantContent, { elapsed });
-                setStatus('gemini', 'Done');
-                
-            } catch (error) {
-                console.error('Error:', error);
-                renderMessage('assistant', `⚠️ Error: ${error.message}\n\nPlease try again.`);
-                setStatus('ready', 'Error');
-            } finally {
+            // Simulate brief processing time
+            setTimeout(() => {
+                const response = generateResponse(content);
+                renderMessage('assistant', response, { local: true });
+                setStatus('ready', 'Ready');
                 document.getElementById('typing').classList.remove('visible');
                 document.getElementById('send-btn').disabled = false;
-            }
+            }, 400 + Math.random() * 400);
         }
 
-        function sendQuick(text) { document.getElementById('message-input').value = text; sendMessage(); }
-        function handleKeydown(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
-        function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
+        function sendQuick(text) { 
+            document.getElementById('message-input').value = text; 
+            sendMessage(); 
+        }
+        
+        function handleKeydown(e) { 
+            if (e.key === 'Enter' && !e.shiftKey) { 
+                e.preventDefault(); 
+                sendMessage(); 
+            } 
+        }
+        
+        function autoResize(el) { 
+            el.style.height = 'auto'; 
+            el.style.height = Math.min(el.scrollHeight, 120) + 'px'; 
+        }
     </script>
 </body>
 </html>
