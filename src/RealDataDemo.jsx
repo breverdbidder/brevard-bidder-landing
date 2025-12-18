@@ -4,8 +4,11 @@
 // Author: Ariel Shapira, Solo Founder, Everest Capital USA
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiZXZlcmVzdDE4IiwiYSI6ImNtYnAydnExdjAwNnAyb3EwaTJjcTZiNnIifQ.55IMlqQsnOCLflDblrQGKw';
+// Set Mapbox access token
+mapboxgl.accessToken = 'pk.eyJ1IjoiZXZlcmVzdDE4IiwiYSI6ImNtYnAydnExdjAwNnAyb3EwaTJjcTZiNnIifQ.55IMlqQsnOCLflDblrQGKw';
 
 // Supabase direct connection (for demo - production uses API layer)
 const SUPABASE_URL = 'https://mocerqjnksmhcjzxrewo.supabase.co';
@@ -165,96 +168,70 @@ Scrapers are running to fetch fresh data!`, 'FREE');
   const [heatmapIntensity, setHeatmapIntensity] = useState(0.7);
   const [mapViewMode, setMapViewMode] = useState('hybrid'); // 'markers', 'heatmap', 'hybrid'
 
-  // Initialize Mapbox with heatmap support
+  // Initialize Mapbox - using npm package
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
-    
-    // First load CSS
-    const link = document.createElement('link');
-    link.href = 'https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css';
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
-    
-    // Then load JS
-    const script = document.createElement('script');
-    script.src = 'https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js';
-    script.onload = () => {
-      // Wait a tick for CSS to apply
-      setTimeout(() => {
-        try {
-          window.mapboxgl.accessToken = MAPBOX_TOKEN;
-          mapInstance.current = new window.mapboxgl.Map({
-            container: mapRef.current,
-            style: 'mapbox://styles/mapbox/dark-v11',
-            center: [-80.65, 28.35],
-            zoom: 9.5,
-            pitch: 30,
-            bearing: -10
-          });
-          
-          mapInstance.current.addControl(new window.mapboxgl.NavigationControl(), 'top-right');
-          mapInstance.current.addControl(new window.mapboxgl.ScaleControl(), 'bottom-left');
-          
-          mapInstance.current.on('load', () => {
-            // Add heatmap source
-            mapInstance.current.addSource('properties-heat', {
-              type: 'geojson',
-              data: { type: 'FeatureCollection', features: [] }
-            });
-            
-            // Add heatmap layer
-            mapInstance.current.addLayer({
-              id: 'properties-heatmap',
-              type: 'heatmap',
-              source: 'properties-heat',
-              maxzoom: 15,
-              paint: {
-                'heatmap-weight': ['interpolate', ['linear'], ['get', 'mlScore'], 0, 0.1, 50, 0.5, 100, 1],
-                'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 8, 0.5, 12, 1.5],
-                'heatmap-color': [
-                  'interpolate', ['linear'], ['heatmap-density'],
-                  0, 'rgba(0, 0, 0, 0)',
-                  0.1, 'rgba(59, 130, 246, 0.3)',
-                  0.3, 'rgba(16, 185, 129, 0.5)',
-                  0.5, 'rgba(245, 158, 11, 0.7)',
-                  0.7, 'rgba(239, 68, 68, 0.8)',
-                  1, 'rgba(220, 38, 38, 1)'
-                ],
-                'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 8, 25, 12, 40, 15, 60],
-                'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 12, 0.9, 15, 0.3]
-              }
-            });
-            
-            mapInstance.current.addLayer({
-              id: 'properties-circles',
-              type: 'circle',
-              source: 'properties-heat',
-              minzoom: 11,
-              paint: {
-                'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 6, 15, 12],
-                'circle-color': ['match', ['get', 'recommendation'], 'BID', '#10B981', 'REVIEW', '#F59E0B', 'SKIP', '#EF4444', '#64748b'],
-                'circle-stroke-color': 'white',
-                'circle-stroke-width': 2,
-                'circle-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0, 13, 0.9]
-              }
-            });
-            
-            setMapLoaded(true);
-          });
-          
-          mapInstance.current.on('error', (e) => {
-            console.error('Mapbox error:', e);
-          });
-        } catch (err) {
-          console.error('Map initialization error:', err);
+
+    // Create map instance directly (no dynamic loading needed)
+    const map = new mapboxgl.Map({
+      container: mapRef.current,
+      style: 'mapbox://styles/mapbox/dark-v11',
+      center: [-80.65, 28.35], // Brevard County center
+      zoom: 9.5,
+      pitch: 30,
+      bearing: -10
+    });
+
+    mapInstance.current = map;
+
+    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    map.addControl(new mapboxgl.ScaleControl(), 'bottom-left');
+
+    map.on('load', () => {
+      console.log('Mapbox map loaded successfully!');
+      
+      // Add heatmap source
+      map.addSource('properties-heat', {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] }
+      });
+
+      // Add heatmap layer
+      map.addLayer({
+        id: 'properties-heatmap',
+        type: 'heatmap',
+        source: 'properties-heat',
+        maxzoom: 15,
+        paint: {
+          'heatmap-weight': ['interpolate', ['linear'], ['get', 'mlScore'], 0, 0.1, 50, 0.5, 100, 1],
+          'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 8, 0.5, 12, 1.5],
+          'heatmap-color': [
+            'interpolate', ['linear'], ['heatmap-density'],
+            0, 'rgba(0, 0, 0, 0)',
+            0.2, 'rgba(59, 130, 246, 0.4)',
+            0.4, 'rgba(16, 185, 129, 0.6)',
+            0.6, 'rgba(245, 158, 11, 0.8)',
+            0.8, 'rgba(239, 68, 68, 0.9)',
+            1, 'rgba(220, 38, 38, 1)'
+          ],
+          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 8, 30, 12, 50],
+          'heatmap-opacity': 0.8
         }
-      }, 100);
+      });
+
+      setMapLoaded(true);
+    });
+
+    map.on('error', (e) => {
+      console.error('Mapbox error:', e);
+    });
+
+    // Cleanup on unmount
+    return () => {
+      map.remove();
     };
-    script.onerror = (e) => {
-      console.error('Failed to load Mapbox GL JS:', e);
-    };
-    document.head.appendChild(script);
   }, []);
+
 
   // Update heatmap and markers when properties change
   useEffect(() => {
@@ -294,7 +271,7 @@ Scrapers are running to fetch fresh data!`, 'FREE');
         el.onclick = () => setSelectedProp(p);
         
         try {
-          const marker = new window.mapboxgl.Marker(el).setLngLat([lng, lat]).addTo(mapInstance.current);
+          const marker = new mapboxgl.Marker(el).setLngLat([lng, lat]).addTo(mapInstance.current);
           markersRef.current.push(marker);
         } catch (e) { console.error('Marker error:', e); }
       });
@@ -764,3 +741,4 @@ What would you like to know?`;
     </div>
   );
 }
+
