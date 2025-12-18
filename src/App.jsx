@@ -1,32 +1,243 @@
-// BidDeed.AI Landing Page V16.2.0 - "Demo Integrated" Edition
-// Clean navy background + AnimatedDemo integration
+// BidDeed.AI V18.0.0 - "Everest Summit" Edition
+// Split-Screen UI + Real Auction Data Animation + Premium Landing
 // © 2025 Everest Capital USA. All Rights Reserved.
+// Architecture: Claude Opus 4.5 | Design: Shadcn/UI + Framer Motion
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import AnimatedDemo from './AnimatedDemo';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 
-// ============ ANIMATION VARIANTS ============
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.4, ease: 'easeOut' } }
+// ============ DESIGN SYSTEM ============
+const theme = {
+  colors: {
+    // Everest Brand - Deep Navy to Summit Gold
+    navy: {
+      950: '#030712',
+      900: '#0a0f1a',
+      800: '#111827',
+      700: '#1e293b',
+    },
+    gold: {
+      400: '#fbbf24',
+      500: '#f59e0b',
+      600: '#d97706',
+    },
+    emerald: {
+      400: '#34d399',
+      500: '#10b981',
+    },
+    red: {
+      400: '#f87171',
+      500: '#ef4444',
+    },
+    slate: {
+      300: '#cbd5e1',
+      400: '#94a3b8',
+      500: '#64748b',
+    }
+  },
+  fonts: {
+    display: "'Instrument Serif', Georgia, serif",
+    body: "'Geist', -apple-system, BlinkMacSystemFont, sans-serif",
+    mono: "'Geist Mono', 'JetBrains Mono', monospace",
+  }
 };
 
-const slideUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } }
+// ============ REAL AUCTION DATA (Dec 18, 2025 Tax Deed Sale) ============
+const REAL_AUCTION_DATA = {
+  auctionDate: '2025-12-18',
+  auctionType: 'Tax Deed',
+  totalProperties: 20,
+  recommendations: {
+    BID: 4,
+    REVIEW: 3,
+    SKIP: 12,
+    DO_NOT_BID: 1
+  },
+  properties: [
+    {
+      id: 1,
+      caseNumber: '250179',
+      parcelId: '3021477',
+      address: '202 Ivory Coral Ln #302',
+      city: 'Merritt Island',
+      zip: '32953',
+      propertyType: 'CONDO',
+      openingBid: 6847.05,
+      marketValue: 176000,
+      bidJudgmentRatio: 3.9,
+      recommendation: 'BID',
+      mlProbability: 0.72,
+      stage: 12,
+      riskLevel: 'LOW'
+    },
+    {
+      id: 2,
+      caseNumber: '250216',
+      parcelId: '3021458',
+      address: '202 Ivory Coral Ln #204',
+      city: 'Merritt Island',
+      zip: '32953',
+      propertyType: 'CONDO',
+      openingBid: 7234.18,
+      marketValue: 168000,
+      bidJudgmentRatio: 4.3,
+      recommendation: 'BID',
+      mlProbability: 0.68,
+      stage: 12,
+      riskLevel: 'LOW'
+    },
+    {
+      id: 3,
+      caseNumber: '250369',
+      parcelId: '2000369',
+      address: 'US-1 (Vacant Land)',
+      city: 'Mims',
+      zip: '32754',
+      propertyType: 'VACANT LAND',
+      openingBid: 1873.96,
+      marketValue: 28800,
+      bidJudgmentRatio: 6.5,
+      recommendation: 'REDEEMED',
+      mlProbability: 0,
+      stage: 0,
+      riskLevel: 'N/A',
+      note: 'Redeemed by owner Dec 17'
+    },
+    {
+      id: 4,
+      caseNumber: '250422',
+      parcelId: '2823886',
+      address: '1247 Palm Bay Rd NE',
+      city: 'Palm Bay',
+      zip: '32905',
+      propertyType: 'SINGLE FAMILY',
+      openingBid: 45678.32,
+      marketValue: 285000,
+      bidJudgmentRatio: 16.0,
+      recommendation: 'REVIEW',
+      mlProbability: 0.45,
+      stage: 9,
+      riskLevel: 'MEDIUM'
+    },
+    {
+      id: 5,
+      caseNumber: '250501',
+      parcelId: '2913986',
+      address: '892 Emerson Dr NW',
+      city: 'Palm Bay',
+      zip: '32907',
+      propertyType: 'SINGLE FAMILY',
+      openingBid: 89234.56,
+      marketValue: 320000,
+      bidJudgmentRatio: 27.9,
+      recommendation: 'SKIP',
+      mlProbability: 0.22,
+      stage: 9,
+      riskLevel: 'HIGH'
+    }
+  ],
+  pipelineStats: {
+    totalAnalyzed: 250,
+    averageProcessingTime: '23 seconds',
+    dataSourcesUsed: ['BCPAO', 'RealTDM', 'AcclaimWeb', 'Census API'],
+    mlAccuracy: 64.4
+  }
+};
+
+// ============ ANIMATION VARIANTS ============
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+  }
 };
 
 const staggerContainer = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.1 }
+    transition: { staggerChildren: 0.1, delayChildren: 0.2 }
   }
 };
 
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { 
+    opacity: 1, 
+    scale: 1,
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] }
+  }
+};
+
+// ============ SHADCN-STYLE COMPONENTS ============
+
+// Card Component
+const Card = ({ className = '', children, ...props }) => (
+  <div 
+    className={`rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm ${className}`}
+    {...props}
+  >
+    {children}
+  </div>
+);
+
+// Badge Component  
+const Badge = ({ variant = 'default', className = '', children }) => {
+  const variants = {
+    default: 'bg-slate-800 text-slate-300',
+    success: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
+    warning: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
+    danger: 'bg-red-500/20 text-red-400 border border-red-500/30',
+    info: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+  };
+  
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]} ${className}`}>
+      {children}
+    </span>
+  );
+};
+
+// Button Component
+const Button = ({ variant = 'default', size = 'default', className = '', children, ...props }) => {
+  const variants = {
+    default: 'bg-amber-500 text-slate-900 hover:bg-amber-400 shadow-lg shadow-amber-500/25',
+    outline: 'border border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white',
+    ghost: 'text-slate-400 hover:text-white hover:bg-slate-800',
+  };
+  
+  const sizes = {
+    sm: 'px-3 py-1.5 text-sm',
+    default: 'px-5 py-2.5 text-sm',
+    lg: 'px-8 py-3.5 text-base',
+  };
+  
+  return (
+    <button 
+      className={`inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 ${variants[variant]} ${sizes[size]} ${className}`}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
+
+// Progress Component
+const Progress = ({ value, className = '' }) => (
+  <div className={`h-2 w-full bg-slate-800 rounded-full overflow-hidden ${className}`}>
+    <motion.div 
+      className="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full"
+      initial={{ width: 0 }}
+      animate={{ width: `${value}%` }}
+      transition={{ duration: 1, ease: 'easeOut' }}
+    />
+  </div>
+);
+
 // ============ NAVIGATION ============
-const Nav = () => {
+const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -36,52 +247,55 @@ const Nav = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks = [
-    { href: '#methodology', label: 'Methodology' },
-    { href: '#stages', label: '12 Stages' },
-    { href: '#founder', label: 'Founder' },
-  ];
-
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
-      scrolled ? 'bg-slate-900/98 shadow-xl shadow-black/20' : 'bg-transparent'
-    }`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-20">
+    <motion.nav 
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? 'bg-slate-950/95 backdrop-blur-xl border-b border-slate-800/50' : 'bg-transparent'
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <a href="#" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center shadow-lg shadow-amber-500/20 transform group-hover:scale-105 transition-transform">
-              <span className="text-slate-900 font-black text-sm tracking-tight">BD</span>
+            <div className="relative">
+              <div className="w-11 h-11 bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-xl shadow-amber-500/30 transform group-hover:scale-105 transition-transform">
+                <span className="text-slate-900 font-black text-sm">BD</span>
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-slate-950 animate-pulse" />
             </div>
-            <span className="text-xl lg:text-2xl font-bold text-white tracking-tight">
-              BidDeed<span className="text-amber-400">.AI</span>
-            </span>
+            <div className="flex flex-col">
+              <span className="text-xl font-bold text-white tracking-tight">
+                BidDeed<span className="text-amber-400">.AI</span>
+              </span>
+              <span className="text-[10px] text-slate-500 tracking-widest uppercase">An Everest Company</span>
+            </div>
           </a>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
-            {navLinks.map((link) => (
+          {/* Desktop Nav */}
+          <div className="hidden lg:flex items-center gap-2">
+            {['Methodology', '12 Stages', 'Live Demo', 'Founder'].map((item) => (
               <a
-                key={link.href}
-                href={link.href}
-                className="px-4 py-2 text-slate-300 hover:text-white transition-colors text-sm font-medium rounded-lg hover:bg-white/5"
+                key={item}
+                href={`#${item.toLowerCase().replace(' ', '-')}`}
+                className="px-4 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium rounded-lg hover:bg-white/5"
               >
-                {link.label}
+                {item}
               </a>
             ))}
-            <a
-              href="#waitlist"
-              className="ml-4 px-6 py-2.5 bg-amber-500 text-slate-900 font-semibold rounded-lg hover:bg-amber-400 transition-colors text-sm shadow-lg shadow-amber-500/20"
-            >
-              Join Waitlist
-            </a>
+            <Button variant="outline" size="sm" className="ml-4">
+              Sign In
+            </Button>
+            <Button size="sm">
+              Get Early Access
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 text-white rounded-lg hover:bg-white/10 transition-colors"
-            aria-label="Toggle menu"
+            className="lg:hidden p-2 text-white"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {mobileOpen ? (
@@ -92,494 +306,553 @@ const Nav = () => {
             </svg>
           </button>
         </div>
-
-        {/* Mobile Menu */}
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden border-t border-slate-800 py-4"
-          >
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className="block px-4 py-3 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-              >
-                {link.label}
-              </a>
-            ))}
-            <a
-              href="#waitlist"
-              onClick={() => setMobileOpen(false)}
-              className="block mx-4 mt-4 px-6 py-3 bg-amber-500 text-slate-900 font-semibold rounded-lg text-center"
-            >
-              Join Waitlist
-            </a>
-          </motion.div>
-        )}
       </div>
-    </nav>
+    </motion.nav>
   );
 };
 
 // ============ HERO SECTION ============
-const Hero = ({ onOpenDemo }) => (
-  <section className="relative min-h-screen flex items-center pt-20 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
-    {/* Clean Navy Background - No Patterns */}
-    <div className="absolute inset-0 bg-slate-900" />
-    <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800" />
-    
-    {/* Subtle Glow Effect */}
-    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-amber-500/5 rounded-full blur-3xl" />
+const Hero = ({ onOpenDemo }) => {
+  const { scrollY } = useScroll();
+  const opacity = useTransform(scrollY, [0, 400], [1, 0]);
+  const scale = useTransform(scrollY, [0, 400], [1, 0.95]);
+  
+  return (
+    <motion.section 
+      style={{ opacity, scale }}
+      className="relative min-h-screen flex items-center pt-24 pb-20 overflow-hidden"
+    >
+      {/* Background */}
+      <div className="absolute inset-0 bg-slate-950" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-950" />
+      
+      {/* Grid Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
+      
+      {/* Gradient Orbs */}
+      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-[128px] animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-emerald-500/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
 
-    <div className="relative max-w-6xl mx-auto w-full">
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={staggerContainer}
-        className="text-center"
-      >
-        {/* Badge */}
-        <motion.div variants={slideUp} className="mb-8">
-          <span className="inline-flex items-center gap-2.5 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+      <div className="relative max-w-7xl mx-auto px-6 w-full">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+          className="max-w-4xl"
+        >
+          {/* Live Badge */}
+          <motion.div variants={fadeInUp} className="mb-8">
+            <Badge variant="success" className="px-4 py-1.5">
+              <span className="relative flex h-2 w-2 mr-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              LIVE: Dec 18 Tax Deed Auction • {REAL_AUCTION_DATA.totalProperties} Properties Analyzed
+            </Badge>
+          </motion.div>
+
+          {/* Headline */}
+          <motion.h1 
+            variants={fadeInUp}
+            className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight mb-6"
+            style={{ fontFamily: theme.fonts.display }}
+          >
+            Distressed Assets
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-400">
+              Decoded.
             </span>
-            <span className="text-emerald-400 text-sm font-medium tracking-wide">
-              Agentic AI Ecosystem • Now in Beta
-            </span>
-          </span>
-        </motion.div>
+          </motion.h1>
 
-        {/* Headline */}
-        <motion.h1 
-          variants={slideUp}
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] mb-6 tracking-tight"
-        >
-          Distressed Assets
-          <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">
-            Decoded
-          </span>
-        </motion.h1>
-
-        {/* Tagline */}
-        <motion.p 
-          variants={slideUp}
-          className="text-lg sm:text-xl lg:text-2xl text-slate-300 max-w-3xl mx-auto mb-10 leading-relaxed font-light"
-        >
-          The Everest Ascent™ — 12 AI agents transform 4-hour courthouse research into 23-second intelligence.
-        </motion.p>
-
-        {/* CTA Buttons */}
-        <motion.div 
-          variants={slideUp}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
-        >
-          <a 
-            href="#waitlist"
-            className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-400 text-slate-900 font-bold rounded-xl text-lg hover:from-amber-400 hover:to-amber-300 transition-all shadow-xl shadow-amber-500/25 transform hover:scale-[1.02]"
+          {/* Subheadline */}
+          <motion.p 
+            variants={fadeInUp}
+            className="text-xl text-slate-400 max-w-2xl mb-10 leading-relaxed"
           >
-            Join the Waitlist
-          </a>
-          
-          {/* PLAY DEMO - Primary CTA Button */}
-          <button 
-            onClick={onOpenDemo}
-            className="w-full sm:w-auto group relative px-10 py-5 bg-gradient-to-r from-red-600 to-red-500 text-white font-black rounded-2xl text-xl hover:from-red-500 hover:to-red-400 transition-all shadow-2xl shadow-red-500/40 hover:shadow-red-500/60 transform hover:scale-105 flex items-center justify-center gap-4 border-2 border-red-400/30"
+            The <span className="text-white font-semibold">Everest Ascent™</span> — 12-stage AI pipeline transforms 
+            4-hour research into <span className="text-amber-400 font-mono">23-second</span> intelligence. 
+            Foreclosure and tax deed auctions, decoded for everyone.
+          </motion.p>
+
+          {/* Stats Row */}
+          <motion.div 
+            variants={fadeInUp}
+            className="flex flex-wrap gap-8 mb-10"
           >
-            {/* Play Icon Circle */}
-            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
-              <svg className="w-6 h-6 ml-0.5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z"/>
-              </svg>
-            </div>
-            <div className="text-left">
-              <div className="text-2xl tracking-wide">▶ PLAY DEMO</div>
-              <div className="text-xs font-normal text-red-200 opacity-90">47-sec AI Pipeline Walkthrough</div>
-            </div>
-          </button>
-          
-          <a 
-            href="#stages"
-            className="w-full sm:w-auto px-8 py-4 bg-white/5 text-white font-semibold rounded-xl text-lg border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all backdrop-blur-sm"
-          >
-            Explore 12 Stages
-          </a>
-        </motion.div>
-
-        {/* Stats Bar */}
-        <motion.div 
-          variants={slideUp}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto"
-        >
-          {[
-            { value: '23s', label: 'Per Property' },
-            { value: '64.4%', label: 'ML Accuracy' },
-            { value: '12', label: 'AI Agents' },
-            { value: '100x', label: 'ROI' },
-          ].map((stat, i) => (
-            <div 
-              key={i}
-              className="bg-white/5 backdrop-blur-sm rounded-xl p-4 sm:p-5 border border-white/5"
-            >
-              <div className="text-2xl sm:text-3xl font-bold text-amber-400 mb-1">{stat.value}</div>
-              <div className="text-xs sm:text-sm text-slate-400 font-medium">{stat.label}</div>
-            </div>
-          ))}
-        </motion.div>
-      </motion.div>
-    </div>
-  </section>
-);
-
-// ============ METHODOLOGY SECTION ============
-const Methodology = () => (
-  <section id="methodology" className="py-20 lg:py-32 px-4 sm:px-6 lg:px-8 bg-slate-800">
-    <div className="max-w-6xl mx-auto">
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-100px" }}
-        variants={staggerContainer}
-      >
-        {/* Section Header */}
-        <motion.div variants={slideUp} className="text-center mb-16">
-          <span className="text-amber-400 font-semibold text-sm uppercase tracking-widest">
-            Proprietary Framework
-          </span>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mt-4 mb-6 tracking-tight">
-            The Everest Ascent™
-          </h2>
-          <p className="text-slate-400 max-w-2xl mx-auto text-lg leading-relaxed">
-            35 years of courthouse expertise encoded into a 12-stage AI pipeline. 
-            From auction discovery to investment decision — in under a minute.
-          </p>
-        </motion.div>
-
-        {/* Three Phases */}
-        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-          {[
-            { 
-              phase: 'Base Camp', 
-              stages: '1-2',
-              title: 'Discovery', 
-              desc: 'AI agents scan courthouse calendars daily and extract complete case details from BECA records.',
-              color: 'emerald',
-              icon: '🔍'
-            },
-            { 
-              phase: 'The Climb', 
-              stages: '3-8',
-              title: 'Deep Analysis', 
-              desc: 'Title search, lien priority analysis, tax certificates, market demographics, ML scoring, and max bid calculation.',
-              color: 'amber',
-              icon: '📊'
-            },
-            { 
-              phase: 'Summit', 
-              stages: '9-12',
-              title: 'Decision', 
-              desc: 'Clear recommendation delivered: BID with confidence, REVIEW further, or SKIP entirely.',
-              color: 'purple',
-              icon: '🎯'
-            },
-          ].map((item, i) => (
-            <motion.div
-              key={i}
-              variants={slideUp}
-              className="group relative bg-slate-900 rounded-2xl p-8 border border-slate-700 hover:border-slate-600 transition-all"
-            >
-              {/* Phase Badge */}
-              <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold tracking-wide mb-6 ${
-                item.color === 'emerald' ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' :
-                item.color === 'amber' ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30' :
-                'bg-purple-500/15 text-purple-400 border border-purple-500/30'
-              }`}>
-                {item.phase} • Stages {item.stages}
+            {[
+              { value: '64.4%', label: 'ML Accuracy' },
+              { value: '23s', label: 'Per Analysis' },
+              { value: '12', label: 'Pipeline Stages' },
+              { value: '100x', label: 'ROI vs Manual' },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="text-3xl font-bold text-white font-mono">{stat.value}</div>
+                <div className="text-sm text-slate-500">{stat.label}</div>
               </div>
+            ))}
+          </motion.div>
 
-              {/* Icon */}
-              <div className="text-4xl mb-4">{item.icon}</div>
+          {/* CTA Buttons */}
+          <motion.div variants={fadeInUp} className="flex flex-wrap gap-4">
+            <Button size="lg" onClick={onOpenDemo}>
+              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+              </svg>
+              Watch Live Demo
+            </Button>
+            <Button variant="outline" size="lg">
+              View Dec 18 Auction
+              <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </Button>
+          </motion.div>
+        </motion.div>
+      </div>
+    </motion.section>
+  );
+};
 
-              {/* Title */}
-              <h3 className="text-2xl font-bold text-white mb-4">{item.title}</h3>
+// ============ SPLIT-SCREEN DEMO INTERFACE ============
+const SplitScreenDemo = ({ isOpen, onClose }) => {
+  const [activeProperty, setActiveProperty] = useState(0);
+  const [currentStage, setCurrentStage] = useState(1);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-              {/* Description */}
-              <p className="text-slate-400 leading-relaxed">{item.desc}</p>
-            </motion.div>
-          ))}
+  const stages = [
+    { id: 1, name: 'Discovery', icon: '🔍', color: 'amber' },
+    { id: 2, name: 'Scraping', icon: '📥', color: 'blue' },
+    { id: 3, name: 'Title Search', icon: '📋', color: 'purple' },
+    { id: 4, name: 'Lien Priority', icon: '⚖️', color: 'red' },
+    { id: 5, name: 'Tax Certs', icon: '💰', color: 'green' },
+    { id: 6, name: 'Demographics', icon: '📊', color: 'cyan' },
+    { id: 7, name: 'ML Score', icon: '🧠', color: 'pink' },
+    { id: 8, name: 'Max Bid', icon: '🎯', color: 'orange' },
+    { id: 9, name: 'Decision', icon: '✅', color: 'emerald' },
+    { id: 10, name: 'Report', icon: '📄', color: 'indigo' },
+    { id: 11, name: 'Disposition', icon: '🏠', color: 'teal' },
+    { id: 12, name: 'Archive', icon: '💾', color: 'slate' },
+  ];
+
+  const property = REAL_AUCTION_DATA.properties[activeProperty];
+
+  // Auto-animate through stages
+  useEffect(() => {
+    if (!isOpen || !isAnimating) return;
+    
+    const interval = setInterval(() => {
+      setCurrentStage(prev => {
+        if (prev >= 12) {
+          setIsAnimating(false);
+          return 12;
+        }
+        return prev + 1;
+      });
+    }, 800);
+
+    return () => clearInterval(interval);
+  }, [isOpen, isAnimating]);
+
+  const startAnimation = () => {
+    setCurrentStage(1);
+    setIsAnimating(true);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl"
+      >
+        {/* Header */}
+        <div className="h-16 border-b border-slate-800 flex items-center justify-between px-6">
+          <div className="flex items-center gap-4">
+            <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
+              <span className="text-slate-900 font-bold text-xs">BD</span>
+            </div>
+            <span className="text-white font-semibold">BidDeed.AI Demo</span>
+            <Badge variant="success">LIVE DATA</Badge>
+          </div>
+          <button onClick={onClose} className="p-2 text-slate-400 hover:text-white">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Split Screen Content */}
+        <div className="flex h-[calc(100vh-4rem)]">
+          {/* LEFT PANEL - Property List */}
+          <div className="w-80 border-r border-slate-800 overflow-y-auto">
+            <div className="p-4 border-b border-slate-800">
+              <h3 className="text-sm font-semibold text-white mb-2">Dec 18, 2025 Tax Deed Auction</h3>
+              <p className="text-xs text-slate-500">{REAL_AUCTION_DATA.properties.length} Properties • Brevard County</p>
+            </div>
+            
+            <div className="p-2">
+              {REAL_AUCTION_DATA.properties.map((prop, idx) => (
+                <button
+                  key={prop.id}
+                  onClick={() => {
+                    setActiveProperty(idx);
+                    setCurrentStage(1);
+                    setIsAnimating(false);
+                  }}
+                  className={`w-full text-left p-3 rounded-lg mb-1 transition-all ${
+                    activeProperty === idx 
+                      ? 'bg-amber-500/20 border border-amber-500/30' 
+                      : 'hover:bg-slate-800/50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium text-white">Case #{prop.caseNumber}</span>
+                    <Badge 
+                      variant={
+                        prop.recommendation === 'BID' ? 'success' :
+                        prop.recommendation === 'REVIEW' ? 'warning' :
+                        prop.recommendation === 'SKIP' ? 'danger' : 'info'
+                      }
+                    >
+                      {prop.recommendation}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-slate-400 truncate">{prop.address}</p>
+                  <p className="text-xs text-slate-500">{prop.city}, FL {prop.zip}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* CENTER PANEL - Pipeline Visualization */}
+          <div className="flex-1 p-6 overflow-y-auto">
+            {/* Property Header */}
+            <div className="mb-8">
+              <div className="flex items-center gap-4 mb-4">
+                <h2 className="text-2xl font-bold text-white">{property.address}</h2>
+                <Badge 
+                  variant={
+                    property.recommendation === 'BID' ? 'success' :
+                    property.recommendation === 'REVIEW' ? 'warning' :
+                    property.recommendation === 'SKIP' ? 'danger' : 'info'
+                  }
+                  className="text-sm px-3 py-1"
+                >
+                  {property.recommendation}
+                </Badge>
+              </div>
+              <p className="text-slate-400">
+                {property.city}, FL {property.zip} • Case #{property.caseNumber} • Parcel {property.parcelId}
+              </p>
+            </div>
+
+            {/* Pipeline Progress */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm text-slate-400">Everest Ascent™ Pipeline</span>
+                <span className="text-sm font-mono text-amber-400">{currentStage}/12 Stages</span>
+              </div>
+              <Progress value={(currentStage / 12) * 100} />
+            </div>
+
+            {/* 12 Stages Grid */}
+            <div className="grid grid-cols-4 gap-3 mb-8">
+              {stages.map((stage) => (
+                <motion.div
+                  key={stage.id}
+                  initial={{ opacity: 0.5, scale: 0.95 }}
+                  animate={{ 
+                    opacity: currentStage >= stage.id ? 1 : 0.4,
+                    scale: currentStage === stage.id ? 1.05 : 1,
+                    borderColor: currentStage === stage.id ? 'rgb(251, 191, 36)' : 'rgb(30, 41, 59)'
+                  }}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    currentStage >= stage.id ? 'bg-slate-800/50' : 'bg-slate-900/30'
+                  }`}
+                >
+                  <div className="text-2xl mb-2">{stage.icon}</div>
+                  <div className="text-xs font-medium text-white mb-1">Stage {stage.id}</div>
+                  <div className="text-xs text-slate-400">{stage.name}</div>
+                  {currentStage >= stage.id && (
+                    <div className="mt-2">
+                      <svg className="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Run Pipeline Button */}
+            <div className="flex justify-center">
+              <Button 
+                size="lg" 
+                onClick={startAnimation}
+                disabled={isAnimating}
+              >
+                {isAnimating ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    Processing Stage {currentStage}...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                    </svg>
+                    Run Everest Ascent™ Pipeline
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* RIGHT PANEL - Analysis Results */}
+          <div className="w-96 border-l border-slate-800 overflow-y-auto p-6">
+            <h3 className="text-lg font-semibold text-white mb-6">Analysis Results</h3>
+            
+            {/* Key Metrics */}
+            <div className="space-y-4 mb-8">
+              <Card className="p-4">
+                <div className="text-xs text-slate-500 mb-1">Opening Bid</div>
+                <div className="text-2xl font-bold text-white font-mono">
+                  ${property.openingBid.toLocaleString()}
+                </div>
+              </Card>
+              
+              <Card className="p-4">
+                <div className="text-xs text-slate-500 mb-1">Market Value</div>
+                <div className="text-2xl font-bold text-emerald-400 font-mono">
+                  ${property.marketValue.toLocaleString()}
+                </div>
+              </Card>
+              
+              <Card className="p-4">
+                <div className="text-xs text-slate-500 mb-1">Bid/Market Ratio</div>
+                <div className="text-2xl font-bold text-amber-400 font-mono">
+                  {property.bidJudgmentRatio}%
+                </div>
+                <div className="text-xs text-slate-500 mt-1">
+                  {property.bidJudgmentRatio < 10 ? '🔥 Excellent opportunity' : 
+                   property.bidJudgmentRatio < 25 ? '✅ Good value' : '⚠️ Review needed'}
+                </div>
+              </Card>
+              
+              <Card className="p-4">
+                <div className="text-xs text-slate-500 mb-1">ML Win Probability</div>
+                <div className="text-2xl font-bold text-white font-mono">
+                  {(property.mlProbability * 100).toFixed(0)}%
+                </div>
+                <Progress value={property.mlProbability * 100} className="mt-2" />
+              </Card>
+            </div>
+
+            {/* Recommendation Box */}
+            <Card className={`p-4 border-2 ${
+              property.recommendation === 'BID' ? 'border-emerald-500/50 bg-emerald-500/10' :
+              property.recommendation === 'REVIEW' ? 'border-amber-500/50 bg-amber-500/10' :
+              'border-red-500/50 bg-red-500/10'
+            }`}>
+              <div className="text-xs text-slate-400 mb-2">AI Recommendation</div>
+              <div className={`text-3xl font-bold ${
+                property.recommendation === 'BID' ? 'text-emerald-400' :
+                property.recommendation === 'REVIEW' ? 'text-amber-400' :
+                'text-red-400'
+              }`}>
+                {property.recommendation}
+              </div>
+              <div className="text-sm text-slate-400 mt-2">
+                {property.recommendation === 'BID' && 'Strong opportunity. Opening bid significantly below market value.'}
+                {property.recommendation === 'REVIEW' && 'Potential opportunity. Additional due diligence recommended.'}
+                {property.recommendation === 'SKIP' && 'High risk. Bid/value ratio unfavorable.'}
+              </div>
+            </Card>
+          </div>
         </div>
       </motion.div>
-    </div>
-  </section>
-);
+    </AnimatePresence>
+  );
+};
 
 // ============ 12 STAGES SECTION ============
-const Stages = () => {
+const StagesSection = () => {
   const stages = [
-    { num: 1, name: 'Discovery', brand: 'AuctionRadar™', icon: '🔍', phase: 'base' },
-    { num: 2, name: 'BECA Scraping', brand: 'Data Summit', icon: '📥', phase: 'base' },
-    { num: 3, name: 'Title Search', brand: 'TitleTrack™', icon: '📋', phase: 'climb' },
-    { num: 4, name: 'Lien Priority', brand: 'LienLogic™', icon: '⚖️', phase: 'climb' },
-    { num: 5, name: 'Tax Certificates', brand: 'Tax Summit', icon: '📑', phase: 'climb' },
-    { num: 6, name: 'Demographics', brand: 'MarketPulse™', icon: '📊', phase: 'climb' },
-    { num: 7, name: 'ML Scoring', brand: 'BidScore™', icon: '🧠', phase: 'climb' },
-    { num: 8, name: 'Max Bid', brand: 'Shapira Formula™', icon: '💰', phase: 'climb' },
-    { num: 9, name: 'Decision Log', brand: 'Summit Log', icon: '📝', phase: 'summit' },
-    { num: 10, name: 'Report Generation', brand: 'Summit Report', icon: '📄', phase: 'summit' },
-    { num: 11, name: 'Disposition', brand: 'ExitPath™', icon: '🚀', phase: 'summit' },
-    { num: 12, name: 'Archive', brand: 'Summit Archive', icon: '🗄️', phase: 'summit' },
+    { num: 1, name: 'Discovery', desc: 'Identify upcoming auctions from RealForeclose, BECA, county records' },
+    { num: 2, name: 'Scraping', desc: 'Extract property data from BCPAO, AcclaimWeb, RealTDM' },
+    { num: 3, name: 'Title Search', desc: 'Automated lien discovery and document retrieval' },
+    { num: 4, name: 'Lien Priority', desc: 'Senior mortgage survival detection (HOA/Tax scenarios)' },
+    { num: 5, name: 'Tax Certificates', desc: 'Outstanding tax debt and redemption calculations' },
+    { num: 6, name: 'Demographics', desc: 'Census API: income, vacancy rates, growth trends' },
+    { num: 7, name: 'ML Score', desc: 'XGBoost predictions: win probability, sale price' },
+    { num: 8, name: 'Max Bid', desc: 'The Shapira Formula: (ARV×70%)-Repairs-$10K-Margin' },
+    { num: 9, name: 'Decision Log', desc: 'BID/REVIEW/SKIP/DO_NOT_BID with full reasoning' },
+    { num: 10, name: 'Report', desc: 'Professional DOCX with photos, maps, CMA analysis' },
+    { num: 11, name: 'Disposition', desc: 'Exit strategy: Flip, Rental, MTR, Wholesale' },
+    { num: 12, name: 'Archive', desc: 'Supabase persistence with full audit trail' },
   ];
 
   return (
-    <section id="stages" className="py-20 lg:py-32 px-4 sm:px-6 lg:px-8 bg-slate-900">
-      <div className="max-w-6xl mx-auto">
+    <section id="stages" className="py-24 px-6 relative">
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
+      
+      <div className="relative max-w-7xl mx-auto">
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={staggerContainer}
+          className="text-center mb-16"
         >
-          {/* Section Header */}
-          <motion.div variants={slideUp} className="text-center mb-16">
-            <span className="text-amber-400 font-semibold text-sm uppercase tracking-widest">
-              Complete Pipeline
-            </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mt-4 mb-6 tracking-tight">
-              12 Autonomous Stages
-            </h2>
-            <p className="text-slate-400 max-w-xl mx-auto text-lg">
-              Each stage powered by a specialized AI agent. Zero human intervention required.
-            </p>
+          <motion.div variants={fadeInUp}>
+            <Badge variant="warning" className="mb-4">THE METHODOLOGY</Badge>
           </motion.div>
+          <motion.h2 
+            variants={fadeInUp}
+            className="text-4xl lg:text-5xl font-bold text-white mb-4"
+            style={{ fontFamily: theme.fonts.display }}
+          >
+            The Everest Ascent™
+          </motion.h2>
+          <motion.p variants={fadeInUp} className="text-xl text-slate-400 max-w-2xl mx-auto">
+            12 stages from courthouse data to investment decision. 
+            Each stage builds on the last, creating unshakeable intelligence.
+          </motion.p>
+        </motion.div>
 
-          {/* Stages Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {stages.map((stage, i) => (
-              <motion.div
-                key={i}
-                variants={slideUp}
-                className={`group relative bg-slate-800/50 backdrop-blur-sm rounded-xl p-5 border transition-all hover:scale-[1.02] ${
-                  stage.phase === 'base' ? 'border-emerald-500/20 hover:border-emerald-500/40' :
-                  stage.phase === 'climb' ? 'border-amber-500/20 hover:border-amber-500/40' :
-                  'border-purple-500/20 hover:border-purple-500/40'
-                }`}
-              >
-                {/* Stage Number */}
-                <div className={`absolute -top-2 -right-2 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
-                  stage.phase === 'base' ? 'bg-emerald-500 text-slate-900' :
-                  stage.phase === 'climb' ? 'bg-amber-500 text-slate-900' :
-                  'bg-purple-500 text-white'
-                }`}>
-                  {stage.num}
-                </div>
-
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {stages.map((stage, idx) => (
+            <motion.div
+              key={stage.num}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.05 }}
+            >
+              <Card className="p-5 h-full hover:border-amber-500/30 transition-colors group">
                 <div className="flex items-start gap-4">
-                  <span className="text-3xl">{stage.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-semibold text-white mb-1">{stage.name}</h3>
-                    {stage.brand && (
-                      <p className={`text-sm ${
-                        stage.phase === 'base' ? 'text-emerald-400' :
-                        stage.phase === 'climb' ? 'text-amber-400' :
-                        'text-purple-400'
-                      }`}>{stage.brand}</p>
-                    )}
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500/20 to-amber-500/5 border border-amber-500/20 flex items-center justify-center flex-shrink-0 group-hover:from-amber-500/30 transition-colors">
+                    <span className="text-amber-400 font-bold text-sm">{stage.num}</span>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-semibold mb-1">{stage.name}</h3>
+                    <p className="text-sm text-slate-400 leading-relaxed">{stage.desc}</p>
                   </div>
                 </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
 };
 
 // ============ FOUNDER SECTION ============
-const Founder = () => (
-  <section id="founder" className="py-20 lg:py-32 px-4 sm:px-6 lg:px-8 bg-slate-800">
-    <div className="max-w-4xl mx-auto">
+const FounderSection = () => (
+  <section id="founder" className="py-24 px-6 relative">
+    <div className="absolute inset-0 bg-slate-950" />
+    
+    <div className="relative max-w-4xl mx-auto">
       <motion.div
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, margin: "-100px" }}
-        variants={fadeIn}
-        className="relative bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 rounded-3xl p-8 sm:p-12 lg:p-16 border border-slate-700 overflow-hidden"
+        viewport={{ once: true }}
+        variants={staggerContainer}
       >
-        {/* Background Accent */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl" />
+        <motion.div variants={fadeInUp} className="text-center mb-12">
+          <Badge variant="info" className="mb-4">THE FOUNDER</Badge>
+        </motion.div>
         
-        <div className="relative text-center">
-          {/* Avatar */}
-          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-amber-500/20">
-            <span className="text-4xl sm:text-5xl">💻</span>
-          </div>
-
-          {/* Quote */}
-          <blockquote className="text-xl sm:text-2xl lg:text-3xl font-medium text-white mb-8 leading-relaxed">
-            "I built this because I was tired of guessing at auctions. After 20 years of investing and hundreds of deals, 
-            I knew exactly what data I needed — I just needed AI to get it faster."
-          </blockquote>
-
-          {/* Author */}
-          <div className="space-y-1">
-            <div className="text-amber-400 font-bold text-xl sm:text-2xl">Ariel Shapira</div>
-            <div className="text-slate-300 font-medium">Developer & Builder • Solo Founder, BidDeed.AI</div>
-            <div className="text-slate-500 text-sm sm:text-base">
-              Everest Capital USA
+        <Card className="p-8 lg:p-12">
+          <motion.div variants={fadeInUp} className="flex flex-col lg:flex-row items-center gap-8">
+            <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center flex-shrink-0">
+              <span className="text-4xl font-bold text-slate-900">AS</span>
             </div>
-          </div>
-        </div>
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-2">Ariel Shapira</h3>
+              <p className="text-amber-400 font-medium mb-4">Founder & Developer, Everest Capital USA</p>
+              <p className="text-slate-400 leading-relaxed mb-4">
+                10+ years in Florida foreclosure investing. Licensed broker, general contractor, 
+                and insurance agency owner. Building BidDeed.AI to democratize access to 
+                courthouse intelligence that was previously available only to insiders.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Badge>FL Real Estate Broker</Badge>
+                <Badge>General Contractor</Badge>
+                <Badge>10+ Years Foreclosure Investing</Badge>
+              </div>
+            </div>
+          </motion.div>
+        </Card>
       </motion.div>
     </div>
   </section>
 );
 
-// ============ WAITLIST SECTION ============
-const Waitlist = () => {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState('idle');
-  const [message, setMessage] = useState('');
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!email || !email.includes('@')) {
-      setStatus('error');
-      setMessage('Please enter a valid email address');
-      return;
-    }
-
-    setStatus('loading');
+// ============ CTA SECTION ============
+const CTASection = () => (
+  <section id="waitlist" className="py-24 px-6 relative">
+    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900 to-slate-950" />
+    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-amber-500/10 via-transparent to-transparent" />
     
-    try {
-      const waitlist = JSON.parse(localStorage.getItem('biddeed_waitlist') || '[]');
-      if (!waitlist.includes(email)) {
-        waitlist.push(email);
-        localStorage.setItem('biddeed_waitlist', JSON.stringify(waitlist));
-      }
-      await new Promise(resolve => setTimeout(resolve, 600));
-      setStatus('success');
-      setMessage("You're on the list! We'll be in touch soon.");
-      setEmail('');
-    } catch (err) {
-      setStatus('error');
-      setMessage('Something went wrong. Please try again.');
-    }
-  };
-
-  return (
-    <section id="waitlist" className="py-20 lg:py-32 px-4 sm:px-6 lg:px-8 bg-slate-900">
-      <div className="max-w-2xl mx-auto text-center">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={staggerContainer}
+    <div className="relative max-w-3xl mx-auto text-center">
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={staggerContainer}
+      >
+        <motion.h2 
+          variants={fadeInUp}
+          className="text-4xl lg:text-5xl font-bold text-white mb-6"
+          style={{ fontFamily: theme.fonts.display }}
         >
-          {/* Badge */}
-          <motion.div variants={slideUp} className="mb-8">
-            <span className="inline-flex items-center gap-2.5 px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
-              <span className="text-emerald-400 text-sm font-medium">Limited Beta Access</span>
-            </span>
-          </motion.div>
-
-          {/* Headline */}
-          <motion.h2 
-            variants={slideUp}
-            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6 tracking-tight"
-          >
-            Ready to Stop Guessing?
-          </motion.h2>
-
-          {/* Description */}
-          <motion.p 
-            variants={slideUp}
-            className="text-slate-400 mb-10 text-lg max-w-lg mx-auto"
-          >
-            Join 50+ Florida investors on the waitlist. Be first to access the Agentic AI ecosystem.
-          </motion.p>
-
-          {/* Form */}
-          <motion.form 
-            variants={slideUp}
-            onSubmit={handleSubmit} 
-            className="max-w-md mx-auto"
-          >
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => { setEmail(e.target.value); setStatus('idle'); }}
-                placeholder="Enter your email"
-                className={`flex-1 px-5 py-4 bg-slate-800 border-2 rounded-xl text-white placeholder-slate-500 focus:outline-none transition-colors text-base ${
-                  status === 'error' ? 'border-red-500 focus:border-red-400' : 
-                  status === 'success' ? 'border-emerald-500' :
-                  'border-slate-700 focus:border-amber-500'
-                }`}
-                disabled={status === 'loading' || status === 'success'}
-              />
-              <button
-                type="submit"
-                disabled={status === 'loading' || status === 'success'}
-                className={`px-8 py-4 font-bold rounded-xl transition-all text-base whitespace-nowrap ${
-                  status === 'success' 
-                    ? 'bg-emerald-500 text-white' 
-                    : status === 'loading'
-                    ? 'bg-amber-500/50 text-slate-900/50 cursor-wait'
-                    : 'bg-amber-500 text-slate-900 hover:bg-amber-400 shadow-lg shadow-amber-500/20'
-                }`}
-              >
-                {status === 'loading' ? 'Joining...' : status === 'success' ? '✓ Joined!' : 'Join Waitlist'}
-              </button>
-            </div>
-            
-            {message && (
-              <p className={`mt-4 text-sm font-medium ${status === 'error' ? 'text-red-400' : 'text-emerald-400'}`}>
-                {message}
-              </p>
-            )}
-          </motion.form>
+          Ready to Reach the Summit?
+        </motion.h2>
+        <motion.p variants={fadeInUp} className="text-xl text-slate-400 mb-10">
+          Join the waitlist for early access to BidDeed.AI. 
+          Transform your auction research from hours to seconds.
+        </motion.p>
+        <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center">
+          <input 
+            type="email" 
+            placeholder="Enter your email"
+            className="px-6 py-4 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500 transition-colors w-full sm:w-80"
+          />
+          <Button size="lg">
+            Get Early Access
+          </Button>
         </motion.div>
-      </div>
-    </section>
-  );
-};
+        <motion.p variants={fadeInUp} className="text-sm text-slate-500 mt-4">
+          No spam. Unsubscribe anytime. Currently in private beta.
+        </motion.p>
+      </motion.div>
+    </div>
+  </section>
+);
 
 // ============ FOOTER ============
 const Footer = () => (
-  <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-slate-800 bg-slate-900">
-    <div className="max-w-6xl mx-auto">
+  <footer className="py-12 px-6 border-t border-slate-800">
+    <div className="max-w-7xl mx-auto">
       <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-        {/* Logo */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-amber-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
             <span className="text-slate-900 font-bold text-xs">BD</span>
           </div>
-          <span className="text-xl font-bold text-white">
-            BidDeed<span className="text-amber-400">.AI</span>
-          </span>
+          <span className="text-white font-semibold">BidDeed.AI</span>
+          <span className="text-slate-600">|</span>
+          <span className="text-slate-500 text-sm">An Everest Company</span>
         </div>
-        
-        {/* Copyright */}
-        <div className="text-slate-500 text-sm text-center">
-          © 2025 Everest Capital USA. All rights reserved.
-        </div>
-        
-        {/* Tagline */}
-        <div className="flex items-center gap-3 text-slate-500 text-sm">
-          <span>An Everest Company</span>
-          <span className="hidden sm:inline text-slate-700">•</span>
-          <span className="hidden sm:inline">Made in Florida 🌴</span>
+        <div className="text-sm text-slate-500">
+          © 2025 Everest Capital USA. All rights reserved. Built with Claude AI.
         </div>
       </div>
     </div>
@@ -588,31 +861,18 @@ const Footer = () => (
 
 // ============ MAIN APP ============
 export default function App() {
-  const [showDemo, setShowDemo] = useState(false);
+  const [demoOpen, setDemoOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white antialiased">
-      <Nav />
-      <Hero onOpenDemo={() => setShowDemo(true)} />
-      <Methodology />
-      <Stages />
-      <Founder />
-      <Waitlist />
+    <div className="min-h-screen bg-slate-950 text-white">
+      <Navigation />
+      <Hero onOpenDemo={() => setDemoOpen(true)} />
+      <StagesSection />
+      <FounderSection />
+      <CTASection />
       <Footer />
       
-      {/* Animated Demo Modal */}
-      <AnimatePresence>
-        {showDemo && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100]"
-          >
-            <AnimatedDemo onClose={() => setShowDemo(false)} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <SplitScreenDemo isOpen={demoOpen} onClose={() => setDemoOpen(false)} />
     </div>
   );
 }
