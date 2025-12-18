@@ -1188,6 +1188,298 @@ const Footer = () => (
   </footer>
 );
 
+
+// ============ FLOATING AI CHAT WIDGET ============
+const FloatingChatWidget = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [messages, setMessages] = useState([
+    { role: 'assistant', content: '👋 Hi! I\'m your AI assistant. Ask me about auctions, max bids, or lien priority!' }
+  ]);
+  const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  // NLP Response Generator (same as ChatV18)
+  const generateResponse = (message) => {
+    const lower = message.toLowerCase();
+    
+    if (/dec\s*18|december\s*18|tax\s*deed|tomorrow/.test(lower)) {
+      return '📅 **Dec 18 Tax Deed Auction**\n• Time: 9 AM EST ONLINE\n• Site: brevard.realforeclose.com\n• Tax deeds wipe ALL liens!\n\n[Open Full Chat →](#chat)';
+    }
+    if (/calendar|schedule|upcoming|next/.test(lower)) {
+      return '📆 **Upcoming Auctions:**\n• Dec 18 - Tax Deed @ 9AM ONLINE\n• Jan 7 - Foreclosure @ 11AM Titusville\n\n[View Full Calendar →](#chat)';
+    }
+    if (/max\s*bid|formula/.test(lower)) {
+      return '💰 **Max Bid Formula:**\n`(ARV×70%) - Repairs - $10K - MIN($25K,15%×ARV)`\n\n[See Full Explanation →](#chat)';
+    }
+    if (/lien|priority|hoa/.test(lower)) {
+      return '⚖️ **Lien Priority:** Senior liens survive!\n• Bank foreclosure → Wipes HOA\n• HOA foreclosure → Mortgage survives!\n\n[Learn More →](#chat)';
+    }
+    if (/recommend|best|bid/.test(lower)) {
+      return '⭐ **Top Picks Dec 18:**\n• 202 Ivory Coral Ln - BID ✅\n• Case #250179 - 3.9% ratio\n\n[See All Recommendations →](#chat)';
+    }
+    return '🤔 Try asking about:\n• Dec 18 auction\n• Max bid formula\n• Lien priority\n\nOr [Open Full Chat →](#chat)';
+  };
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+    setMessages(prev => [...prev, { role: 'user', content: input }]);
+    setInput('');
+    setIsTyping(true);
+    
+    setTimeout(() => {
+      const response = generateResponse(input);
+      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+      setIsTyping(false);
+    }, 500);
+  };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  if (!isOpen) {
+    return (
+      <motion.button
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        whileHover={{ scale: 1.1 }}
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-6 right-6 z-50 w-16 h-16 bg-gradient-to-r from-amber-500 to-amber-600 rounded-full shadow-2xl flex items-center justify-center text-3xl hover:from-amber-400 hover:to-amber-500 transition-all"
+        style={{ boxShadow: '0 0 30px rgba(245, 158, 11, 0.4)' }}
+      >
+        💬
+        <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full animate-pulse" />
+      </motion.button>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 100, scale: 0.8 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 100, scale: 0.8 }}
+      className={`fixed bottom-6 right-6 z-50 bg-slate-900 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden ${isMinimized ? 'w-80 h-14' : 'w-96 h-[500px]'}`}
+      style={{ boxShadow: '0 0 50px rgba(0, 0, 0, 0.5)' }}
+    >
+      {/* Header */}
+      <div className="bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">🤖</span>
+          <div>
+            <div className="font-semibold text-slate-900 text-sm">BidDeed.AI Assistant</div>
+            <div className="text-xs text-slate-700">Powered by NLP Engine</div>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={() => setIsMinimized(!isMinimized)} className="text-slate-800 hover:text-slate-900">
+            {isMinimized ? '▲' : '▼'}
+          </button>
+          <button onClick={() => setIsOpen(false)} className="text-slate-800 hover:text-slate-900 font-bold">✕</button>
+        </div>
+      </div>
+
+      {!isMinimized && (
+        <>
+          {/* Messages */}
+          <div className="h-[360px] overflow-y-auto p-4 space-y-3">
+            {messages.map((msg, idx) => (
+              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[80%] rounded-xl px-3 py-2 text-sm ${
+                  msg.role === 'user' ? 'bg-amber-500 text-slate-900' : 'bg-slate-800 text-slate-100'
+                }`}>
+                  <div dangerouslySetInnerHTML={{ 
+                    __html: msg.content
+                      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                      .replace(/`([^`]+)`/g, '<code class="bg-slate-700 px-1 rounded text-amber-400">$1</code>')
+                      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-amber-400 underline">$1</a>')
+                      .replace(/\n/g, '<br/>')
+                  }} />
+                </div>
+              </div>
+            ))}
+            {isTyping && (
+              <div className="flex justify-start">
+                <div className="bg-slate-800 rounded-xl px-3 py-2 flex gap-1">
+                  <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                  <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                  <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Actions */}
+          <div className="px-3 pb-2 flex gap-1 overflow-x-auto">
+            {['Dec 18?', 'Max Bid', 'Liens'].map(q => (
+              <button key={q} onClick={() => { setInput(q); setTimeout(() => handleSend(), 100); }}
+                className="flex-shrink-0 px-2 py-1 bg-slate-800 rounded-full text-xs text-slate-400 hover:bg-slate-700">
+                {q}
+              </button>
+            ))}
+          </div>
+
+          {/* Input */}
+          <div className="p-3 border-t border-slate-700 flex gap-2">
+            <input
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSend()}
+              placeholder="Ask about auctions..."
+              className="flex-1 bg-slate-800 rounded-xl px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+            />
+            <button onClick={handleSend} className="px-4 py-2 bg-amber-500 hover:bg-amber-400 rounded-xl text-slate-900 font-medium text-sm">
+              Send
+            </button>
+          </div>
+        </>
+      )}
+    </motion.div>
+  );
+};
+
+// ============ AI CHATBOT SHOWCASE SECTION ============
+const AIShowcase = () => (
+  <section id="ai-assistant" className="py-20 px-6 relative overflow-hidden">
+    <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
+    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-500/5 via-transparent to-transparent" />
+    
+    <div className="relative max-w-6xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="text-center mb-12"
+      >
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 rounded-full text-amber-400 text-sm font-medium mb-6">
+          <span className="animate-pulse">🤖</span> NEW: AI-Powered Assistant
+        </div>
+        <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4" style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}>
+          Meet Your Auction Intelligence Partner
+        </h2>
+        <p className="text-xl text-slate-400 max-w-3xl mx-auto">
+          Our advanced NLP chatbot understands natural language queries about foreclosures, 
+          lien priority, max bid calculations, and more. Get instant answers 24/7.
+        </p>
+      </motion.div>
+
+      <div className="grid lg:grid-cols-2 gap-12 items-center">
+        {/* Features */}
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          className="space-y-6"
+        >
+          {[
+            { icon: '🧠', title: 'Advanced NLP Engine', desc: 'Intent classification, entity extraction, and sentiment analysis for natural conversations' },
+            { icon: '⚡', title: 'Instant Responses', desc: 'Sub-second response times powered by optimized LangGraph orchestration' },
+            { icon: '📊', title: 'Real Data Integration', desc: 'Live auction data, ML predictions, and lien analysis at your fingertips' },
+            { icon: '🔒', title: 'Privacy-First', desc: 'HIPAA/GDPR compliant architecture with no data retention' },
+          ].map((feature, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.1 }}
+              className="flex gap-4 p-4 bg-slate-800/50 rounded-xl border border-slate-700/50 hover:border-amber-500/30 transition-colors"
+            >
+              <span className="text-3xl">{feature.icon}</span>
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-1">{feature.title}</h3>
+                <p className="text-slate-400 text-sm">{feature.desc}</p>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Chat Demo Preview */}
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          className="relative"
+        >
+          <div className="absolute -inset-4 bg-gradient-to-r from-amber-500/20 to-amber-600/20 blur-3xl rounded-3xl" />
+          <div className="relative bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden shadow-2xl">
+            {/* Mock Chat Header */}
+            <div className="bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 flex items-center gap-3">
+              <span className="text-2xl">🤖</span>
+              <div>
+                <div className="font-semibold text-slate-900 text-sm">BidDeed.AI Assistant</div>
+                <div className="text-xs text-slate-700">Online • NLP Engine v18</div>
+              </div>
+            </div>
+            
+            {/* Mock Chat Messages */}
+            <div className="p-4 space-y-3 h-72 overflow-hidden">
+              <div className="flex justify-start">
+                <div className="bg-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 max-w-[80%]">
+                  👋 Hi! Ask me anything about Brevard auctions!
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <div className="bg-amber-500 rounded-xl px-3 py-2 text-sm text-slate-900 max-w-[80%]">
+                  What auctions are on Dec 18?
+                </div>
+              </div>
+              <div className="flex justify-start">
+                <div className="bg-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 max-w-[80%]">
+                  📅 <strong>Dec 18 Tax Deed Auction</strong><br/>
+                  • Time: 9 AM EST<br/>
+                  • Location: ONLINE<br/>
+                  • 20 properties available
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <div className="bg-amber-500 rounded-xl px-3 py-2 text-sm text-slate-900 max-w-[80%]">
+                  What's the max bid formula?
+                </div>
+              </div>
+              <div className="flex justify-start">
+                <div className="bg-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 max-w-[80%]">
+                  💰 <strong>Max Bid Formula:</strong><br/>
+                  <code className="bg-slate-700 px-1 rounded text-amber-400">(ARV×70%) - Repairs - $10K - MIN($25K,15%×ARV)</code>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA */}
+            <div className="p-4 border-t border-slate-700 bg-slate-800/50">
+              <a 
+                href="#chat" 
+                className="block w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl text-center font-semibold text-slate-900 hover:from-amber-400 hover:to-amber-500 transition-all"
+              >
+                Open Full AI Chat →
+              </a>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Tech Stack */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="mt-16 text-center"
+      >
+        <p className="text-slate-500 text-sm mb-4">Powered by</p>
+        <div className="flex flex-wrap justify-center gap-4">
+          {['LangGraph', 'NLP Cloud', 'XGBoost ML', 'Supabase', 'Smart Router'].map(tech => (
+            <span key={tech} className="px-4 py-2 bg-slate-800/50 rounded-lg text-slate-400 text-sm border border-slate-700/50">
+              {tech}
+            </span>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  </section>
+);
+
 // ============ MAIN APP ============
 export default function App() {
   const [demoOpen, setDemoOpen] = useState(false);
@@ -1196,12 +1488,14 @@ export default function App() {
     <div className="min-h-screen bg-slate-950 text-white">
       <Navigation />
       <Hero onOpenDemo={() => setDemoOpen(true)} />
+      <AIShowcase />
       <StagesSection />
       <FounderSection />
       <CTASection />
       <Footer />
       
       <SplitScreenDemo isOpen={demoOpen} onClose={() => setDemoOpen(false)} />
+      <FloatingChatWidget />
     </div>
   );
 }
