@@ -12,7 +12,7 @@ const CORS_HEADERS = {
 const SMART_ROUTER_CONFIG = {
   tiers: {
     FREE: {
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash',
       provider: 'google',
       contextLimit: 1000000,
       rateLimit: 1000,
@@ -38,10 +38,14 @@ const SYSTEM_PROMPT = `You are BidDeed.AI V18, an intelligent foreclosure auctio
 
 ## Your Capabilities:
 1. **Property Analysis**: Analyze foreclosure and tax deed properties using data from BCPAO, AcclaimWeb, RealTDM, and Census API
-2. **Auction Intelligence**: Provide information about upcoming auctions (Dec 17 foreclosure, Dec 18 tax deed)
+2. **Auction Intelligence**: Provide information about upcoming auctions
 3. **Investment Recommendations**: Offer BID/REVIEW/SKIP recommendations based on 12-stage pipeline analysis
 4. **Market Insights**: Share demographic data, market trends, and neighborhood analysis
 5. **Lien Analysis**: Explain lien priority, title issues, and their impact on investments
+
+## Auction Calendar (Brevard County, Florida):
+- **December 18, 2025 (Thursday)**: Tax Deed Auction @ 9:00 AM - ONLINE at brevard.realforeclose.com
+- **January 7, 2026 (Tuesday)**: Foreclosure Auction @ 11:00 AM - IN-PERSON at Titusville Courthouse
 
 ## Response Guidelines:
 - Be concise but comprehensive
@@ -57,32 +61,21 @@ const SYSTEM_PROMPT = `You are BidDeed.AI V18, an intelligent foreclosure auctio
 - Bid/Judgment Ratio: <10% = Excellent, 10-25% = Good, >25% = Risky
 - ML Model Accuracy: 64.4% for third-party purchase prediction
 
-## Current Context:
-- Today's Date: ${new Date().toISOString().split('T')[0]}
-- Upcoming Auctions: Dec 17 (Foreclosure), Dec 18 (Tax Deed)
-- System Status: All pipelines operational
-
 Remember: You're speaking with real estate investors who need actionable intelligence, not generic advice.`;
-
-// Route request to appropriate LLM
-async function routeToLLM(messages, tier, env) {
-  const config = SMART_ROUTER_CONFIG.tiers[tier] || SMART_ROUTER_CONFIG.tiers.FREE;
-  
-  if (config.provider === 'google') {
-    return await callGemini(messages, env.GOOGLE_API_KEY, config);
-  } else if (config.provider === 'anthropic') {
-    return await callClaude(messages, env.ANTHROPIC_API_KEY, config);
-  }
-  
-  throw new Error('Invalid LLM provider');
-}
 
 // Call Gemini API
 async function callGemini(messages, apiKey, config) {
-  const geminiMessages = messages.map(m => ({
-    role: m.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: m.content }],
-  }));
+  if (!apiKey) {
+    throw new Error('GOOGLE_API_KEY not configured');
+  }
+
+  // Convert messages to Gemini format
+  const geminiMessages = messages
+    .filter(m => m.role === 'user' || m.role === 'assistant')
+    .map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }],
+    }));
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${apiKey}`,
@@ -110,13 +103,20 @@ async function callGemini(messages, apiKey, config) {
   );
 
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Gemini API error: ${response.status} - ${error}`);
+    const errorText = await response.text();
+    console.error('Gemini API error:', response.status, errorText);
+    throw new Error(`Gemini API error: ${response.status}`);
   }
 
   const data = await response.json();
+  
+  if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
+    console.error('Unexpected Gemini response:', JSON.stringify(data));
+    throw new Error('Invalid response from Gemini');
+  }
+
   return {
-    content: data.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate response',
+    content: data.candidates[0].content.parts[0].text,
     model: config.model,
     provider: 'google',
     tokens: data.usageMetadata?.totalTokenCount || 0,
@@ -125,6 +125,10 @@ async function callGemini(messages, apiKey, config) {
 
 // Call Claude API
 async function callClaude(messages, apiKey, config) {
+  if (!apiKey) {
+    throw new Error('ANTHROPIC_API_KEY not configured');
+  }
+
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -144,79 +148,38 @@ async function callClaude(messages, apiKey, config) {
   });
 
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Claude API error: ${response.status} - ${error}`);
+    const errorText = await response.text();
+    console.error('Claude API error:', response.status, errorText);
+    throw new Error(`Claude API error: ${response.status}`);
   }
 
   const data = await response.json();
   return {
-    content: data.content?.[0]?.text || 'Unable to generate response',
+    content: data.content?.[0]?.text || 'No response',
     model: config.model,
     provider: 'anthropic',
-    tokens: data.usage?.input_tokens + data.usage?.output_tokens || 0,
+    tokens: (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0),
   };
 }
 
-// Fetch property data from Supabase
-async function fetchPropertyData(query, env) {
-  const supabaseUrl = env.SUPABASE_URL || 'https://mocerqjnksmhcjzxrewo.supabase.co';
-  const supabaseKey = env.SUPABASE_ANON_KEY;
-
-  if (!supabaseKey) return null;
-
-  try {
-    let endpoint = `${supabaseUrl}/rest/v1/`;
-    
-    if (query.type === 'property') {
-      endpoint += `auction_results?address=ilike.*${encodeURIComponent(query.address)}*&limit=5`;
-    } else if (query.type === 'auction') {
-      endpoint += `historical_auctions?auction_date=eq.${query.date}&limit=50`;
-    } else if (query.type === 'recommendations') {
-      endpoint += `auction_results?recommendation=eq.BID&order=ml_score.desc&limit=10`;
-    }
-
-    const response = await fetch(endpoint, {
-      headers: {
-        'apikey': supabaseKey,
-        'Authorization': `Bearer ${supabaseKey}`,
-      },
-    });
-
-    if (!response.ok) return null;
-    return await response.json();
-  } catch (error) {
-    console.error('Supabase fetch error:', error);
-    return null;
-  }
-}
-
-// Extract query context from message
-function extractQueryContext(message) {
-  const lowerMessage = message.toLowerCase();
+// Route to appropriate LLM
+async function routeToLLM(messages, tier, env) {
+  const config = SMART_ROUTER_CONFIG.tiers[tier] || SMART_ROUTER_CONFIG.tiers.FREE;
   
-  // Property address detection
-  const addressMatch = message.match(/(\d+\s+[\w\s]+(?:st|rd|ave|dr|blvd|ln|ct|way|pl)[\w\s,]*)/i);
-  if (addressMatch) {
-    return { type: 'property', address: addressMatch[1] };
+  if (config.provider === 'google') {
+    return await callGemini(messages, env.GOOGLE_API_KEY, config);
+  } else if (config.provider === 'anthropic') {
+    return await callClaude(messages, env.ANTHROPIC_API_KEY, config);
   }
-
-  // Date detection for auctions
-  const dateMatch = lowerMessage.match(/dec(?:ember)?\s*(\d{1,2})/);
-  if (dateMatch) {
-    return { type: 'auction', date: `2025-12-${dateMatch[1].padStart(2, '0')}` };
-  }
-
-  // Recommendations query
-  if (lowerMessage.includes('recommend') || lowerMessage.includes('best') || lowerMessage.includes('top')) {
-    return { type: 'recommendations' };
-  }
-
-  return null;
+  
+  throw new Error('Invalid LLM provider');
 }
 
-// Main request handler
+// Main handler
 export default {
   async fetch(request, env, ctx) {
+    const startTime = Date.now();
+
     // Handle CORS preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: CORS_HEADERS });
@@ -243,52 +206,33 @@ export default {
     if (url.pathname === '/api/chat' && request.method === 'POST') {
       try {
         const body = await request.json();
-        const { messages, tier = 'FREE', includeData = true } = body;
+        const { messages, tier = 'FREE', session_id } = body;
 
         if (!messages || !Array.isArray(messages)) {
-          return new Response(JSON.stringify({ error: 'Invalid messages format' }), {
+          return new Response(JSON.stringify({ 
+            error: 'Invalid messages format',
+            content: [{ type: 'text', text: 'Error: Invalid request format' }]
+          }), {
             status: 400,
             headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
           });
         }
 
-        // Get the last user message
-        const lastUserMessage = messages.filter(m => m.role === 'user').pop();
-        
-        // Augment with database context if needed
-        let dbContext = null;
-        if (includeData && lastUserMessage) {
-          const queryContext = extractQueryContext(lastUserMessage.content);
-          if (queryContext) {
-            dbContext = await fetchPropertyData(queryContext, env);
-          }
-        }
-
-        // Prepare messages with context
-        let augmentedMessages = [...messages];
-        if (dbContext && dbContext.length > 0) {
-          const contextMessage = {
-            role: 'user',
-            content: `[SYSTEM DATA - Use this to answer the user's question]\n${JSON.stringify(dbContext, null, 2)}\n\n[USER QUESTION]\n${lastUserMessage.content}`,
-          };
-          augmentedMessages = [
-            ...messages.slice(0, -1),
-            contextMessage,
-          ];
-        }
-
         // Route to LLM
-        const llmResponse = await routeToLLM(augmentedMessages, tier, env);
+        const llmResponse = await routeToLLM(messages, tier, env);
+        const elapsed = Date.now() - startTime;
 
+        // Return in format expected by chat.html frontend
         return new Response(JSON.stringify({
-          success: true,
-          response: llmResponse.content,
-          metadata: {
+          content: [{ type: 'text', text: llmResponse.content }],
+          _meta: {
+            router: tier === 'FREE' ? 'GEMINI_FREE' : 'CLAUDE',
             model: llmResponse.model,
             provider: llmResponse.provider,
             tokens: llmResponse.tokens,
-            tier,
-            hasDbContext: !!dbContext,
+            elapsed_ms: elapsed,
+            cost: tier === 'FREE' ? 'FREE' : `~$${(llmResponse.tokens * 0.00001).toFixed(4)}`,
+            session_id: session_id,
             timestamp: new Date().toISOString(),
           },
         }), {
@@ -297,10 +241,16 @@ export default {
 
       } catch (error) {
         console.error('Chat API error:', error);
+        const elapsed = Date.now() - startTime;
+        
         return new Response(JSON.stringify({
-          success: false,
           error: error.message,
-          timestamp: new Date().toISOString(),
+          content: [{ type: 'text', text: `⚠️ Error: ${error.message}\n\nPlease try again or rephrase your question.` }],
+          _meta: {
+            router: 'ERROR',
+            elapsed_ms: elapsed,
+            timestamp: new Date().toISOString(),
+          },
         }), {
           status: 500,
           headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
