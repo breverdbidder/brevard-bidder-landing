@@ -1,2 +1,1 @@
-Deploy triggered: 2025-12-18T02:22:45Z
-Supabase LIVE mode enabled
+Deploy triggered: 2025-12-18 03:46:25 UTC - V18 NLP Chat with _routes.json fix
