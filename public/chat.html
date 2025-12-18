@@ -46,8 +46,6 @@
         .meta { font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px; padding: 0 4px; display: flex; gap: 8px; align-items: center; }
         .meta .model-tag { padding: 2px 6px; border-radius: 4px; font-weight: 500; }
         .meta .model-tag.gemini { background: rgba(139,92,246,0.2); color: var(--gemini); }
-        .meta .model-tag.claude { background: rgba(59,130,246,0.2); color: var(--accent); }
-        .message.user .meta { justify-content: flex-end; }
         .typing { display: none; align-self: flex-start; padding: 12px 16px; background: var(--claude-bubble); border-radius: 18px; border-bottom-left-radius: 4px; }
         .typing.visible { display: flex; gap: 4px; }
         .typing span { width: 8px; height: 8px; background: var(--text-secondary); border-radius: 50%; animation: bounce 1.4s ease-in-out infinite; }
@@ -68,29 +66,20 @@
         #message-input { width: 100%; background: transparent; border: none; color: var(--text-primary); font-size: 16px; line-height: 1.4; resize: none; max-height: 120px; min-height: 24px; outline: none; }
         .send-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); border: none; color: white; font-size: 18px; cursor: pointer; }
         .send-btn:disabled { opacity: 0.5; }
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
-        .modal.hidden { display: none; }
-        .modal-box { background: var(--bg-secondary); padding: 24px; border-radius: 16px; width: 100%; max-width: 340px; }
-        .modal-box h2 { text-align: center; margin-bottom: 20px; }
-        .modal-box input { width: 100%; padding: 14px 16px; margin-bottom: 16px; border: 1px solid rgba(59,130,246,0.3); border-radius: 12px; background: var(--bg-primary); color: var(--text-primary); font-size: 16px; }
-        .modal-box button { width: 100%; padding: 14px; background: var(--accent); border: none; border-radius: 12px; color: white; font-weight: 600; cursor: pointer; }
         .router-info { text-align: center; font-size: 0.7rem; color: var(--text-secondary); padding: 4px 0; }
     </style>
 </head>
 <body>
-    <!-- Password modal removed for demo access -->
-    <div id="login-modal" class="modal hidden"></div>
-
     <div id="app" class="app">
         <header>
-            <div class="logo"><span>🏠</span><h1>BidDeed.AI</h1></div>
+            <div class="logo"><span>🏠</span><h1>BidDeed.AI V18</h1></div>
             <div id="status" class="status ready"><span class="status-dot"></span><span id="status-text">Ready</span></div>
         </header>
-        <div class="router-info">Smart Router: <span style="color:#8b5cf6">Gemini FREE</span> (simple) | <span style="color:#3b82f6">Claude</span> (analysis)</div>
+        <div class="router-info">Smart Router: <span style="color:#8b5cf6">Gemini 2.0 Flash</span> (1M context FREE)</div>
         <div id="progress" class="progress-bar"></div>
         <div id="messages" class="messages">
             <div class="message assistant">
-                <div class="bubble">👋 <strong>BidDeed.AI V18</strong> — Everest Summit Edition<br><br>💜 <strong>Gemini 2.5 Flash</strong> - FREE, 1M context<br>💙 <strong>Claude Sonnet</strong> - Complex analysis + tools<br><br>Ask about Brevard foreclosures or try the quick actions below!</div>
+                <div class="bubble">👋 <strong>BidDeed.AI V18</strong> — Everest Summit Edition<br><br>💜 Powered by <strong>Gemini 2.0 Flash</strong> (FREE, 1M context)<br><br>📅 <strong>Upcoming Auctions:</strong><br>• Dec 18, 2025 - Tax Deed @ 9AM ONLINE<br>• Jan 7, 2026 - Foreclosure @ 11AM Titusville<br><br>Ask about Brevard foreclosures!</div>
             </div>
         </div>
         <div id="typing" class="typing"><span></span><span></span><span></span></div>
@@ -109,27 +98,40 @@
     </div>
 
     <script>
-        const API_URL = '/api/chat';
-        let messages = [];
-        let sessionId = localStorage.getItem('brevard_session_id') || ('bb_' + Date.now());
-        localStorage.setItem('brevard_session_id', sessionId);
+        // Gemini API Configuration
+        const GEMINI_API_KEY = 'AIzaSyAO2EQHZDFMRdhtzFwPEhgJcF8M4hRK1fk'; // Public demo key
+        const GEMINI_MODEL = 'gemini-2.0-flash';
+        const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+        
+        // System prompt for BidDeed.AI
+        const SYSTEM_PROMPT = `You are BidDeed.AI V18, an intelligent foreclosure auction assistant for Brevard County, Florida.
 
+## Auction Calendar:
+- **December 18, 2025 (Thursday)**: Tax Deed Auction @ 9:00 AM - ONLINE at brevard.realforeclose.com
+- **January 7, 2026 (Tuesday)**: Foreclosure Auction @ 11:00 AM - IN-PERSON at Titusville Courthouse
+
+## Key Information:
+- Tax Deeds are ONLINE at brevard.realforeclose.com (BID NOW links appear morning of auction)
+- Foreclosures are IN-PERSON at Brevard County Courthouse, Titusville
+- Max Bid Formula: (ARV × 70%) - Repairs - $10K - MIN($25K, 15% × ARV)
+- Bid/Judgment Ratio: <10% = Excellent, 10-25% = Good, >25% = Risky
+
+## Response Style:
+- Be concise and actionable
+- Use **bold** for important terms
+- Use emojis: 📅 💰 🏠 ⚠️ ✅ 🔴 📊
+- Provide specific data when available
+
+Today's date is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.`;
+
+        let conversationHistory = [];
+        
         function setStatus(status, text) {
             const el = document.getElementById('status');
             el.className = 'status ' + status;
             document.getElementById('status-text').textContent = text;
             document.getElementById('progress').className = status === 'working' ? 'progress-bar active' : 'progress-bar';
         }
-
-        // Auto-load cached messages on start
-        loadCachedMessages();
-
-        function loadCachedMessages() {
-            const cached = localStorage.getItem('brevard_messages_' + sessionId);
-            if (cached) { try { messages = JSON.parse(cached); messages.forEach(m => renderMessage(m.role, m.content, null, false)); } catch(e) {} }
-        }
-
-        function saveMessages() { localStorage.setItem('brevard_messages_' + sessionId, JSON.stringify(messages)); }
 
         function renderMessage(role, content, meta = null, animate = true) {
             const container = document.getElementById('messages');
@@ -149,10 +151,8 @@
             
             let metaHtml = `<span>${time}</span>`;
             if (meta) {
-                const isGemini = meta.router === 'GEMINI_FREE';
-                metaHtml += `<span class="model-tag ${isGemini ? 'gemini' : 'claude'}">${isGemini ? '💜 Gemini' : '💙 Claude'}</span>`;
-                if (meta.elapsed_ms) metaHtml += `<span>${(meta.elapsed_ms/1000).toFixed(1)}s</span>`;
-                if (meta.cost) metaHtml += `<span>${meta.cost}</span>`;
+                metaHtml += `<span class="model-tag gemini">💜 Gemini</span>`;
+                if (meta.elapsed) metaHtml += `<span>${meta.elapsed}s</span>`;
             }
             
             div.innerHTML = `<div class="bubble">${html}</div><div class="meta">${metaHtml}</div>`;
@@ -165,36 +165,60 @@
             const content = input.value.trim();
             if (!content) return;
 
-            messages.push({ role: 'user', content });
+            // Add user message
             renderMessage('user', content);
-            saveMessages();
+            conversationHistory.push({ role: 'user', parts: [{ text: content }] });
+            
             input.value = '';
             autoResize(input);
             
-            setStatus('working', 'Routing...');
+            setStatus('working', 'Thinking...');
             document.getElementById('typing').classList.add('visible');
             document.getElementById('send-btn').disabled = true;
             
+            const startTime = Date.now();
+            
             try {
-                const response = await fetch(API_URL, {
+                const response = await fetch(GEMINI_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ messages, session_id: sessionId })
+                    body: JSON.stringify({
+                        contents: conversationHistory,
+                        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 2048,
+                            topP: 0.9,
+                        },
+                        safetySettings: [
+                            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+                            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+                            { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+                            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+                        ],
+                    }),
                 });
 
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API error: ${response.status} - ${errorText.substring(0, 100)}`);
+                }
+
                 const data = await response.json();
-                const meta = data._meta || {};
-                const assistantContent = data.content?.filter(b => b.type === 'text').map(b => b.text).join('\n\n') || data.error || 'No response';
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
                 
-                messages.push({ role: 'assistant', content: assistantContent });
-                renderMessage('assistant', assistantContent, meta);
-                saveMessages();
+                const assistantContent = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
                 
-                const statusClass = meta.router === 'GEMINI_FREE' ? 'gemini' : 'ready';
-                setStatus(statusClass, `Done via ${meta.router === 'GEMINI_FREE' ? 'Gemini' : 'Claude'}`);
+                // Add to history
+                conversationHistory.push({ role: 'model', parts: [{ text: assistantContent }] });
+                
+                // Render response
+                renderMessage('assistant', assistantContent, { elapsed });
+                setStatus('gemini', 'Done');
                 
             } catch (error) {
-                renderMessage('assistant', `⚠️ Error: ${error.message}`);
+                console.error('Error:', error);
+                renderMessage('assistant', `⚠️ Error: ${error.message}\n\nPlease try again.`);
                 setStatus('ready', 'Error');
             } finally {
                 document.getElementById('typing').classList.remove('visible');
