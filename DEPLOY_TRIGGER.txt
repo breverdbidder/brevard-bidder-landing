@@ -1,1 +1,1 @@
-V18 Chat Integration: 2025-12-18 03:56:21 UTC - ChatV18.jsx + AppRouter #chat route
+V18.1: AI Chatbot Showcase + Floating Widget + API Mega Library: 2025-12-18 04:07:58 UTC
