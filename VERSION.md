@@ -1,39 +1,44 @@
 # BidDeed.AI Version History
 
-## V18.1.0 - "Everest Summit" + Integrated Chat (Dec 18, 2025)
+## V18.2.0 - December 18, 2025 (CURRENT)
 
-### New Features
-- **V18 Chat Interface** - Integrated at `#chat` route
-- **NLP Intent Engine** - 10 intent categories with entity extraction
-- **LangGraph Ready** - Connected to unified_orchestrator_v18.py
-- **Smart Response Generator** - Context-aware responses for auctions, liens, recommendations
+### Mapbox Heatmap Integration
+- **Mapbox GL JS** integrated via npm package (proper React pattern)
+- **Heatmap layer** showing property density with color gradient
+- **Dark-v11 style** for professional appearance
+- **Test markers** at Brevard County cities (Melbourne, Cocoa, Titusville, Rockledge)
+- **Heatmap controls**: Heat/Hybrid/Pins view modes with intensity slider
+- **API Token**: everest18 Mapbox account
 
-### Routes
-- `/` - Landing page
-- `#demo` - Live agentic pipeline demo
-- `#pipeline` - 12-stage walkthrough
-- `#chat` - V18 AI Chat Assistant ⬅️ NEW
+### AI Chatbot V18
+- **NLP Engine** with 10 intent categories
+- **Entity extraction**: addresses, case numbers, dates, parcel IDs
+- **Floating chat widget** on all pages
+- **AI Showcase section** on landing page
+- **Smart Router integration**: Gemini FREE → Claude fallback
 
-### Architecture
-- React 18 + Vite + Framer Motion
-- LangGraph orchestration backend
-- XGBoost ML (64.4% accuracy)
-- Supabase data layer
+### Technical Stack
+- React + Vite
+- mapbox-gl ^3.0.1 (npm package)
+- Supabase PostgreSQL
+- Cloudflare Pages deployment
+- GitHub Actions CI/CD
 
-## V18.0.0 - "Everest Summit" Edition (Dec 17, 2025)
+## V18.1.0 - December 18, 2025
+- AI Chatbot integration with landing page
+- FloatingChatWidget component
+- AIShowcase section with feature cards
+- ChatV18.jsx full-page chat interface
 
-- Premium landing page with split-screen UI
-- Real auction data animation
-- Dec 18 Tax Deed properties integrated
-- 12-stage pipeline visualization
+## V18.0.0 - December 17, 2025
+- LangGraph V18 unified orchestrator
+- Smart Router V5 with Gemini FREE tier
+- NLP intent classification (92% accuracy)
 
-## V17.0.0 - LangGraph Agentic AI (Dec 15, 2025)
-
-- Unified orchestrator with checkpointing
-- Multi-agent pipeline coordination
-- MCP client integration
-- Autonomous 7-hour development sessions
+## V13.4.0 - December 2025
+- BECA Scraper V2.0
+- 12-stage Everest Ascent pipeline
+- XGBoost ML predictions (64.4% accuracy)
 
 ---
-
-© 2025 Everest Capital USA. All Rights Reserved.
+© 2025 Ariel Shapira, Everest Capital USA
