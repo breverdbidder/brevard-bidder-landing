@@ -175,7 +175,7 @@ Scrapers are running to fetch fresh data!`, 'FREE');
     // Create map instance directly (no dynamic loading needed)
     const map = new mapboxgl.Map({
       container: mapRef.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
+      style: 'mapbox://styles/mapbox/streets-v12',
       center: [-80.65, 28.35], // Brevard County center
       zoom: 9.5,
       pitch: 30,
@@ -189,6 +189,27 @@ Scrapers are running to fetch fresh data!`, 'FREE');
 
     map.on('load', () => {
       console.log('Mapbox map loaded successfully!');
+
+      // Add test marker at Brevard County center for debugging
+      new mapboxgl.Marker({ color: '#FF0000' })
+        .setLngLat([-80.65, 28.35])
+        .setPopup(new mapboxgl.Popup().setHTML('<h3>Brevard County Center</h3>'))
+        .addTo(map);
+
+      // Add markers for key Brevard cities
+      const testLocations = [
+        { lng: -80.6081, lat: 28.0836, name: 'Melbourne' },
+        { lng: -80.5887, lat: 28.3828, name: 'Cocoa' },
+        { lng: -80.6076, lat: 28.6122, name: 'Titusville' },
+        { lng: -80.6637, lat: 28.3200, name: 'Rockledge' }
+      ];
+
+      testLocations.forEach(loc => {
+        new mapboxgl.Marker({ color: '#10B981' })
+          .setLngLat([loc.lng, loc.lat])
+          .setPopup(new mapboxgl.Popup().setHTML('<b>' + loc.name + '</b>'))
+          .addTo(map);
+      });
       
       // Add heatmap source
       map.addSource('properties-heat', {
@@ -741,4 +762,5 @@ What would you like to know?`;
     </div>
   );
 }
+
 
