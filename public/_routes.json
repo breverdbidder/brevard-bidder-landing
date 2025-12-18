@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "include": ["/*"],
+  "exclude": [
+    "/chat.html",
+    "/bidchat.html", 
+    "/dec17_auction_dashboard.html",
+    "/cma_map_923_slocum.html",
+    "/*.html",
+    "/api/*",
+    "/assets/*",
+    "/icons/*",
+    "/*.json",
+    "/*.js",
+    "/*.css",
+    "/*.svg",
+    "/*.ico"
+  ]
+}
