@@ -1,0 +1,4 @@
+# Cloudflare Pages Redirects
+# Serve static chat.html for /chat route
+/chat /chat.html 200
+/chat.html /chat.html 200
