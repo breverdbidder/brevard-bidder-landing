@@ -1,28 +1,39 @@
-# BidDeed.AI Landing Page
+# BidDeed.AI Version History
 
-## Version 3.5.0
-**Date:** December 7, 2025
+## V18.1.0 - "Everest Summit" + Integrated Chat (Dec 18, 2025)
 
-### What's New
-- **NextAuction Component**: Live countdown to Dec 10, 2025 auction
-- **Featured Properties**: Preview of 4 properties with recommendations
-- **Download Report CTA**: Direct link to DOCX report artifacts
+### New Features
+- **V18 Chat Interface** - Integrated at `#chat` route
+- **NLP Intent Engine** - 10 intent categories with entity extraction
+- **LangGraph Ready** - Connected to unified_orchestrator_v18.py
+- **Smart Response Generator** - Context-aware responses for auctions, liens, recommendations
 
-### Components
-- `PremiumHero.jsx` - Hero section with value proposition
-- `AnimatedDemo.jsx` - Interactive demo animation
-- `AILiveDemo.jsx` - Live Fara V8 AI inference demo
-- `NextAuction.jsx` - Upcoming auction countdown (NEW)
+### Routes
+- `/` - Landing page
+- `#demo` - Live agentic pipeline demo
+- `#pipeline` - 12-stage walkthrough
+- `#chat` - V18 AI Chat Assistant ⬅️ NEW
 
-### Deployment
-- **Live URL**: https://brevard-bidder-landing-v2.vercel.app
-- **Auto-deploy**: Push to main → Vercel builds automatically
+### Architecture
+- React 18 + Vite + Framer Motion
+- LangGraph orchestration backend
+- XGBoost ML (64.4% accuracy)
+- Supabase data layer
 
-### Stack
-- React + Vite
-- Tailwind CSS
-- Framer Motion
-- Lucide Icons
+## V18.0.0 - "Everest Summit" Edition (Dec 17, 2025)
+
+- Premium landing page with split-screen UI
+- Real auction data animation
+- Dec 18 Tax Deed properties integrated
+- 12-stage pipeline visualization
+
+## V17.0.0 - LangGraph Agentic AI (Dec 15, 2025)
+
+- Unified orchestrator with checkpointing
+- Multi-agent pipeline coordination
+- MCP client integration
+- Autonomous 7-hour development sessions
 
 ---
-**Built by Ariel Shapira - Real Estate Developer & Founder, Everest Capital USA**
+
+© 2025 Everest Capital USA. All Rights Reserved.
