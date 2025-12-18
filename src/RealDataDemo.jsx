@@ -161,6 +161,11 @@ Scrapers are running to fetch fresh data!`, 'FREE');
   }, []);
 
   // Mapbox initialization
+  const [showHeatmap, setShowHeatmap] = useState(true);
+  const [heatmapIntensity, setHeatmapIntensity] = useState(0.7);
+  const [mapViewMode, setMapViewMode] = useState('hybrid'); // 'markers', 'heatmap', 'hybrid'
+
+  // Initialize Mapbox with heatmap support
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
     const script = document.createElement('script');
@@ -170,49 +175,119 @@ Scrapers are running to fetch fresh data!`, 'FREE');
       link.href = 'https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css';
       link.rel = 'stylesheet';
       document.head.appendChild(link);
-      setTimeout(() => {
-        window.mapboxgl.accessToken = MAPBOX_TOKEN;
-        mapInstance.current = new window.mapboxgl.Map({
-          container: mapRef.current,
-          style: 'mapbox://styles/mapbox/dark-v11',
-          center: [-80.65, 28.25],
-          zoom: 9
+      
+      window.mapboxgl.accessToken = MAPBOX_TOKEN;
+      mapInstance.current = new window.mapboxgl.Map({
+        container: mapRef.current,
+        style: 'mapbox://styles/mapbox/dark-v11',
+        center: [-80.65, 28.35],
+        zoom: 9.5,
+        pitch: 30,
+        bearing: -10
+      });
+      
+      mapInstance.current.addControl(new window.mapboxgl.NavigationControl(), 'top-right');
+      mapInstance.current.addControl(new window.mapboxgl.ScaleControl(), 'bottom-left');
+      
+      mapInstance.current.on('load', () => {
+        // Add heatmap source
+        mapInstance.current.addSource('properties-heat', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: [] }
         });
-        mapInstance.current.addControl(new window.mapboxgl.NavigationControl(), 'top-right');
-        mapInstance.current.on('load', () => setMapLoaded(true));
-      }, 100);
+        
+        // Add heatmap layer
+        mapInstance.current.addLayer({
+          id: 'properties-heatmap',
+          type: 'heatmap',
+          source: 'properties-heat',
+          maxzoom: 15,
+          paint: {
+            'heatmap-weight': ['interpolate', ['linear'], ['get', 'mlScore'], 0, 0.1, 50, 0.5, 100, 1],
+            'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 8, 0.5, 12, 1.5],
+            'heatmap-color': [
+              'interpolate', ['linear'], ['heatmap-density'],
+              0, 'rgba(0, 0, 0, 0)',
+              0.1, 'rgba(59, 130, 246, 0.3)',
+              0.3, 'rgba(16, 185, 129, 0.5)',
+              0.5, 'rgba(245, 158, 11, 0.7)',
+              0.7, 'rgba(239, 68, 68, 0.8)',
+              1, 'rgba(220, 38, 38, 1)'
+            ],
+            'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 8, 25, 12, 40, 15, 60],
+            'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 12, 0.9, 15, 0.3]
+          }
+        });
+        
+        mapInstance.current.addLayer({
+          id: 'properties-circles',
+          type: 'circle',
+          source: 'properties-heat',
+          minzoom: 11,
+          paint: {
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 6, 15, 12],
+            'circle-color': ['match', ['get', 'recommendation'], 'BID', '#10B981', 'REVIEW', '#F59E0B', 'SKIP', '#EF4444', '#64748b'],
+            'circle-stroke-color': 'white',
+            'circle-stroke-width': 2,
+            'circle-opacity': ['interpolate', ['linear'], ['zoom'], 11, 0, 13, 0.9]
+          }
+        });
+        
+        setMapLoaded(true);
+      });
     };
     document.head.appendChild(script);
   }, []);
 
-  // Update markers when properties change
+  // Update heatmap and markers when properties change
   useEffect(() => {
     if (!mapLoaded || !mapInstance.current) return;
     
     markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
     
-    properties.forEach(p => {
-      const lat = p.lat || p.latitude || 28.25;
-      const lng = p.lng || p.longitude || -80.65;
-      const rec = p.recommendation || 'SKIP';
-      const mlScore = p.ml_score || 50;
-      
-      const el = document.createElement('div');
-      el.style.cssText = `width:36px;height:36px;background:${COLORS[rec] || COLORS.SKIP};border:3px solid white;border-radius:50%;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:white;`;
-      el.innerHTML = mlScore;
-      el.onclick = () => setSelectedProp(p);
-      
-      try {
-        const marker = new window.mapboxgl.Marker(el).setLngLat([lng, lat]).addTo(mapInstance.current);
-        markersRef.current.push(marker);
-      } catch (e) {
-        console.error('Marker error:', e);
-      }
-    });
-  }, [properties, mapLoaded]);
+    const geojsonData = {
+      type: 'FeatureCollection',
+      features: properties.map(p => {
+        const lat = p.lat || p.latitude || (28.1 + Math.random() * 0.5);
+        const lng = p.lng || p.longitude || (-80.9 + Math.random() * 0.4);
+        return {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [lng, lat] },
+          properties: { id: p.id || p.case_number, mlScore: p.ml_score || 50, recommendation: p.recommendation || 'SKIP', address: p.address, city: p.city }
+        };
+      })
+    };
+    
+    const source = mapInstance.current.getSource('properties-heat');
+    if (source) source.setData(geojsonData);
+    
+    if (mapViewMode !== 'heatmap') {
+      properties.forEach(p => {
+        const lat = p.lat || p.latitude || (28.1 + Math.random() * 0.5);
+        const lng = p.lng || p.longitude || (-80.9 + Math.random() * 0.4);
+        const rec = p.recommendation || 'SKIP';
+        const mlScore = p.ml_score || 50;
+        
+        const el = document.createElement('div');
+        el.style.cssText = \`width:36px;height:36px;background:\${COLORS[rec] || COLORS.SKIP};border:3px solid white;border-radius:50%;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:white;transition:transform 0.2s;\`;
+        el.innerHTML = mlScore;
+        el.onmouseenter = () => el.style.transform = 'scale(1.2)';
+        el.onmouseleave = () => el.style.transform = 'scale(1)';
+        el.onclick = () => setSelectedProp(p);
+        
+        try {
+          const marker = new window.mapboxgl.Marker(el).setLngLat([lng, lat]).addTo(mapInstance.current);
+          markersRef.current.push(marker);
+        } catch (e) { console.error('Marker error:', e); }
+      });
+    }
+    
+    if (mapInstance.current.getLayer('properties-heatmap')) {
+      mapInstance.current.setLayoutProperty('properties-heatmap', 'visibility', mapViewMode === 'markers' ? 'none' : 'visible');
+    }
+  }, [properties, mapLoaded, mapViewMode]);
 
-  // Scroll chat to bottom
   useEffect(() => {
     chatRef.current?.scrollTo(0, chatRef.current.scrollHeight);
   }, [messages]);
@@ -594,34 +669,54 @@ What would you like to know?`;
       </div>
 
       {/* Map */}
+
+      {/* Map with Heatmap */}
       <div style={{ flex: 1, position: 'relative' }}>
         <div ref={mapRef} style={{ position: 'absolute', inset: 0 }} />
+        
+        {/* Heatmap Controls */}
+        <div style={{ position: 'absolute', top: 16, right: 60, background: '#0f172ae0', padding: 12, borderRadius: 12, border: '1px solid #334155', zIndex: 10, backdropFilter: 'blur(8px)' }}>
+          <div style={{ fontSize: 11, color: '#64748b', marginBottom: 8 }}>🗺️ MAP VIEW</div>
+          <div style={{ display: 'flex', gap: 4 }}>
+            {[{ mode: 'heatmap', icon: '🔥', label: 'Heat' }, { mode: 'hybrid', icon: '📍', label: 'Hybrid' }, { mode: 'markers', icon: '⚫', label: 'Pins' }].map(({ mode, icon, label }) => (
+              <button key={mode} onClick={() => setMapViewMode(mode)} style={{ background: mapViewMode === mode ? '#f59e0b' : '#1e293b', border: mapViewMode === mode ? '2px solid #fbbf24' : '1px solid #334155', borderRadius: 8, padding: '8px 12px', color: mapViewMode === mode ? '#0f172a' : '#94a3b8', fontSize: 12, fontWeight: mapViewMode === mode ? 700 : 500, cursor: 'pointer', transition: 'all 0.2s' }}>
+                {icon} {label}
+              </button>
+            ))}
+          </div>
+          {mapViewMode !== 'markers' && (
+            <div style={{ marginTop: 10 }}>
+              <div style={{ fontSize: 10, color: '#64748b', marginBottom: 4 }}>Intensity</div>
+              <input type="range" min="0.3" max="1" step="0.1" value={heatmapIntensity} onChange={(e) => { const val = parseFloat(e.target.value); setHeatmapIntensity(val); if (mapInstance.current?.getLayer('properties-heatmap')) { mapInstance.current.setPaintProperty('properties-heatmap', 'heatmap-intensity', ['interpolate', ['linear'], ['zoom'], 8, val * 0.5, 12, val * 1.5]); }}} style={{ width: '100%', accentColor: '#f59e0b' }} />
+            </div>
+          )}
+        </div>
+
+        {/* Heatmap Legend */}
+        {mapViewMode !== 'markers' && (
+          <div style={{ position: 'absolute', top: 150, right: 60, background: '#0f172ae0', padding: 12, borderRadius: 12, border: '1px solid #334155', zIndex: 10 }}>
+            <div style={{ fontSize: 11, color: '#64748b', marginBottom: 8 }}>HEAT INTENSITY</div>
+            <div style={{ width: 120, height: 12, borderRadius: 6, background: 'linear-gradient(90deg, rgba(59,130,246,0.3), rgba(16,185,129,0.5), rgba(245,158,11,0.7), rgba(239,68,68,0.9), rgba(220,38,38,1))' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#64748b', marginTop: 4 }}><span>Low</span><span>High</span></div>
+          </div>
+        )}
         
         {/* Data source badge */}
         <div style={{ position: 'absolute', top: 16, left: 16, background: '#0f172ae0', padding: 14, borderRadius: 12, border: '1px solid #334155', zIndex: 10 }}>
           <div style={{ fontSize: 11, color: '#64748b' }}>DATA SOURCE</div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: supabaseStatus === 'connected' ? '#10b981' : '#f59e0b' }}>
-            {dataSource.label}
-          </div>
-          <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>
-            {properties.length} properties • {supabaseStatus === 'connected' ? 'Supabase LIVE' : 'Loading...'}
-          </div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: supabaseStatus === 'connected' ? '#10b981' : '#f59e0b' }}>{dataSource.label}</div>
+          <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4 }}>{properties.length} properties • {supabaseStatus === 'connected' ? 'Supabase LIVE' : 'Loading...'}</div>
         </div>
 
         {/* Legend */}
         <div style={{ position: 'absolute', bottom: 24, left: 16, background: '#0f172ae0', padding: 14, borderRadius: 12, border: '1px solid #334155', zIndex: 10 }}>
           <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 8 }}>Recommendations</div>
           <div style={{ display: 'flex', gap: 12 }}>
-            {Object.entries(COLORS).map(([s, c]) => (
-              <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{ width: 12, height: 12, borderRadius: '50%', background: c }} />
-                <span style={{ fontSize: 12, fontWeight: 600 }}>{s}</span>
-              </div>
-            ))}
+            {Object.entries(COLORS).map(([s, c]) => (<div key={s} style={{ display: 'flex', alignItems: 'center', gap: 6 }}><div style={{ width: 12, height: 12, borderRadius: '50%', background: c }} /><span style={{ fontSize: 12, fontWeight: 600 }}>{s}</span></div>))}
           </div>
         </div>
 
-        {/* Property Detail */}
+        {/* Property Detail Panel */}
         {selectedProp && (
           <div style={{ position: 'absolute', right: 0, top: 0, height: '100%', width: 380, background: '#1e293b', borderLeft: '1px solid #334155', overflow: 'auto', zIndex: 20 }}>
             <div style={{ padding: 16, borderBottom: '1px solid #334155', background: '#0f172a' }}>
@@ -635,23 +730,9 @@ What would you like to know?`;
             {selectedProp.photo_url && <img src={selectedProp.photo_url} alt="" style={{ width: '100%', height: 180, objectFit: 'cover' }} onError={e => e.target.style.display = 'none'} />}
             <div style={{ padding: 16 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                {[
-                  { l: 'ML Score', v: `${selectedProp.ml_score || 'N/A'}%`, c: '#10b981' },
-                  { l: 'Max Bid', v: `$${(selectedProp.max_bid || 0).toLocaleString()}`, c: '#f59e0b' },
-                  { l: 'Judgment', v: `$${(selectedProp.final_judgment || 0).toLocaleString()}` },
-                  { l: 'Market', v: `$${(selectedProp.market_value || selectedProp.just_value || 0).toLocaleString()}` },
-                  { l: 'Sqft', v: selectedProp.sqft?.toLocaleString() || 'N/A' },
-                  { l: 'Built', v: selectedProp.year_built || 'N/A' }
-                ].map((s, i) => (
-                  <div key={i} style={{ background: '#0f172a', padding: 12, borderRadius: 10 }}>
-                    <div style={{ fontSize: 10, color: '#64748b' }}>{s.l}</div>
-                    <div style={{ fontSize: 16, fontWeight: 700, color: s.c || 'white' }}>{s.v}</div>
-                  </div>
-                ))}
+                {[{ l: 'ML Score', v: \`\${selectedProp.ml_score || 'N/A'}%\`, c: '#10b981' }, { l: 'Max Bid', v: \`$\${(selectedProp.max_bid || 0).toLocaleString()}\`, c: '#f59e0b' }, { l: 'Judgment', v: \`$\${(selectedProp.final_judgment || 0).toLocaleString()}\` }, { l: 'Market', v: \`$\${(selectedProp.market_value || selectedProp.just_value || 0).toLocaleString()}\` }, { l: 'Sqft', v: selectedProp.sqft?.toLocaleString() || 'N/A' }, { l: 'Built', v: selectedProp.year_built || 'N/A' }].map((s, i) => (<div key={i} style={{ background: '#0f172a', padding: 12, borderRadius: 10 }}><div style={{ fontSize: 10, color: '#64748b' }}>{s.l}</div><div style={{ fontSize: 16, fontWeight: 700, color: s.c || 'white' }}>{s.v}</div></div>))}
               </div>
-              <button onClick={() => runPipeline(selectedProp)} style={{ width: '100%', marginTop: 16, background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', padding: 14, borderRadius: 10, color: 'black', fontWeight: 700, cursor: 'pointer' }}>
-                🚀 Run 12-Stage Pipeline
-              </button>
+              <button onClick={() => runPipeline(selectedProp)} style={{ width: '100%', marginTop: 16, background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', padding: 14, borderRadius: 10, color: 'black', fontWeight: 700, cursor: 'pointer' }}>🚀 Run 12-Stage Pipeline</button>
             </div>
           </div>
         )}
@@ -660,7 +741,7 @@ What would you like to know?`;
       {/* Footer */}
       <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#0f172ae0', borderTop: '1px solid #334155', padding: '8px 20px', display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#64748b', zIndex: 5 }}>
         <span>© 2025 Ariel Shapira, Solo Founder • Everest Capital USA</span>
-        <span style={{ color: '#10b981' }}>BidDeed.AI V13.4.0 • Supabase LIVE • Smart Router Active</span>
+        <span style={{ color: '#10b981' }}>BidDeed.AI V18 • Heatmap Enabled • Smart Router Active</span>
       </div>
     </div>
   );
