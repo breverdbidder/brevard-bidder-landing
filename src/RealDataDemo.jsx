@@ -175,7 +175,7 @@ Scrapers are running to fetch fresh data!`, 'FREE');
     // Create map instance directly (no dynamic loading needed)
     const map = new mapboxgl.Map({
       container: mapRef.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
+      style: 'mapbox://styles/mapbox/dark-v11',
       center: [-80.65, 28.35], // Brevard County center
       zoom: 9.5,
       pitch: 30,
@@ -762,5 +762,6 @@ What would you like to know?`;
     </div>
   );
 }
+
 
 
