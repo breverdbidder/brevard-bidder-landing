@@ -918,6 +918,91 @@ const SplitScreenDemo = ({ isOpen, onClose }) => {
                 {property.recommendation === 'SKIP' && 'High risk. Bid/value ratio unfavorable.'}
               </div>
             </Card>
+
+            {/* Report Section - Appears at Stage 10+ */}
+            {currentStage >= 10 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="mt-6"
+              >
+                <Card className="p-4 border-2 border-indigo-500/50 bg-indigo-500/10">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-2xl">📄</span>
+                    <div className="text-sm font-semibold text-white">Investment Report Ready</div>
+                  </div>
+                  <div className="text-xs text-slate-400 mb-4">
+                    Stage 10: Professional DOCX report with property analysis, comparable sales, ML predictions, and investment recommendation.
+                  </div>
+                  
+                  {/* Report Preview */}
+                  <div className="bg-slate-900 rounded-lg p-4 mb-4 border border-slate-700">
+                    <div className="text-center mb-3">
+                      <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">BidDeed.AI</div>
+                      <div className="text-sm font-bold text-white">Property Investment Report</div>
+                      <div className="text-xs text-slate-400">Case #{property.caseNumber}</div>
+                    </div>
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Property:</span>
+                        <span className="text-white">{property.address}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Opening Bid:</span>
+                        <span className="text-emerald-400">${property.openingBid.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Market Value:</span>
+                        <span className="text-white">${property.marketValue.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">AI Score:</span>
+                        <span className="text-amber-400">{(property.mlProbability * 100).toFixed(0)}%</span>
+                      </div>
+                      <div className="flex justify-between border-t border-slate-700 pt-2 mt-2">
+                        <span className="text-slate-500">Recommendation:</span>
+                        <span className={`font-bold ${
+                          property.recommendation === 'BID' ? 'text-emerald-400' :
+                          property.recommendation === 'REVIEW' ? 'text-amber-400' :
+                          'text-red-400'
+                        }`}>{property.recommendation}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Download Buttons */}
+                  <div className="space-y-2">
+                    <a 
+                      href="https://raw.githubusercontent.com/breverdbidder/brevard-bidder-landing/main/reports/BidDeed_Report_250179.docx"
+                      download="BidDeed_Report_250179.docx"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Download DOCX Report
+                    </a>
+                    <a 
+                      href="https://raw.githubusercontent.com/breverdbidder/brevard-bidder-landing/main/reports/BidDeed_Report_250179.pdf"
+                      download="BidDeed_Report_250179.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm font-medium transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                      Download PDF Report
+                    </a>
+                  </div>
+
+                  <div className="text-xs text-slate-500 text-center mt-3">
+                    © 2025 Everest Capital USA • Everest Ascent™ Pipeline
+                  </div>
+                </Card>
+              </motion.div>
+            )}
           </div>
         </div>
       </motion.div>
