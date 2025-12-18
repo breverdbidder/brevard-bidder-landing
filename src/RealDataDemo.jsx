@@ -270,7 +270,7 @@ Scrapers are running to fetch fresh data!`, 'FREE');
         const mlScore = p.ml_score || 50;
         
         const el = document.createElement('div');
-        el.style.cssText = \`width:36px;height:36px;background:\${COLORS[rec] || COLORS.SKIP};border:3px solid white;border-radius:50%;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:white;transition:transform 0.2s;\`;
+        el.style.cssText = `width:36px;height:36px;background:${COLORS[rec] || COLORS.SKIP};border:3px solid white;border-radius:50%;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:white;transition:transform 0.2s;`;
         el.innerHTML = mlScore;
         el.onmouseenter = () => el.style.transform = 'scale(1.2)';
         el.onmouseleave = () => el.style.transform = 'scale(1)';
@@ -730,7 +730,7 @@ What would you like to know?`;
             {selectedProp.photo_url && <img src={selectedProp.photo_url} alt="" style={{ width: '100%', height: 180, objectFit: 'cover' }} onError={e => e.target.style.display = 'none'} />}
             <div style={{ padding: 16 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-                {[{ l: 'ML Score', v: \`\${selectedProp.ml_score || 'N/A'}%\`, c: '#10b981' }, { l: 'Max Bid', v: \`$\${(selectedProp.max_bid || 0).toLocaleString()}\`, c: '#f59e0b' }, { l: 'Judgment', v: \`$\${(selectedProp.final_judgment || 0).toLocaleString()}\` }, { l: 'Market', v: \`$\${(selectedProp.market_value || selectedProp.just_value || 0).toLocaleString()}\` }, { l: 'Sqft', v: selectedProp.sqft?.toLocaleString() || 'N/A' }, { l: 'Built', v: selectedProp.year_built || 'N/A' }].map((s, i) => (<div key={i} style={{ background: '#0f172a', padding: 12, borderRadius: 10 }}><div style={{ fontSize: 10, color: '#64748b' }}>{s.l}</div><div style={{ fontSize: 16, fontWeight: 700, color: s.c || 'white' }}>{s.v}</div></div>))}
+                {[{ l: 'ML Score', v: `${selectedProp.ml_score || 'N/A'}%`, c: '#10b981' }, { l: 'Max Bid', v: `$${(selectedProp.max_bid || 0).toLocaleString()}`, c: '#f59e0b' }, { l: 'Judgment', v: `$${(selectedProp.final_judgment || 0).toLocaleString()}` }, { l: 'Market', v: `$${(selectedProp.market_value || selectedProp.just_value || 0).toLocaleString()}` }, { l: 'Sqft', v: selectedProp.sqft?.toLocaleString() || 'N/A' }, { l: 'Built', v: selectedProp.year_built || 'N/A' }].map((s, i) => (<div key={i} style={{ background: '#0f172a', padding: 12, borderRadius: 10 }}><div style={{ fontSize: 10, color: '#64748b' }}>{s.l}</div><div style={{ fontSize: 16, fontWeight: 700, color: s.c || 'white' }}>{s.v}</div></div>))}
               </div>
               <button onClick={() => runPipeline(selectedProp)} style={{ width: '100%', marginTop: 16, background: 'linear-gradient(135deg, #f59e0b, #d97706)', border: 'none', padding: 14, borderRadius: 10, color: 'black', fontWeight: 700, cursor: 'pointer' }}>🚀 Run 12-Stage Pipeline</button>
             </div>
