@@ -7,81 +7,87 @@
     
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#667eea" />
+    <meta name="theme-color" content="#0a0f1a" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="BidDeed.AI" />
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
     
     <!-- Primary Meta Tags -->
-    <title>BidDeed.AI | Distressed Assets Decoded. For Everyone. Everywhere.</title>
-    <meta name="title" content="BidDeed.AI | Distressed Assets Decoded. For Everyone. Everywhere." />
-    <meta name="description" content="The Everest Ascent™ - 12-stage AI pipeline transforms 4-hour research into 23-second intelligence for distressed asset auctions. Global investors access US foreclosure and tax deed markets. An Everest Company." />
-    <meta name="author" content="Ariel Shapira, Founder of Everest" />
-    <meta name="keywords" content="distressed assets, foreclosure auction, tax deed auction, US real estate investment, AI analysis, LienLogic, BidScore, The Shapira Formula, Everest, international investors, global capital" />
+    <title>BidDeed.AI | Distressed Assets Decoded</title>
+    <meta name="title" content="BidDeed.AI | Distressed Assets Decoded" />
+    <meta name="description" content="The Everest Ascent™ - 12-stage AI pipeline transforms 4-hour research into 23-second intelligence for foreclosure and tax deed auctions. An Everest Company." />
+    <meta name="author" content="Ariel Shapira, Founder of Everest Capital USA" />
     
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://biddeed.ai/" />
     <meta property="og:title" content="BidDeed.AI | Distressed Assets Decoded" />
-    <meta property="og:description" content="The Everest Ascent™ - 35 years of courthouse expertise, encoded into a 12-stage AI pipeline. Your on-ramp to America's highest-yield real estate market." />
-    <meta property="og:site_name" content="BidDeed.AI - An Everest Company" />
+    <meta property="og:description" content="The Everest Ascent™ - 12 stages to the summit of distressed real estate intelligence." />
     
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://biddeed.ai/" />
-    <meta name="twitter:title" content="BidDeed.AI | The Everest Ascent™" />
-    <meta name="twitter:description" content="12 stages to the summit of distressed real estate. Global investors access US auctions with AI-powered intelligence. Founded by Ariel Shapira." />
-    
-    <!-- Premium Fonts: DM Sans (body) + Plus Jakarta Sans (headlines) -->
+    <!-- Premium Fonts: Instrument Serif (display) + Geist (body) + Geist Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    
+    <!-- Geist Font (Vercel's typeface) via CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.2.0/dist/fonts/geist-sans/style.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.2.0/dist/fonts/geist-mono/style.min.css">
     
     <style>
-      /* ============ FONT RENDERING - CRISP & CLEAR ============ */
-      :root {
-        --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-        
-        /* Brand Colors */
-        --amber-400: #fbbf24;
-        --amber-500: #f59e0b;
-        --emerald-400: #34d399;
-        --emerald-500: #10b981;
-        --slate-900: #0f172a;
-        --slate-800: #1e293b;
+      /* ============ CSS RESET & BASE ============ */
+      *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
       }
       
-      /* Critical: Force crisp font rendering */
+      :root {
+        /* Typography */
+        --font-display: 'Instrument Serif', Georgia, serif;
+        --font-body: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        --font-mono: 'Geist Mono', 'JetBrains Mono', 'Fira Code', monospace;
+        
+        /* Colors - Everest Brand */
+        --slate-950: #030712;
+        --slate-900: #0a0f1a;
+        --slate-800: #111827;
+        --slate-700: #1e293b;
+        --slate-600: #334155;
+        --slate-500: #64748b;
+        --slate-400: #94a3b8;
+        --slate-300: #cbd5e1;
+        
+        --amber-400: #fbbf24;
+        --amber-500: #f59e0b;
+        --amber-600: #d97706;
+        
+        --emerald-400: #34d399;
+        --emerald-500: #10b981;
+        
+        --red-400: #f87171;
+        --red-500: #ef4444;
+      }
+      
       html {
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         text-rendering: optimizeLegibility;
-        font-feature-settings: "kern" 1;
         scroll-behavior: smooth;
       }
       
       body {
         font-family: var(--font-body);
-        background-color: var(--slate-900);
+        background-color: var(--slate-950);
         color: white;
-        margin: 0;
-        padding: 0;
+        line-height: 1.6;
         overflow-x: hidden;
-        /* Prevent any subpixel blurriness */
-        transform: translateZ(0);
-        backface-visibility: hidden;
       }
       
-      /* Headlines - use display font */
+      /* Headlines use display serif */
       h1, h2, h3, h4, h5, h6 {
         font-family: var(--font-display);
-        font-weight: 700;
-        /* Ensure sharp text */
-        -webkit-font-smoothing: antialiased;
-        transform: translateZ(0);
+        font-weight: 400;
+        line-height: 1.2;
       }
       
       /* Monospace */
@@ -89,27 +95,10 @@
         font-family: var(--font-mono);
       }
       
-      /* ============ ANTI-BLUR FOR ANIMATIONS ============ */
-      * {
-        /* Prevent blurry transforms */
-        transform-style: preserve-3d;
-      }
-      
-      /* Force GPU acceleration for smooth animations without blur */
-      .motion-safe {
-        will-change: transform, opacity;
-        transform: translateZ(0);
-      }
-      
-      /* Selection color */
-      ::selection {
-        background: var(--amber-500);
-        color: black;
-      }
-      
-      /* ============ SCROLLBAR (Clean) ============ */
+      /* ============ SCROLLBAR STYLING ============ */
       ::-webkit-scrollbar {
         width: 8px;
+        height: 8px;
       }
       
       ::-webkit-scrollbar-track {
@@ -117,77 +106,97 @@
       }
       
       ::-webkit-scrollbar-thumb {
-        background: #334155;
+        background: var(--slate-700);
         border-radius: 4px;
       }
       
       ::-webkit-scrollbar-thumb:hover {
-        background: #475569;
+        background: var(--slate-600);
       }
       
-      /* ============ FOCUS STATES (Accessibility) ============ */
-      *:focus-visible {
+      /* ============ SELECTION ============ */
+      ::selection {
+        background: var(--amber-500);
+        color: var(--slate-900);
+      }
+      
+      /* ============ FOCUS STATES ============ */
+      :focus-visible {
         outline: 2px solid var(--amber-500);
         outline-offset: 2px;
       }
       
-      /* ============ RESPONSIVE IMAGES ============ */
-      img {
-        max-width: 100%;
-        height: auto;
-        image-rendering: -webkit-optimize-contrast;
-        image-rendering: crisp-edges;
-      }
-      
-      /* ============ PREVENT ZOOM ON INPUT (iOS) ============ */
-      @media screen and (max-width: 768px) {
-        input[type="email"],
-        input[type="text"],
-        input[type="tel"],
-        select,
-        textarea {
-          font-size: 16px !important;
-        }
-      }
-      
-      /* ============ PWA STANDALONE MODE ============ */
-      @media (display-mode: standalone) {
-        body {
-          /* Safe area insets for notched devices */
-          padding-top: env(safe-area-inset-top);
-          padding-bottom: env(safe-area-inset-bottom);
-          padding-left: env(safe-area-inset-left);
-          padding-right: env(safe-area-inset-right);
-        }
-      }
-      
-      /* ============ LOADING STATE ============ */
-      #root:empty {
+      /* ============ LOADING SCREEN ============ */
+      #loading-screen {
+        position: fixed;
+        inset: 0;
+        background: var(--slate-950);
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 100vh;
+        z-index: 9999;
+        transition: opacity 0.5s ease;
       }
       
-      #root:empty::after {
-        content: '';
-        width: 40px;
-        height: 40px;
-        border: 3px solid #1e293b;
+      #loading-screen.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      
+      .loader {
+        width: 48px;
+        height: 48px;
+        border: 3px solid var(--slate-800);
         border-top-color: var(--amber-500);
         border-radius: 50%;
-        animation: spin 0.8s linear infinite;
+        animation: spin 1s linear infinite;
       }
       
       @keyframes spin {
         to { transform: rotate(360deg); }
       }
+      
+      /* ============ UTILITY CLASSES ============ */
+      .container {
+        width: 100%;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+      
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
     </style>
   </head>
   <body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+      <div class="loader"></div>
+    </div>
+    
+    <!-- React App Mount Point -->
     <div id="root"></div>
+    
     <script type="module" src="/src/main.jsx"></script>
-    <!-- PWA Registration -->
-    <script src="/pwa-register.js"></script>
+    
+    <script>
+      // Remove loading screen when app loads
+      window.addEventListener('load', () => {
+        const loader = document.getElementById('loading-screen');
+        if (loader) {
+          loader.classList.add('fade-out');
+          setTimeout(() => loader.remove(), 500);
+        }
+      });
+    </script>
   </body>
 </html>
