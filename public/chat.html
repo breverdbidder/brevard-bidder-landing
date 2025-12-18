@@ -78,15 +78,10 @@
     </style>
 </head>
 <body>
-    <div id="login-modal" class="modal">
-        <div class="modal-box">
-            <h2>🏠 BidDeed.AI</h2>
-            <input type="password" id="password-input" placeholder="Enter password">
-            <button onclick="login()">Access Chat</button>
-        </div>
-    </div>
+    <!-- Password modal removed for demo access -->
+    <div id="login-modal" class="modal hidden"></div>
 
-    <div id="app" class="app" style="display:none">
+    <div id="app" class="app">
         <header>
             <div class="logo"><span>🏠</span><h1>BidDeed.AI</h1></div>
             <div id="status" class="status ready"><span class="status-dot"></span><span id="status-text">Ready</span></div>
@@ -95,16 +90,16 @@
         <div id="progress" class="progress-bar"></div>
         <div id="messages" class="messages">
             <div class="message assistant">
-                <div class="bubble">Welcome! I use <strong>Smart Router</strong>:<br><br>💜 <strong>Gemini 1.5 Flash</strong> - FREE, 1M context<br>💙 <strong>Claude Sonnet</strong> - Complex analysis + tools<br><br>Ask anything about Brevard foreclosures!</div>
+                <div class="bubble">👋 <strong>BidDeed.AI V18</strong> — Everest Summit Edition<br><br>💜 <strong>Gemini 2.5 Flash</strong> - FREE, 1M context<br>💙 <strong>Claude Sonnet</strong> - Complex analysis + tools<br><br>Ask about Brevard foreclosures or try the quick actions below!</div>
             </div>
         </div>
         <div id="typing" class="typing"><span></span><span></span><span></span></div>
         <div class="input-area">
             <div class="quick-actions">
-                <button class="quick-btn" onclick="sendQuick('What auctions are on Dec 17?')">📅 Dec 17</button>
-                <button class="quick-btn" onclick="sendQuick('Analyze top 3 Dec 10 properties with full investment reports')">📊 Full Report</button>
+                <button class="quick-btn" onclick="sendQuick('What auctions are on Dec 18?')">📅 Dec 18</button>
+                <button class="quick-btn" onclick="sendQuick('Show top BID recommendations')">⭐ Best Bids</button>
                 <button class="quick-btn" onclick="sendQuick('Explain max bid formula')">💰 Max Bid</button>
-                <button class="quick-btn" onclick="sendQuick('Query 5 recent sold auctions from database')">🔍 DB Query</button>
+                <button class="quick-btn" onclick="sendQuick('Show auction calendar')">📆 Calendar</button>
             </div>
             <div class="input-row">
                 <div class="input-wrapper"><textarea id="message-input" placeholder="Ask about auctions..." rows="1" onkeydown="handleKeydown(event)" oninput="autoResize(this)"></textarea></div>
@@ -126,22 +121,8 @@
             document.getElementById('progress').className = status === 'working' ? 'progress-bar active' : 'progress-bar';
         }
 
-        function login() {
-            const pwd = document.getElementById('password-input').value;
-            if (!pwd) return;
-            localStorage.setItem('brevard_pwd', pwd);
-            document.getElementById('login-modal').classList.add('hidden');
-            document.getElementById('app').style.display = 'flex';
-            loadCachedMessages();
-        }
-
-        if (localStorage.getItem('brevard_pwd')) {
-            document.getElementById('login-modal').classList.add('hidden');
-            document.getElementById('app').style.display = 'flex';
-            loadCachedMessages();
-        }
-
-        document.getElementById('password-input').addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
+        // Auto-load cached messages on start
+        loadCachedMessages();
 
         function loadCachedMessages() {
             const cached = localStorage.getItem('brevard_messages_' + sessionId);
@@ -198,15 +179,9 @@
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: localStorage.getItem('brevard_pwd'), messages, session_id: sessionId })
+                    body: JSON.stringify({ messages, session_id: sessionId })
                 });
 
-                if (response.status === 401) {
-                    localStorage.removeItem('brevard_pwd');
-                    location.reload();
-                    return;
-                }
-                
                 const data = await response.json();
                 const meta = data._meta || {};
                 const assistantContent = data.content?.filter(b => b.type === 'text').map(b => b.text).join('\n\n') || data.error || 'No response';
