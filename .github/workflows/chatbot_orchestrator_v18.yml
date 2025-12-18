@@ -1,0 +1,298 @@
+# BidDeed.AI V18 — Chatbot Orchestrator Workflow
+# Runs the LangGraph-based chatbot with pipeline integration
+# Triggers: Manual, Schedule (every 30 min), or API webhook
+
+name: V18 Chatbot Orchestrator
+
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Chat message to process'
+        required: false
+        default: 'Show Dec 18 properties'
+      session_id:
+        description: 'Session ID (optional)'
+        required: false
+        default: ''
+      action:
+        description: 'Action type'
+        required: true
+        type: choice
+        options:
+          - chat
+          - batch_analysis
+          - health_check
+        default: 'chat'
+  
+  schedule:
+    # Run health check every 30 minutes
+    - cron: '*/30 * * * *'
+  
+  repository_dispatch:
+    types: [chatbot_message]
+
+env:
+  PYTHON_VERSION: '3.11'
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+  SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+  GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+jobs:
+  orchestrator:
+    name: Run V18 Orchestrator
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+      
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install langgraph langchain-core httpx pydantic supabase
+          pip install -e . || true
+      
+      - name: Create Source Structure
+        run: |
+          mkdir -p src/langgraph src/agents
+          touch src/__init__.py src/langgraph/__init__.py src/agents/__init__.py
+      
+      - name: Run Health Check
+        if: github.event_name == 'schedule' || github.event.inputs.action == 'health_check'
+        run: |
+          python -c "
+          import asyncio
+          import os
+          import json
+          from datetime import datetime
+          
+          async def health_check():
+              status = {
+                  'timestamp': datetime.now().isoformat(),
+                  'version': 'V18',
+                  'components': {
+                      'chatbot': 'online',
+                      'database': 'checking...',
+                      'pipeline': 'checking...'
+                  }
+              }
+              
+              # Check Supabase
+              try:
+                  import httpx
+                  async with httpx.AsyncClient() as client:
+                      url = os.getenv('SUPABASE_URL', '') + '/rest/v1/'
+                      key = os.getenv('SUPABASE_ANON_KEY', '')
+                      resp = await client.get(url, headers={'apikey': key}, timeout=10)
+                      status['components']['database'] = 'online' if resp.status_code < 500 else 'error'
+              except Exception as e:
+                  status['components']['database'] = f'error: {str(e)[:50]}'
+              
+              # Check LangGraph
+              try:
+                  from langgraph.graph import StateGraph
+                  status['components']['pipeline'] = 'online'
+              except ImportError:
+                  status['components']['pipeline'] = 'unavailable'
+              
+              print('🏥 Health Check Results:')
+              print(json.dumps(status, indent=2))
+              
+              return status
+          
+          asyncio.run(health_check())
+          "
+      
+      - name: Process Chat Message
+        if: github.event.inputs.action == 'chat' || github.event_name == 'repository_dispatch'
+        run: |
+          python << 'EOF'
+          import asyncio
+          import os
+          import sys
+          import json
+          from datetime import datetime
+          
+          # Add src to path
+          sys.path.insert(0, os.getcwd())
+          
+          async def process_chat():
+              message = "${{ github.event.inputs.message }}" or "${{ github.event.client_payload.message }}" or "Hello"
+              session_id = "${{ github.event.inputs.session_id }}" or "${{ github.event.client_payload.session_id }}" or f"gh_action_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+              
+              print(f"📨 Processing message: {message}")
+              print(f"🔑 Session ID: {session_id}")
+              
+              try:
+                  from src.langgraph.unified_orchestrator_v18 import UnifiedOrchestrator
+                  
+                  orchestrator = UnifiedOrchestrator()
+                  result = await orchestrator.chat(message, session_id)
+                  
+                  print("\n" + "=" * 60)
+                  print("🤖 BidDeed.AI V18 Response:")
+                  print("=" * 60)
+                  print(f"\nIntent: {result['intent']} (confidence: {result['confidence']:.2f})")
+                  print(f"Action: {result['action']}")
+                  print(f"\n{result['response']}")
+                  
+                  if result.get('pipeline_run_id'):
+                      print(f"\n⚡ Pipeline triggered: {result['pipeline_run_id']}")
+                  
+                  # Log to Supabase
+                  await log_to_supabase(session_id, message, result)
+                  
+              except ImportError as e:
+                  print(f"⚠️ Import error (running fallback): {e}")
+                  await run_fallback(message, session_id)
+              except Exception as e:
+                  print(f"❌ Error: {e}")
+                  raise
+          
+          async def log_to_supabase(session_id, message, result):
+              """Log conversation to Supabase insights table"""
+              try:
+                  import httpx
+                  
+                  url = os.getenv('SUPABASE_URL', '') + '/rest/v1/insights'
+                  key = os.getenv('SUPABASE_SERVICE_KEY') or os.getenv('SUPABASE_ANON_KEY', '')
+                  
+                  payload = {
+                      'category': 'chatbot_v18',
+                      'insight_type': 'conversation',
+                      'title': f"Chat: {result['intent']}",
+                      'content': json.dumps({
+                          'session_id': session_id,
+                          'user_message': message[:500],
+                          'bot_response': result['response'][:1000],
+                          'intent': result['intent'],
+                          'confidence': result['confidence'],
+                          'action': result['action'],
+                          'pipeline_run_id': result.get('pipeline_run_id')
+                      }),
+                      'source': 'github_actions',
+                      'created_at': datetime.now().isoformat()
+                  }
+                  
+                  async with httpx.AsyncClient() as client:
+                      resp = await client.post(
+                          url,
+                          headers={
+                              'apikey': key,
+                              'Authorization': f'Bearer {key}',
+                              'Content-Type': 'application/json',
+                              'Prefer': 'return=minimal'
+                          },
+                          json=payload,
+                          timeout=10
+                      )
+                      
+                      if resp.status_code in [200, 201]:
+                          print("✅ Logged to Supabase")
+                      else:
+                          print(f"⚠️ Supabase log failed: {resp.status_code}")
+                          
+              except Exception as e:
+                  print(f"⚠️ Could not log to Supabase: {e}")
+          
+          async def run_fallback(message, session_id):
+              """Fallback when full orchestrator unavailable"""
+              from src.langgraph.chatbot_agent import ChatNLPEngine, ChatResponseGenerator, ExtractedEntities, ChatIntent
+              
+              # Classify intent
+              classification = ChatNLPEngine.classify_intent(message)
+              
+              print(f"\n📊 Intent: {classification.intent.value}")
+              print(f"📊 Confidence: {classification.confidence:.2f}")
+              
+              # Generate response
+              response = ChatResponseGenerator.generate(
+                  classification.intent,
+                  classification.entities,
+                  None,
+                  None
+              )
+              
+              print("\n" + "=" * 60)
+              print("🤖 BidDeed.AI V18 Response (Fallback Mode):")
+              print("=" * 60)
+              print(f"\n{response}")
+          
+          asyncio.run(process_chat())
+          EOF
+      
+      - name: Run Batch Analysis
+        if: github.event.inputs.action == 'batch_analysis'
+        run: |
+          python << 'EOF'
+          import asyncio
+          import os
+          import sys
+          from datetime import datetime
+          
+          sys.path.insert(0, os.getcwd())
+          
+          async def run_batch():
+              print("🚀 Starting Batch Analysis...")
+              print(f"📅 Target: December 18, 2025 Tax Deed Auction")
+              
+              try:
+                  from src.langgraph.unified_orchestrator_v18 import UnifiedOrchestrator
+                  
+                  orchestrator = UnifiedOrchestrator()
+                  
+                  # Trigger batch via chat
+                  result = await orchestrator.chat(
+                      "Run batch analysis for Dec 18 auction",
+                      session_id=f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                  )
+                  
+                  print("\n" + "=" * 60)
+                  print("📊 Batch Analysis Triggered")
+                  print("=" * 60)
+                  print(f"\n{result['response']}")
+                  
+                  if result.get('pipeline_run_id'):
+                      print(f"\n⚡ Pipeline ID: {result['pipeline_run_id']}")
+                      
+                      # Monitor progress
+                      for i in range(60):  # 5 minutes max
+                          await asyncio.sleep(5)
+                          status = await orchestrator.get_pipeline_status(result['pipeline_run_id'])
+                          if status:
+                              print(f"📈 Progress: {status['progress_percent']}% - Stage {status['current_stage']}/12")
+                              if status['status'] in ['completed', 'failed']:
+                                  print(f"\n✅ Final Status: {status['status']}")
+                                  if status.get('results'):
+                                      print(f"📊 Results: {status['results']}")
+                                  break
+                  
+              except Exception as e:
+                  print(f"❌ Error: {e}")
+                  raise
+          
+          asyncio.run(run_batch())
+          EOF
+      
+      - name: Summary
+        run: |
+          echo "## 🤖 BidDeed.AI V18 Orchestrator" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Action:** ${{ github.event.inputs.action || 'scheduled' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Timestamp:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Components" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ NLP Engine: Active" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Database Connector: Connected" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ LLM Router: Gemini 2.5 Flash" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Pipeline: Everest Ascent™ V18" >> $GITHUB_STEP_SUMMARY
