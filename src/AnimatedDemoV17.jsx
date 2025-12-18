@@ -1,20 +1,14 @@
-// BidDeed.AI V17 - Animated Video Demo with Real-Time Supabase Data
-// Pulls LIVE auction data from Supabase to showcase platform functionality
+// BidDeed.AI V17 - Animated Video Demo with API-based Real-Time Data
+// Uses /api/auction-data endpoint which securely proxies to Supabase
 // © 2025 Everest Capital USA. All Rights Reserved.
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { createClient } from '@supabase/supabase-js';
-
-// ============ SUPABASE CLIENT ============
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://mocerqjnksmhcjzxrewo.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-const supabase = supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
 // ============ DEMO CONFIGURATION ============
 const DEMO_CONFIG = {
-  totalDuration: 45, // seconds
+  totalDuration: 45,
+  apiEndpoint: '/api/auction-data',
   stages: [
     { id: 1, name: 'Discovery', duration: 3, startAt: 0 },
     { id: 2, name: 'Scraping', duration: 4, startAt: 3 },
@@ -31,8 +25,9 @@ const DEMO_CONFIG = {
   ],
 };
 
-// ============ FALLBACK DATA (if Supabase unavailable) ============
+// ============ FALLBACK DATA ============
 const FALLBACK_DATA = {
+  source: 'fallback',
   auction: {
     date: '2025-12-18',
     type: 'TAX_DEED',
@@ -62,12 +57,8 @@ const FALLBACK_DATA = {
       { type: 'Tax Certificate', amount: 4426.73, survives: false },
     ],
     winProbabilityMatrix: {
-      '10%': 46250,
-      '20%': 55500,
-      '40%': 74000,
-      '60%': 92500,
-      '80%': 111000,
-      '95%': 129500,
+      '10%': 46250, '20%': 55500, '40%': 74000,
+      '60%': 92500, '80%': 111000, '95%': 129500,
     },
   },
   stats: {
@@ -78,172 +69,67 @@ const FALLBACK_DATA = {
   }
 };
 
-// ============ REAL DATA FETCHER WITH SUPABASE ============
-const useRealAuctionData = () => {
-  const [auctionData, setAuctionData] = useState(null);
+// ============ DATA FETCHER HOOK ============
+const useAuctionData = () => {
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [dataSource, setDataSource] = useState('loading');
 
   useEffect(() => {
     const fetchData = async () => {
-      // If no Supabase client, use fallback
-      if (!supabase) {
-        console.log('Supabase not configured, using fallback data');
-        setAuctionData(FALLBACK_DATA);
-        setDataSource('fallback');
-        setLoading(false);
-        return;
-      }
-
       try {
-        // Fetch from multiple tables in parallel
-        const [
-          { data: auctionResults, error: auctionError },
-          { data: historicalData, error: historyError },
-          { data: statsData, error: statsError }
-        ] = await Promise.all([
-          // Get latest auction results
-          supabase
-            .from('auction_results')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(20),
-          
-          // Get historical stats
-          supabase
-            .from('historical_auctions')
-            .select('*')
-            .order('auction_date', { ascending: false })
-            .limit(5),
-          
-          // Get daily metrics
-          supabase
-            .from('daily_metrics')
-            .select('*')
-            .order('date', { ascending: false })
-            .limit(1)
-        ]);
-
-        // Check for errors
-        if (auctionError) {
-          console.warn('Auction results error:', auctionError);
-        }
-        if (historyError) {
-          console.warn('Historical data error:', historyError);
-        }
-
-        // Process results
-        if (auctionResults && auctionResults.length > 0) {
-          // Transform Supabase data to demo format
-          const latestAuction = auctionResults[0];
-          
-          const transformedData = {
-            auction: {
-              date: latestAuction.auction_date || '2025-12-18',
-              type: latestAuction.auction_type || 'TAX_DEED',
-              location: 'Brevard County, FL',
-              totalProperties: auctionResults.length,
-              bidRecommended: auctionResults.filter(r => r.recommendation === 'BID').length,
-              reviewRecommended: auctionResults.filter(r => r.recommendation === 'REVIEW').length,
-              skipRecommended: auctionResults.filter(r => r.recommendation === 'SKIP').length,
-            },
-            sampleProperty: {
-              caseNumber: latestAuction.case_number || latestAuction.caseNumber,
-              parcelId: latestAuction.parcel_id || latestAuction.parcelId,
-              address: latestAuction.property_address || latestAuction.address,
-              propertyType: latestAuction.property_type || 'SFR',
-              sqft: latestAuction.building_sqft || latestAuction.sqft || 0,
-              yearBuilt: latestAuction.year_built || latestAuction.yearBuilt || 0,
-              ownerName: latestAuction.owner_name || 'OWNER',
-              marketValue: latestAuction.market_value || latestAuction.arv || 0,
-              openingBid: latestAuction.opening_bid || latestAuction.openingBid || 0,
-              finalJudgment: latestAuction.final_judgment || latestAuction.finalJudgment || 0,
-              bidJudgmentRatio: latestAuction.bid_judgment_ratio || latestAuction.bidJudgmentRatio || 0,
-              recommendation: latestAuction.recommendation || 'REVIEW',
-              mlProbability: latestAuction.ml_probability || latestAuction.mlProbability || 0.4,
-              maxBid: latestAuction.max_bid || latestAuction.maxBid || 0,
-              liens: latestAuction.liens || [],
-              winProbabilityMatrix: latestAuction.win_probability_matrix || 
-                                    latestAuction.winProbabilityMatrix || 
-                                    FALLBACK_DATA.sampleProperty.winProbabilityMatrix,
-            },
-            stats: {
-              totalProcessed: historicalData?.length || 1393,
-              mlAccuracy: statsData?.[0]?.ml_accuracy || 64.4,
-              avgProcessingTime: statsData?.[0]?.avg_processing_time || 23,
-              costSavings: 90,
-            }
-          };
-
-          setAuctionData(transformedData);
-          setDataSource('supabase');
-        } else {
-          // Use fallback if no data
-          console.log('No auction results found, using fallback');
-          setAuctionData(FALLBACK_DATA);
-          setDataSource('fallback');
-        }
+        const response = await fetch(DEMO_CONFIG.apiEndpoint);
+        const result = await response.json();
         
+        // Check data source from response or header
+        const source = result.source || 
+                      response.headers.get('X-Data-Source') || 
+                      'api';
+        
+        setData(result);
+        setDataSource(source === 'supabase-live' ? 'live' : 
+                     source === 'supabase' ? 'live' : 'demo');
         setLoading(false);
-      } catch (err) {
-        console.error('Error fetching auction data:', err);
-        setError(err.message);
-        setAuctionData(FALLBACK_DATA);
-        setDataSource('fallback');
+      } catch (error) {
+        console.warn('API fetch failed, using fallback:', error);
+        setData(FALLBACK_DATA);
+        setDataSource('demo');
         setLoading(false);
       }
     };
 
     fetchData();
-
-    // Set up real-time subscription if Supabase available
-    let subscription = null;
-    if (supabase) {
-      subscription = supabase
-        .channel('auction_updates')
-        .on('postgres_changes', 
-          { event: '*', schema: 'public', table: 'auction_results' },
-          (payload) => {
-            console.log('Real-time update:', payload);
-            fetchData(); // Refresh data on changes
-          }
-        )
-        .subscribe();
-    }
-
-    return () => {
-      if (subscription) {
-        subscription.unsubscribe();
-      }
-    };
+    
+    // Refresh every 30 seconds if live
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
   }, []);
 
-  return { auctionData, loading, error, dataSource };
+  return { data, loading, dataSource };
 };
 
 // ============ DATA SOURCE BADGE ============
 const DataSourceBadge = ({ source }) => {
-  const badges = {
-    supabase: { label: '🔴 LIVE', color: 'bg-red-500/20 text-red-400 border-red-500/30' },
-    fallback: { label: '📦 Demo', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
-    loading: { label: '⏳ Loading', color: 'bg-slate-500/20 text-slate-400 border-slate-500/30' },
+  const config = {
+    live: { label: '🔴 LIVE', color: 'bg-red-500/20 text-red-400 border-red-500/30', pulse: true },
+    demo: { label: '📦 Demo', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30', pulse: false },
+    loading: { label: '⏳ Loading', color: 'bg-slate-500/20 text-slate-400 border-slate-500/30', pulse: false },
   };
   
-  const badge = badges[source] || badges.loading;
+  const { label, color, pulse } = config[source] || config.loading;
   
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded-full border ${badge.color}`}>
-      {source === 'supabase' && <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />}
-      {badge.label}
+    <span className={`inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded-full border ${color}`}>
+      {pulse && <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />}
+      {label}
     </span>
   );
 };
 
-// ============ ANIMATED STAGE COMPONENT ============
-const AnimatedStage = ({ stage, isActive, isComplete, data }) => {
-  const stageContent = {
-    1: { // Discovery
+// ============ STAGE CONTENT GENERATOR ============
+const getStageContent = (stageId, data) => {
+  const contents = {
+    1: {
       title: 'Discovering Auction Properties',
       visual: (
         <div className="space-y-2">
@@ -252,35 +138,30 @@ const AnimatedStage = ({ stage, isActive, isComplete, data }) => {
             <span>Scanning brevard.realforeclose.com...</span>
           </div>
           <div className="text-sm text-slate-400">
-            Found: {data?.auction?.totalProperties || 20} properties for {data?.auction?.date || '12/18/2025'}
+            Found: {data?.auction?.totalProperties || 20} properties for {data?.auction?.date}
           </div>
         </div>
       )
     },
-    2: { // Scraping
+    2: {
       title: 'Extracting Property Data',
       visual: (
         <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="p-2 bg-white/5 rounded">
-            <div className="text-slate-500">Parcel</div>
-            <div className="text-white font-mono">{data?.sampleProperty?.parcelId}</div>
-          </div>
-          <div className="p-2 bg-white/5 rounded">
-            <div className="text-slate-500">Type</div>
-            <div className="text-white">{data?.sampleProperty?.propertyType}</div>
-          </div>
-          <div className="p-2 bg-white/5 rounded">
-            <div className="text-slate-500">SqFt</div>
-            <div className="text-white">{data?.sampleProperty?.sqft?.toLocaleString()}</div>
-          </div>
-          <div className="p-2 bg-white/5 rounded">
-            <div className="text-slate-500">Year</div>
-            <div className="text-white">{data?.sampleProperty?.yearBuilt}</div>
-          </div>
+          {[
+            { label: 'Parcel', value: data?.sampleProperty?.parcelId, mono: true },
+            { label: 'Type', value: data?.sampleProperty?.propertyType },
+            { label: 'SqFt', value: data?.sampleProperty?.sqft?.toLocaleString() },
+            { label: 'Year', value: data?.sampleProperty?.yearBuilt },
+          ].map((item, i) => (
+            <div key={i} className="p-2 bg-white/5 rounded">
+              <div className="text-slate-500">{item.label}</div>
+              <div className={`text-white ${item.mono ? 'font-mono' : ''}`}>{item.value}</div>
+            </div>
+          ))}
         </div>
       )
     },
-    3: { // Title Search
+    3: {
       title: 'Running Title Search',
       visual: (
         <div className="space-y-2">
@@ -295,7 +176,7 @@ const AnimatedStage = ({ stage, isActive, isComplete, data }) => {
         </div>
       )
     },
-    4: { // Lien Priority - CRITICAL
+    4: {
       title: 'Analyzing Lien Priority',
       visual: (
         <div className="space-y-3">
@@ -310,55 +191,44 @@ const AnimatedStage = ({ stage, isActive, isComplete, data }) => {
               </div>
             ))}
           </div>
-          <div className="text-xs text-emerald-400">
-            ✓ No senior mortgage detected - Safe to bid
-          </div>
+          <div className="text-xs text-emerald-400">✓ No senior mortgage detected - Safe to bid</div>
         </div>
       )
     },
-    5: { // Tax Certs
+    5: {
       title: 'Checking Tax Certificates',
       visual: (
-        <div className="p-3 bg-white/5 rounded">
-          <div className="flex justify-between mb-2">
+        <div className="p-3 bg-white/5 rounded space-y-2">
+          <div className="flex justify-between">
             <span className="text-slate-400">Opening Bid</span>
-            <span className="text-amber-400 font-mono">
-              ${data?.sampleProperty?.openingBid?.toLocaleString()}
-            </span>
+            <span className="text-amber-400 font-mono">${data?.sampleProperty?.openingBid?.toLocaleString()}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-400">Final Judgment</span>
-            <span className="text-white font-mono">
-              ${data?.sampleProperty?.finalJudgment?.toLocaleString()}
-            </span>
+            <span className="text-white font-mono">${data?.sampleProperty?.finalJudgment?.toLocaleString()}</span>
           </div>
         </div>
       )
     },
-    6: { // Demographics
+    6: {
       title: 'Loading Demographics',
       visual: (
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <div className="p-2 bg-emerald-500/10 rounded">
-            <div className="text-slate-500">ZIP</div>
-            <div className="text-emerald-400">32953</div>
-          </div>
-          <div className="p-2 bg-emerald-500/10 rounded">
-            <div className="text-slate-500">Median Income</div>
-            <div className="text-emerald-400">$79,000</div>
-          </div>
-          <div className="p-2 bg-emerald-500/10 rounded">
-            <div className="text-slate-500">Vacancy Rate</div>
-            <div className="text-emerald-400">5.5%</div>
-          </div>
-          <div className="p-2 bg-emerald-500/10 rounded">
-            <div className="text-slate-500">Target ZIP</div>
-            <div className="text-emerald-400">✓ Yes</div>
-          </div>
+          {[
+            { label: 'ZIP', value: '32953' },
+            { label: 'Median Income', value: '$79,000' },
+            { label: 'Vacancy Rate', value: '5.5%' },
+            { label: 'Target ZIP', value: '✓ Yes' },
+          ].map((item, i) => (
+            <div key={i} className="p-2 bg-emerald-500/10 rounded">
+              <div className="text-slate-500">{item.label}</div>
+              <div className="text-emerald-400">{item.value}</div>
+            </div>
+          ))}
         </div>
       )
     },
-    7: { // ML Score - Key Feature
+    7: {
       title: 'Calculating ML Predictions',
       visual: (
         <div className="space-y-3">
@@ -373,8 +243,8 @@ const AnimatedStage = ({ stage, isActive, isComplete, data }) => {
               ))}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-slate-400">XGBoost Prediction:</span>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-slate-400">XGBoost:</span>
             <span className="text-emerald-400 font-semibold">
               {((data?.sampleProperty?.mlProbability || 0.4) * 100).toFixed(0)}% third-party probability
             </span>
@@ -382,7 +252,7 @@ const AnimatedStage = ({ stage, isActive, isComplete, data }) => {
         </div>
       )
     },
-    8: { // Max Bid
+    8: {
       title: 'Computing Maximum Bid',
       visual: (
         <div className="space-y-2">
@@ -397,44 +267,33 @@ const AnimatedStage = ({ stage, isActive, isComplete, data }) => {
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-slate-400">Bid/Judgment Ratio</span>
-            <span className="text-emerald-400 font-semibold">
-              {data?.sampleProperty?.bidJudgmentRatio}%
-            </span>
+            <span className="text-emerald-400 font-semibold">{data?.sampleProperty?.bidJudgmentRatio}%</span>
           </div>
         </div>
       )
     },
-    9: { // Decision
+    9: {
       title: 'Generating Recommendation',
-      visual: (
-        <div className={`p-4 border-2 rounded-lg text-center ${
-          data?.sampleProperty?.recommendation === 'BID' 
-            ? 'bg-emerald-500/10 border-emerald-500/50' 
-            : data?.sampleProperty?.recommendation === 'REVIEW'
-            ? 'bg-amber-500/10 border-amber-500/50'
-            : 'bg-red-500/10 border-red-500/50'
-        }`}>
-          <div className="text-3xl mb-2">
-            {data?.sampleProperty?.recommendation === 'BID' ? '✅' : 
-             data?.sampleProperty?.recommendation === 'REVIEW' ? '⚠️' : '❌'}
+      visual: (() => {
+        const rec = data?.sampleProperty?.recommendation || 'BID';
+        const colors = {
+          BID: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/50', text: 'text-emerald-400', icon: '✅' },
+          REVIEW: { bg: 'bg-amber-500/10', border: 'border-amber-500/50', text: 'text-amber-400', icon: '⚠️' },
+          SKIP: { bg: 'bg-red-500/10', border: 'border-red-500/50', text: 'text-red-400', icon: '❌' },
+        };
+        const c = colors[rec] || colors.BID;
+        return (
+          <div className={`p-4 ${c.bg} border-2 ${c.border} rounded-lg text-center`}>
+            <div className="text-3xl mb-2">{c.icon}</div>
+            <div className={`text-2xl font-bold ${c.text}`}>{rec}</div>
+            <div className="text-sm text-slate-400 mt-1">
+              {data?.sampleProperty?.bidJudgmentRatio >= 75 ? 'Ratio ≥75% threshold met' : 'Review recommended'}
+            </div>
           </div>
-          <div className={`text-2xl font-bold ${
-            data?.sampleProperty?.recommendation === 'BID' ? 'text-emerald-400' :
-            data?.sampleProperty?.recommendation === 'REVIEW' ? 'text-amber-400' : 'text-red-400'
-          }`}>
-            {data?.sampleProperty?.recommendation}
-          </div>
-          <div className="text-sm text-slate-400 mt-1">
-            {data?.sampleProperty?.bidJudgmentRatio >= 75 
-              ? 'Ratio ≥75% threshold met' 
-              : data?.sampleProperty?.bidJudgmentRatio >= 60
-              ? 'Ratio 60-74% - Review required'
-              : 'Ratio <60% - Skip recommended'}
-          </div>
-        </div>
-      )
+        );
+      })()
     },
-    10: { // Report
+    10: {
       title: 'Generating DOCX Report',
       visual: (
         <div className="space-y-2">
@@ -456,7 +315,7 @@ const AnimatedStage = ({ stage, isActive, isComplete, data }) => {
         </div>
       )
     },
-    11: { // Disposition
+    11: {
       title: 'Determining Exit Strategy',
       visual: (
         <div className="grid grid-cols-2 gap-3">
@@ -473,7 +332,7 @@ const AnimatedStage = ({ stage, isActive, isComplete, data }) => {
         </div>
       )
     },
-    12: { // Archive
+    12: {
       title: 'Archiving to Supabase',
       visual: (
         <div className="space-y-2">
@@ -491,8 +350,13 @@ const AnimatedStage = ({ stage, isActive, isComplete, data }) => {
       )
     },
   };
+  
+  return contents[stageId] || { title: `Stage ${stageId}`, visual: null };
+};
 
-  const content = stageContent[stage.id] || { title: stage.name, visual: null };
+// ============ ANIMATED STAGE COMPONENT ============
+const AnimatedStage = ({ stage, isActive, isComplete, data }) => {
+  const content = getStageContent(stage.id, data);
 
   return (
     <motion.div
@@ -522,9 +386,7 @@ const AnimatedStage = ({ stage, isActive, isComplete, data }) => {
           <div className="text-sm font-semibold text-white">{content.title}</div>
           <div className="text-xs text-slate-500">Stage {stage.id} of 12</div>
         </div>
-        {isActive && (
-          <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
-        )}
+        {isActive && <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />}
       </div>
       
       <AnimatePresence>
@@ -542,9 +404,9 @@ const AnimatedStage = ({ stage, isActive, isComplete, data }) => {
   );
 };
 
-// ============ MAIN ANIMATED DEMO COMPONENT ============
+// ============ MAIN COMPONENT ============
 const AnimatedDemoV17 = ({ autoPlay = false, onComplete }) => {
-  const { auctionData, loading, error, dataSource } = useRealAuctionData();
+  const { data, loading, dataSource } = useAuctionData();
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const intervalRef = useRef(null);
@@ -562,10 +424,7 @@ const AnimatedDemoV17 = ({ autoPlay = false, onComplete }) => {
         });
       }, 100);
     }
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
+    return () => clearInterval(intervalRef.current);
   }, [isPlaying, currentTime, onComplete]);
 
   const getCurrentStage = useCallback(() => {
@@ -585,8 +444,7 @@ const AnimatedDemoV17 = ({ autoPlay = false, onComplete }) => {
       <div className="flex items-center justify-center h-96 bg-slate-900 rounded-2xl">
         <div className="text-center">
           <div className="animate-spin w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full mx-auto mb-4" />
-          <div className="text-slate-400">Connecting to Supabase...</div>
-          <div className="text-xs text-slate-600 mt-2">Fetching real auction data</div>
+          <div className="text-slate-400">Loading auction data...</div>
         </div>
       </div>
     );
@@ -606,7 +464,7 @@ const AnimatedDemoV17 = ({ autoPlay = false, onComplete }) => {
               <DataSourceBadge source={dataSource} />
             </div>
             <div className="text-xs text-slate-400">
-              {dataSource === 'supabase' ? 'Real-time' : 'Sample'} data from {auctionData?.auction?.date} Auction
+              {dataSource === 'live' ? 'Real-time' : 'Sample'} data • {data?.auction?.date}
             </div>
           </div>
         </div>
@@ -615,86 +473,45 @@ const AnimatedDemoV17 = ({ autoPlay = false, onComplete }) => {
             onClick={() => setIsPlaying(!isPlaying)}
             className="px-4 py-2 bg-amber-500 text-slate-900 font-semibold rounded-lg hover:bg-amber-400 transition-colors flex items-center gap-2"
           >
-            {isPlaying ? (
-              <>
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
-                </svg>
-                Pause
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-                Play
-              </>
-            )}
+            {isPlaying ? '⏸ Pause' : '▶ Play'}
           </button>
           <button
             onClick={() => { setCurrentTime(0); setIsPlaying(true); }}
             className="px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors"
           >
-            ↺ Restart
+            ↺
           </button>
         </div>
       </div>
 
-      {/* Progress Bar */}
+      {/* Progress */}
       <div className="h-1 bg-white/10">
-        <motion.div
-          className="h-full bg-gradient-to-r from-amber-500 to-emerald-500"
-          style={{ width: `${progress}%` }}
-        />
+        <motion.div className="h-full bg-gradient-to-r from-amber-500 to-emerald-500" style={{ width: `${progress}%` }} />
       </div>
 
-      {/* Main Content - Split View */}
+      {/* Content */}
       <div className="grid lg:grid-cols-2 gap-4 p-4">
-        {/* Left: Property Card */}
+        {/* Property Card */}
         <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-          <div className="flex items-center justify-between mb-3">
-            <div className="text-xs text-slate-500 uppercase tracking-wider">Analyzing Property</div>
-            {error && (
-              <span className="text-xs text-amber-400">⚠️ Using cached data</span>
-            )}
-          </div>
-          <div className="text-lg font-semibold text-white mb-1">
-            {auctionData?.sampleProperty?.address}
-          </div>
+          <div className="text-xs text-slate-500 uppercase tracking-wider mb-2">Analyzing Property</div>
+          <div className="text-lg font-semibold text-white mb-1">{data?.sampleProperty?.address}</div>
           <div className="text-sm text-slate-400 mb-4">
-            Case #{auctionData?.sampleProperty?.caseNumber} • Parcel {auctionData?.sampleProperty?.parcelId}
+            Case #{data?.sampleProperty?.caseNumber} • Parcel {data?.sampleProperty?.parcelId}
           </div>
           
           <div className="grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <div className="text-slate-500">Market Value</div>
-              <div className="text-white font-semibold">
-                ${auctionData?.sampleProperty?.marketValue?.toLocaleString()}
-              </div>
-            </div>
-            <div>
-              <div className="text-slate-500">Opening Bid</div>
-              <div className="text-amber-400 font-semibold">
-                ${auctionData?.sampleProperty?.openingBid?.toLocaleString()}
-              </div>
-            </div>
-            <div>
-              <div className="text-slate-500">Type</div>
-              <div className="text-white">{auctionData?.sampleProperty?.propertyType}</div>
-            </div>
-            <div>
-              <div className="text-slate-500">SqFt</div>
-              <div className="text-white">{auctionData?.sampleProperty?.sqft?.toLocaleString()}</div>
-            </div>
+            <div><div className="text-slate-500">Market Value</div><div className="text-white font-semibold">${data?.sampleProperty?.marketValue?.toLocaleString()}</div></div>
+            <div><div className="text-slate-500">Opening Bid</div><div className="text-amber-400 font-semibold">${data?.sampleProperty?.openingBid?.toLocaleString()}</div></div>
+            <div><div className="text-slate-500">Type</div><div className="text-white">{data?.sampleProperty?.propertyType}</div></div>
+            <div><div className="text-slate-500">SqFt</div><div className="text-white">{data?.sampleProperty?.sqft?.toLocaleString()}</div></div>
           </div>
 
-          {/* Final Recommendation */}
           {currentStageId >= 9 && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className={`mt-4 p-3 rounded-lg border ${
-                auctionData?.sampleProperty?.recommendation === 'BID'
+                data?.sampleProperty?.recommendation === 'BID'
                   ? 'bg-emerald-500/10 border-emerald-500/30'
                   : 'bg-amber-500/10 border-amber-500/30'
               }`}
@@ -702,63 +519,39 @@ const AnimatedDemoV17 = ({ autoPlay = false, onComplete }) => {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-xs text-slate-400">RECOMMENDATION</div>
-                  <div className={`text-xl font-bold ${
-                    auctionData?.sampleProperty?.recommendation === 'BID' ? 'text-emerald-400' : 'text-amber-400'
-                  }`}>
-                    {auctionData?.sampleProperty?.recommendation}
+                  <div className={`text-xl font-bold ${data?.sampleProperty?.recommendation === 'BID' ? 'text-emerald-400' : 'text-amber-400'}`}>
+                    {data?.sampleProperty?.recommendation}
                   </div>
                 </div>
                 <div className="text-right">
                   <div className="text-xs text-slate-400">MAX BID</div>
-                  <div className="text-xl font-bold text-amber-400">
-                    ${auctionData?.sampleProperty?.maxBid?.toLocaleString()}
-                  </div>
+                  <div className="text-xl font-bold text-amber-400">${data?.sampleProperty?.maxBid?.toLocaleString()}</div>
                 </div>
               </div>
             </motion.div>
           )}
         </div>
 
-        {/* Right: Stage Progress */}
-        <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-white/10">
+        {/* Stages */}
+        <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2">
           {DEMO_CONFIG.stages.map((stage) => (
             <AnimatedStage
               key={stage.id}
               stage={stage}
               isActive={currentStageId === stage.id}
               isComplete={currentStageId > stage.id}
-              data={auctionData}
+              data={data}
             />
           ))}
         </div>
       </div>
 
-      {/* Footer Stats */}
+      {/* Stats Footer */}
       <div className="p-4 border-t border-white/10 grid grid-cols-4 gap-4 text-center bg-slate-900/50">
-        <div>
-          <div className="text-2xl font-bold text-amber-400">
-            {auctionData?.stats?.totalProcessed?.toLocaleString()}
-          </div>
-          <div className="text-xs text-slate-500">Historical Records</div>
-        </div>
-        <div>
-          <div className="text-2xl font-bold text-emerald-400">
-            {auctionData?.stats?.mlAccuracy}%
-          </div>
-          <div className="text-xs text-slate-500">ML Accuracy</div>
-        </div>
-        <div>
-          <div className="text-2xl font-bold text-white">
-            {auctionData?.stats?.avgProcessingTime}s
-          </div>
-          <div className="text-xs text-slate-500">Avg Processing</div>
-        </div>
-        <div>
-          <div className="text-2xl font-bold text-amber-400">
-            {auctionData?.stats?.costSavings}%
-          </div>
-          <div className="text-xs text-slate-500">Cost Savings</div>
-        </div>
+        <div><div className="text-2xl font-bold text-amber-400">{data?.stats?.totalProcessed?.toLocaleString()}</div><div className="text-xs text-slate-500">Records</div></div>
+        <div><div className="text-2xl font-bold text-emerald-400">{data?.stats?.mlAccuracy}%</div><div className="text-xs text-slate-500">ML Accuracy</div></div>
+        <div><div className="text-2xl font-bold text-white">{data?.stats?.avgProcessingTime}s</div><div className="text-xs text-slate-500">Processing</div></div>
+        <div><div className="text-2xl font-bold text-amber-400">{data?.stats?.costSavings}%</div><div className="text-xs text-slate-500">Cost Savings</div></div>
       </div>
     </div>
   );
