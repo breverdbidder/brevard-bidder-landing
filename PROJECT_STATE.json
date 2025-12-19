@@ -1,9 +1,9 @@
 {
   "project_name": "BidDeed.AI",
-  "version": "16.2.0",
+  "version": "16.3.0",
   "parent_company": "EVEREST CAPITAL USA",
   "methodology": "The Everest Ascent™",
-  "last_updated": "2025-12-12T12:00:00Z",
+  "last_updated": "2025-12-19T03:42:00Z",
   "updated_by": "Claude Opus 4.5 (AI Architect)",
   "stack_status": {
     "scrapers": {
@@ -44,7 +44,9 @@
       "decision_panel": "deployed",
       "pipeline_progress": "deployed",
       "biddeed_chat": "deployed",
-      "design_tokens": "deployed"
+      "design_tokens": "deployed",
+      "shadcn_preset": "v2_deployed",
+      "typography": "geist"
     }
   },
   "repositories": {
@@ -69,6 +71,15 @@
       "decision": "Full stack merge from BrevardBidderAI to BidDeed.AI",
       "files_deployed": 76,
       "status": "completed"
+    },
+    {
+      "date": "2025-12-19",
+      "decision": "Deploy Shadcn new-york preset V2 with Geist typography",
+      "commits": [
+        "62e6b5b",
+        "4d4f595"
+      ],
+      "source": "YouTube learning: 5 Ways To Build Beautiful Websites Using Claude Code"
     }
   ],
   "pipeline_stages": [
