@@ -1,8 +1,4 @@
 # Cloudflare Pages Redirects
-# Static HTML routes (must come before catch-all)
-/chat /chat.html 200
-/bidchat /bidchat.html 200
-/calendar /calendar.html 200
-
-# SPA catch-all (send all other routes to index.html)
-/* /index.html 200
+# Static HTML files - these take precedence
+/chat /chat.html 200!
+/bidchat /bidchat.html 200!
