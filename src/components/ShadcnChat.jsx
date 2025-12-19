@@ -1,5 +1,5 @@
-// ShadcnChat.jsx - Unified Chat Component for BidDeed.AI & Life OS
-// Shadcn new-york preset + Smart Router V5 (Gemini 2.5 Flash FREE)
+// ShadcnChat.jsx - Unified Chat Component V2
+// Shadcn new-york preset + Premium Typography + Smart Router V5
 // © 2025 Everest Capital USA. All Rights Reserved.
 
 'use client';
@@ -9,76 +9,110 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Send, Loader2, Mountain, Sparkles, ChevronDown, 
   CheckCircle2, Circle, AlertCircle, Home, MessageSquare,
-  Calendar, Calculator, Scale, HelpCircle, Zap
+  Calendar, Calculator, Scale, HelpCircle, Zap, User, Bot
 } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════
-// DESIGN SYSTEM - Shadcn New York + BidDeed Brand
+// SHADCN NEW-YORK DESIGN TOKENS
+// Premium typography: Geist + Geist Mono (Vercel's flagship fonts)
+// ═══════════════════════════════════════════════════════════════
+
+const tokens = {
+  colors: {
+    background: 'hsl(240 10% 3.9%)',
+    foreground: 'hsl(0 0% 98%)',
+    card: 'hsl(240 10% 3.9%)',
+    cardForeground: 'hsl(0 0% 98%)',
+    popover: 'hsl(240 10% 3.9%)',
+    popoverForeground: 'hsl(0 0% 98%)',
+    primary: 'hsl(0 0% 98%)',
+    primaryForeground: 'hsl(240 5.9% 10%)',
+    secondary: 'hsl(240 3.7% 15.9%)',
+    secondaryForeground: 'hsl(0 0% 98%)',
+    muted: 'hsl(240 3.7% 15.9%)',
+    mutedForeground: 'hsl(240 5% 64.9%)',
+    accent: 'hsl(240 3.7% 15.9%)',
+    accentForeground: 'hsl(0 0% 98%)',
+    destructive: 'hsl(0 62.8% 30.6%)',
+    destructiveForeground: 'hsl(0 0% 98%)',
+    border: 'hsl(240 3.7% 15.9%)',
+    input: 'hsl(240 3.7% 15.9%)',
+    ring: 'hsl(240 4.9% 83.9%)',
+  },
+  radius: '0.5rem',
+};
+
+// ═══════════════════════════════════════════════════════════════
+// VARIANT CONFIGURATIONS
 // ═══════════════════════════════════════════════════════════════
 
 const VARIANTS = {
   biddeed: {
     name: 'BidDeed.AI',
+    tagline: 'Everest Summit Edition',
     icon: Mountain,
-    accent: 'amber',
-    gradient: 'from-amber-500 to-orange-600',
-    bgGradient: 'from-slate-950 via-slate-900 to-slate-950',
-    subtitle: 'Everest Summit Edition',
+    accentHue: 38, // Amber
+    accentColor: 'hsl(38 92% 50%)',
+    accentGradient: 'linear-gradient(135deg, hsl(38 92% 50%), hsl(24 95% 53%))',
+    glowColor: 'hsla(38, 92%, 50%, 0.15)',
     quickActions: [
-      { icon: Calendar, label: 'Dec 18 Auction', query: 'What auctions are on Dec 18?' },
-      { icon: Calculator, label: 'Max Bid Formula', query: 'Explain max bid formula' },
-      { icon: Scale, label: 'Lien Priority', query: 'How do liens work?' },
+      { icon: Calendar, label: 'Upcoming Auctions', query: 'What auctions are coming up?' },
+      { icon: Calculator, label: 'Max Bid Formula', query: 'Explain max bid calculation' },
+      { icon: Scale, label: 'Lien Priority', query: 'How do liens get prioritized?' },
       { icon: HelpCircle, label: 'Help', query: 'What can you help me with?' },
     ],
-    welcomeMessage: `Welcome to **BidDeed.AI V18** — Everest Summit Edition
-
-📅 **Upcoming Auctions:**
-• **Dec 18, 2025** — Tax Deed @ 9AM ONLINE
-• **Jan 7, 2026** — Foreclosure @ 11AM Titusville
-
-Ask me about properties, liens, or auction strategy.`,
+    welcomeMessage: {
+      headline: 'Foreclosure Intelligence',
+      subheadline: 'AI-powered auction analysis for Brevard County',
+      features: [
+        { emoji: '📅', label: 'Live auction tracking' },
+        { emoji: '⚖️', label: 'Automated lien discovery' },
+        { emoji: '🎯', label: 'ML-powered bid recommendations' },
+      ],
+    },
+    placeholder: 'Ask about properties, auctions, or liens...',
   },
   lifeos: {
     name: 'Life OS',
+    tagline: 'ADHD Command Center',
     icon: Home,
-    accent: 'emerald',
-    gradient: 'from-emerald-500 to-teal-600',
-    bgGradient: 'from-slate-950 via-slate-900 to-slate-950',
-    subtitle: 'ADHD-Optimized Productivity',
+    accentHue: 160, // Emerald
+    accentColor: 'hsl(160 84% 39%)',
+    accentGradient: 'linear-gradient(135deg, hsl(160 84% 39%), hsl(172 66% 39%))',
+    glowColor: 'hsla(160, 84%, 39%, 0.15)',
     quickActions: [
-      { icon: Calendar, label: 'Today\'s Tasks', query: 'What are my tasks for today?' },
+      { icon: Calendar, label: "Today's Tasks", query: 'What are my tasks for today?' },
       { icon: Zap, label: 'Quick Capture', query: 'Log a new task' },
-      { icon: MessageSquare, label: 'Michael D1', query: 'Show Michael\'s swim progress' },
+      { icon: MessageSquare, label: 'Michael D1', query: "Show Michael's swim progress" },
       { icon: HelpCircle, label: 'Help', query: 'What can you help me with?' },
     ],
-    welcomeMessage: `Welcome to **Life OS** — Your ADHD-Optimized Command Center
-
-🏠 **Family Dashboard**
-• Track tasks, goals, and habits
-• Michael D1 swimming analytics
-• ADHD-friendly accountability
-
-What would you like to accomplish?`,
+    welcomeMessage: {
+      headline: 'Productivity Dashboard',
+      subheadline: 'ADHD-optimized task management & accountability',
+      features: [
+        { emoji: '🎯', label: 'Task state tracking' },
+        { emoji: '🏊', label: 'Michael D1 analytics' },
+        { emoji: '⚡', label: 'Smart interventions' },
+      ],
+    },
+    placeholder: 'What would you like to accomplish?',
   },
 };
 
 // ═══════════════════════════════════════════════════════════════
-// SMART ROUTER INTEGRATION
+// SMART ROUTER V5 INTEGRATION
 // ═══════════════════════════════════════════════════════════════
 
 const SmartRouter = {
   async sendMessage(messages, variant = 'biddeed') {
-    const endpoint = variant === 'biddeed' 
-      ? '/api/chat'
-      : '/api/chat';
-    
     try {
-      const response = await fetch(endpoint, {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           messages: messages.map(m => ({ role: m.role, content: m.content })),
-          model: 'gemini-2.5-flash', // FREE tier default
+          model: 'gemini-2.5-flash',
+          variant,
         }),
       });
       
@@ -92,7 +126,7 @@ const SmartRouter = {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// COMPONENTS
+// SUBCOMPONENTS
 // ═══════════════════════════════════════════════════════════════
 
 function WelcomeScreen({ config, onQuickAction }) {
@@ -100,92 +134,158 @@ function WelcomeScreen({ config, onQuickAction }) {
   
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col items-center justify-center h-full px-6 text-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex flex-col items-center justify-center h-full px-6"
     >
-      {/* Hero Icon */}
+      {/* Hero Section */}
       <motion.div 
-        className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${config.gradient} 
-                    flex items-center justify-center mb-6 shadow-2xl shadow-${config.accent}-500/20`}
-        initial={{ scale: 0.8 }}
-        animate={{ scale: 1 }}
-        transition={{ type: 'spring', bounce: 0.5 }}
+        className="relative mb-8"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: 'spring', bounce: 0.4, delay: 0.1 }}
       >
-        <Icon className="w-10 h-10 text-white" strokeWidth={1.5} />
+        {/* Glow Effect */}
+        <div 
+          className="absolute inset-0 blur-3xl opacity-40 rounded-full scale-150"
+          style={{ background: config.accentGradient }}
+        />
+        
+        {/* Icon Container */}
+        <div 
+          className="relative w-24 h-24 rounded-3xl flex items-center justify-center shadow-2xl"
+          style={{ background: config.accentGradient }}
+        >
+          <Icon className="w-12 h-12 text-white" strokeWidth={1.5} />
+        </div>
       </motion.div>
       
-      {/* Title */}
-      <h2 className="text-2xl font-bold text-white mb-1 tracking-tight">
-        {config.name}
-      </h2>
-      <p className="text-sm text-slate-400 mb-6">{config.subtitle}</p>
+      {/* Typography */}
+      <motion.div 
+        className="text-center mb-8"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
+        <h1 className="text-3xl font-semibold tracking-tight text-white mb-2">
+          {config.welcomeMessage.headline}
+        </h1>
+        <p className="text-base text-zinc-400 max-w-md">
+          {config.welcomeMessage.subheadline}
+        </p>
+      </motion.div>
       
-      {/* Welcome Message */}
-      <div className="max-w-md text-left bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 mb-6">
-        <div className="text-sm text-slate-300 leading-relaxed whitespace-pre-line"
-             dangerouslySetInnerHTML={{ 
-               __html: config.welcomeMessage
-                 .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white">$1</strong>')
-                 .replace(/\n/g, '<br/>') 
-             }} 
-        />
-      </div>
+      {/* Feature Pills */}
+      <motion.div 
+        className="flex flex-wrap gap-3 justify-center mb-10"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.3 }}
+      >
+        {config.welcomeMessage.features.map((feature, i) => (
+          <div 
+            key={i}
+            className="flex items-center gap-2 px-4 py-2 rounded-full 
+                       bg-zinc-900/80 border border-zinc-800"
+          >
+            <span className="text-lg">{feature.emoji}</span>
+            <span className="text-sm text-zinc-300">{feature.label}</span>
+          </div>
+        ))}
+      </motion.div>
       
       {/* Quick Actions */}
-      <div className="flex flex-wrap gap-2 justify-center max-w-md">
+      <motion.div 
+        className="grid grid-cols-2 gap-3 w-full max-w-md"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.4 }}
+      >
         {config.quickActions.map((action, i) => (
           <motion.button
             key={i}
             onClick={() => onQuickAction(action.query)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full
-                       bg-slate-800/80 border border-slate-700/50
-                       text-sm text-slate-300 hover:text-white
-                       hover:border-${config.accent}-500/50 hover:bg-slate-800
-                       transition-all duration-200`}
+            className="group flex items-center gap-3 p-4 rounded-2xl
+                       bg-zinc-900/60 border border-zinc-800/80
+                       hover:bg-zinc-800/80 hover:border-zinc-700
+                       transition-all duration-200 text-left"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 * i }}
           >
-            <action.icon className="w-4 h-4" />
-            {action.label}
+            <div 
+              className="w-10 h-10 rounded-xl flex items-center justify-center
+                         bg-zinc-800 group-hover:bg-zinc-700 transition-colors"
+              style={{ 
+                boxShadow: `0 0 20px ${config.glowColor}`,
+              }}
+            >
+              <action.icon 
+                className="w-5 h-5 transition-colors" 
+                style={{ color: config.accentColor }}
+              />
+            </div>
+            <span className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">
+              {action.label}
+            </span>
           </motion.button>
         ))}
-      </div>
+      </motion.div>
+      
+      {/* Powered By */}
+      <motion.p 
+        className="mt-10 text-xs text-zinc-600"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6 }}
+      >
+        Powered by Smart Router V5 • Gemini 2.5 Flash
+      </motion.p>
     </motion.div>
   );
 }
 
-function MessageBubble({ message, config }) {
+function MessageBubble({ message, config, isLast }) {
   const isUser = message.role === 'user';
   
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-3`}
+      className={`flex gap-3 mb-4 ${isUser ? 'flex-row-reverse' : ''}`}
     >
+      {/* Avatar */}
+      <div 
+        className={`flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center
+                    ${isUser ? 'bg-zinc-700' : ''}`}
+        style={!isUser ? { background: config.accentGradient } : undefined}
+      >
+        {isUser ? (
+          <User className="w-4 h-4 text-zinc-300" />
+        ) : (
+          <Bot className="w-4 h-4 text-white" />
+        )}
+      </div>
+      
+      {/* Bubble */}
       <div className={`
-        max-w-[85%] rounded-2xl px-4 py-3
+        max-w-[80%] rounded-2xl px-4 py-3
         ${isUser 
-          ? `bg-gradient-to-br ${config.gradient} text-white shadow-lg shadow-${config.accent}-500/10` 
-          : 'bg-slate-800/80 text-slate-200 border border-slate-700/50'}
+          ? 'bg-zinc-800 text-zinc-100' 
+          : 'bg-zinc-900/80 border border-zinc-800 text-zinc-200'}
       `}>
-        {/* Message Content */}
+        {/* Content */}
         <div 
-          className="text-sm leading-relaxed whitespace-pre-wrap"
+          className="text-[15px] leading-relaxed whitespace-pre-wrap [&>strong]:font-semibold [&>strong]:text-white [&>code]:px-1.5 [&>code]:py-0.5 [&>code]:bg-zinc-800 [&>code]:rounded [&>code]:text-[13px] [&>code]:font-mono [&>pre]:mt-3 [&>pre]:p-3 [&>pre]:bg-zinc-950 [&>pre]:rounded-xl [&>pre]:overflow-x-auto [&>pre]:text-[13px] [&>pre]:font-mono"
           dangerouslySetInnerHTML={{ 
             __html: message.content
               .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-              .replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 bg-black/20 rounded text-xs font-mono">$1</code>')
-              .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="mt-2 p-3 bg-black/30 rounded-lg overflow-x-auto text-xs font-mono">$2</pre>')
+              .replace(/`([^`]+)`/g, '<code>$1</code>')
+              .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre>$2</pre>')
           }} 
         />
         
         {/* Timestamp */}
-        <div className={`text-xs mt-2 ${isUser ? 'text-white/60' : 'text-slate-500'}`}>
+        <div className={`text-xs mt-2 ${isUser ? 'text-zinc-500' : 'text-zinc-600'}`}>
           {message.timestamp?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </div>
       </div>
@@ -196,31 +296,44 @@ function MessageBubble({ message, config }) {
 function TypingIndicator({ config }) {
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="flex justify-start mb-3"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -12 }}
+      className="flex gap-3 mb-4"
     >
-      <div className="bg-slate-800/80 border border-slate-700/50 rounded-2xl px-4 py-3">
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1">
-            {[0, 1, 2].map((i) => (
-              <motion.span
-                key={i}
-                className={`w-2 h-2 rounded-full bg-${config.accent}-500`}
-                animate={{ y: [0, -4, 0] }}
-                transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
-              />
-            ))}
-          </div>
-          <span className="text-sm text-slate-400">Thinking...</span>
+      <div 
+        className="w-8 h-8 rounded-xl flex items-center justify-center"
+        style={{ background: config.accentGradient }}
+      >
+        <Bot className="w-4 h-4 text-white" />
+      </div>
+      
+      <div className="bg-zinc-900/80 border border-zinc-800 rounded-2xl px-4 py-3">
+        <div className="flex items-center gap-1.5">
+          {[0, 1, 2].map((i) => (
+            <motion.span
+              key={i}
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: config.accentColor }}
+              animate={{ 
+                scale: [1, 1.3, 1],
+                opacity: [0.5, 1, 0.5],
+              }}
+              transition={{ 
+                duration: 1, 
+                repeat: Infinity, 
+                delay: i * 0.2,
+                ease: 'easeInOut',
+              }}
+            />
+          ))}
         </div>
       </div>
     </motion.div>
   );
 }
 
-function PipelineProgress({ stages, show }) {
+function PipelineProgress({ stages, show, config }) {
   if (!show) return null;
   
   const completedCount = stages.filter(s => s.status === 'complete').length;
@@ -231,42 +344,48 @@ function PipelineProgress({ stages, show }) {
       initial={{ height: 0, opacity: 0 }}
       animate={{ height: 'auto', opacity: 1 }}
       exit={{ height: 0, opacity: 0 }}
-      className="border-b border-slate-700/50 overflow-hidden"
+      className="border-b border-zinc-800/80 overflow-hidden"
     >
-      <div className="p-3 bg-slate-900/50">
+      <div className="p-4 bg-zinc-950/50">
         {/* Progress Bar */}
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs text-slate-500 font-mono">{completedCount}/{stages.length}</span>
-          <div className="flex-1 h-1 bg-slate-800 rounded-full overflow-hidden">
+        <div className="flex items-center gap-3 mb-3">
+          <span className="text-xs text-zinc-500 font-mono tabular-nums">
+            {completedCount}/{stages.length}
+          </span>
+          <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-amber-500 to-orange-500"
+              className="h-full rounded-full"
+              style={{ background: config.accentGradient }}
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
             />
           </div>
+          <span className="text-xs text-zinc-500">{Math.round(progress)}%</span>
         </div>
         
         {/* Stage Grid */}
-        <div className="grid grid-cols-6 gap-1">
+        <div className="grid grid-cols-6 gap-2">
           {stages.map((stage) => {
             const StatusIcon = stage.status === 'complete' ? CheckCircle2 
               : stage.status === 'running' ? Loader2 
               : stage.status === 'error' ? AlertCircle 
               : Circle;
             
-            const statusColor = stage.status === 'complete' ? 'text-emerald-500 bg-emerald-500/10'
-              : stage.status === 'running' ? 'text-amber-500 bg-amber-500/10'
-              : stage.status === 'error' ? 'text-red-500 bg-red-500/10'
-              : 'text-slate-600 bg-slate-800/50';
+            const statusStyles = {
+              complete: { bg: 'bg-emerald-500/10', text: 'text-emerald-500' },
+              running: { bg: 'bg-amber-500/10', text: 'text-amber-500' },
+              error: { bg: 'bg-red-500/10', text: 'text-red-500' },
+              pending: { bg: 'bg-zinc-800/50', text: 'text-zinc-600' },
+            }[stage.status] || { bg: 'bg-zinc-800/50', text: 'text-zinc-600' };
             
             return (
               <div 
                 key={stage.id}
-                className={`flex items-center gap-1 p-1.5 rounded text-[10px] ${statusColor}`}
+                className={`flex items-center justify-center gap-1.5 p-2 rounded-lg ${statusStyles.bg}`}
               >
-                <StatusIcon className={`w-3 h-3 ${stage.status === 'running' ? 'animate-spin' : ''}`} />
-                <span className="truncate">{stage.icon}</span>
+                <StatusIcon className={`w-3.5 h-3.5 ${statusStyles.text} ${stage.status === 'running' ? 'animate-spin' : ''}`} />
+                <span className={`text-[11px] ${statusStyles.text}`}>{stage.icon}</span>
               </div>
             );
           })}
@@ -326,7 +445,6 @@ export default function ShadcnChat({ variant = 'biddeed' }) {
     setInput('');
     setIsLoading(true);
     
-    // Show pipeline for BidDeed variant
     if (variant === 'biddeed') {
       setShowPipeline(true);
       setStages(prev => prev.map(s => ({ ...s, status: 'pending' })));
@@ -386,32 +504,58 @@ export default function ShadcnChat({ variant = 'biddeed' }) {
   }, [handleSubmit]);
   
   return (
-    <div className={`flex flex-col h-screen bg-gradient-to-br ${config.bgGradient}`}>
+    <div className="flex flex-col h-screen bg-zinc-950">
+      {/* CSS Variables */}
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
+        
+        :root {
+          --font-geist: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          --font-geist-mono: 'Geist Mono', 'SF Mono', monospace;
+        }
+        
+        body {
+          font-family: var(--font-geist);
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        
+        code, pre {
+          font-family: var(--font-geist-mono);
+        }
+      `}</style>
+      
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 
-                        bg-slate-900/80 backdrop-blur-xl border-b border-slate-800/50">
-        <div className="flex items-center gap-3">
-          <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${config.gradient} 
-                          flex items-center justify-center shadow-lg`}>
+      <header className="flex items-center justify-between px-5 py-4 
+                        bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-800/80">
+        <div className="flex items-center gap-4">
+          <div 
+            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
+            style={{ 
+              background: config.accentGradient,
+              boxShadow: `0 8px 24px ${config.glowColor}`,
+            }}
+          >
             <Icon className="w-5 h-5 text-white" strokeWidth={1.5} />
           </div>
           <div>
-            <h1 className="text-base font-semibold text-white tracking-tight">
+            <h1 className="text-[17px] font-semibold text-white tracking-tight">
               {config.name}
             </h1>
-            <p className="text-xs text-slate-500">{config.subtitle}</p>
+            <p className="text-xs text-zinc-500">{config.tagline}</p>
           </div>
         </div>
         
         {variant === 'biddeed' && (
           <button
             onClick={() => setShowPipeline(!showPipeline)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg
-                      text-xs text-slate-400 hover:text-white
-                      bg-slate-800/50 hover:bg-slate-800 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl
+                      text-xs font-medium text-zinc-400 hover:text-white
+                      bg-zinc-900 hover:bg-zinc-800 border border-zinc-800
+                      transition-all duration-200"
           >
             Pipeline
-            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showPipeline ? 'rotate-180' : ''}`} />
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showPipeline ? 'rotate-180' : ''}`} />
           </button>
         )}
       </header>
@@ -419,18 +563,23 @@ export default function ShadcnChat({ variant = 'biddeed' }) {
       {/* Pipeline (BidDeed only) */}
       <AnimatePresence>
         {variant === 'biddeed' && (
-          <PipelineProgress stages={stages} show={showPipeline} />
+          <PipelineProgress stages={stages} show={showPipeline} config={config} />
         )}
       </AnimatePresence>
       
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div className="flex-1 overflow-y-auto px-5 py-6">
         {messages.length === 0 ? (
           <WelcomeScreen config={config} onQuickAction={handleQuickAction} />
         ) : (
           <>
-            {messages.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} config={config} />
+            {messages.map((msg, i) => (
+              <MessageBubble 
+                key={msg.id} 
+                message={msg} 
+                config={config}
+                isLast={i === messages.length - 1}
+              />
             ))}
             
             <AnimatePresence>
@@ -442,23 +591,24 @@ export default function ShadcnChat({ variant = 'biddeed' }) {
       </div>
       
       {/* Input Area */}
-      <div className="p-4 bg-slate-900/80 backdrop-blur-xl border-t border-slate-800/50">
+      <div className="p-5 bg-zinc-950/90 backdrop-blur-xl border-t border-zinc-800/80">
         <form onSubmit={handleSubmit} className="flex gap-3">
-          <div className="flex-1 relative">
+          <div className="flex-1">
             <input
               ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={variant === 'biddeed' 
-                ? 'Ask about properties, auctions, or liens...' 
-                : 'What would you like to accomplish?'}
-              className="w-full bg-slate-800/80 text-white text-sm
-                        rounded-xl px-4 py-3 pr-12
-                        border border-slate-700/50 
-                        placeholder:text-slate-500
-                        focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-transparent
-                        transition-all"
+              placeholder={config.placeholder}
+              className="w-full bg-zinc-900 text-white text-[15px]
+                        rounded-xl px-4 py-3.5
+                        border border-zinc-800 
+                        placeholder:text-zinc-500
+                        focus:outline-none focus:ring-2 focus:border-transparent
+                        transition-all duration-200"
+              style={{ 
+                '--tw-ring-color': config.accentColor,
+              }}
               disabled={isLoading}
             />
           </div>
@@ -466,11 +616,14 @@ export default function ShadcnChat({ variant = 'biddeed' }) {
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
-            className={`w-12 h-12 rounded-xl bg-gradient-to-br ${config.gradient}
-                       flex items-center justify-center
-                       text-white shadow-lg shadow-${config.accent}-500/20
-                       disabled:opacity-50 disabled:cursor-not-allowed
-                       hover:opacity-90 active:scale-95 transition-all`}
+            className="w-12 h-12 rounded-xl flex items-center justify-center
+                       text-white shadow-lg
+                       disabled:opacity-40 disabled:cursor-not-allowed
+                       hover:opacity-90 active:scale-95 transition-all duration-200"
+            style={{ 
+              background: config.accentGradient,
+              boxShadow: `0 8px 24px ${config.glowColor}`,
+            }}
           >
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -479,16 +632,11 @@ export default function ShadcnChat({ variant = 'biddeed' }) {
             )}
           </button>
         </form>
-        
-        {/* Footer */}
-        <p className="text-center text-xs text-slate-600 mt-3">
-          Powered by Smart Router V5 • Gemini 2.5 Flash (FREE)
-        </p>
       </div>
     </div>
   );
 }
 
-// Export variants for convenience
+// Export variants
 export const BidDeedChat = () => <ShadcnChat variant="biddeed" />;
 export const LifeOSChat = () => <ShadcnChat variant="lifeos" />;
