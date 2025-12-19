@@ -13,36 +13,6 @@ import {
 } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════════
-// SHADCN NEW-YORK DESIGN TOKENS
-// Premium typography: Geist + Geist Mono (Vercel's flagship fonts)
-// ═══════════════════════════════════════════════════════════════
-
-const tokens = {
-  colors: {
-    background: 'hsl(240 10% 3.9%)',
-    foreground: 'hsl(0 0% 98%)',
-    card: 'hsl(240 10% 3.9%)',
-    cardForeground: 'hsl(0 0% 98%)',
-    popover: 'hsl(240 10% 3.9%)',
-    popoverForeground: 'hsl(0 0% 98%)',
-    primary: 'hsl(0 0% 98%)',
-    primaryForeground: 'hsl(240 5.9% 10%)',
-    secondary: 'hsl(240 3.7% 15.9%)',
-    secondaryForeground: 'hsl(0 0% 98%)',
-    muted: 'hsl(240 3.7% 15.9%)',
-    mutedForeground: 'hsl(240 5% 64.9%)',
-    accent: 'hsl(240 3.7% 15.9%)',
-    accentForeground: 'hsl(0 0% 98%)',
-    destructive: 'hsl(0 62.8% 30.6%)',
-    destructiveForeground: 'hsl(0 0% 98%)',
-    border: 'hsl(240 3.7% 15.9%)',
-    input: 'hsl(240 3.7% 15.9%)',
-    ring: 'hsl(240 4.9% 83.9%)',
-  },
-  radius: '0.5rem',
-};
-
-// ═══════════════════════════════════════════════════════════════
 // VARIANT CONFIGURATIONS
 // ═══════════════════════════════════════════════════════════════
 
@@ -51,10 +21,10 @@ const VARIANTS = {
     name: 'BidDeed.AI',
     tagline: 'Everest Summit Edition',
     icon: Mountain,
-    accentHue: 38, // Amber
-    accentColor: 'hsl(38 92% 50%)',
-    accentGradient: 'linear-gradient(135deg, hsl(38 92% 50%), hsl(24 95% 53%))',
-    glowColor: 'hsla(38, 92%, 50%, 0.15)',
+    accentHue: 38,
+    accentColor: 'rgb(245, 158, 11)',
+    accentGradient: 'linear-gradient(135deg, rgb(245, 158, 11), rgb(249, 115, 22))',
+    glowColor: 'rgba(245, 158, 11, 0.15)',
     quickActions: [
       { icon: Calendar, label: 'Upcoming Auctions', query: 'What auctions are coming up?' },
       { icon: Calculator, label: 'Max Bid Formula', query: 'Explain max bid calculation' },
@@ -76,10 +46,10 @@ const VARIANTS = {
     name: 'Life OS',
     tagline: 'ADHD Command Center',
     icon: Home,
-    accentHue: 160, // Emerald
-    accentColor: 'hsl(160 84% 39%)',
-    accentGradient: 'linear-gradient(135deg, hsl(160 84% 39%), hsl(172 66% 39%))',
-    glowColor: 'hsla(160, 84%, 39%, 0.15)',
+    accentHue: 160,
+    accentColor: 'rgb(16, 185, 129)',
+    accentGradient: 'linear-gradient(135deg, rgb(16, 185, 129), rgb(20, 184, 166))',
+    glowColor: 'rgba(16, 185, 129, 0.15)',
     quickActions: [
       { icon: Calendar, label: "Today's Tasks", query: 'What are my tasks for today?' },
       { icon: Zap, label: 'Quick Capture', query: 'Log a new task' },
@@ -185,8 +155,7 @@ function WelcomeScreen({ config, onQuickAction }) {
         {config.welcomeMessage.features.map((feature, i) => (
           <div 
             key={i}
-            className="flex items-center gap-2 px-4 py-2 rounded-full 
-                       bg-zinc-900/80 border border-zinc-800"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/80 border border-zinc-800"
           >
             <span className="text-lg">{feature.emoji}</span>
             <span className="text-sm text-zinc-300">{feature.label}</span>
@@ -205,24 +174,15 @@ function WelcomeScreen({ config, onQuickAction }) {
           <motion.button
             key={i}
             onClick={() => onQuickAction(action.query)}
-            className="group flex items-center gap-3 p-4 rounded-2xl
-                       bg-zinc-900/60 border border-zinc-800/80
-                       hover:bg-zinc-800/80 hover:border-zinc-700
-                       transition-all duration-200 text-left"
+            className="group flex items-center gap-3 p-4 rounded-2xl bg-zinc-900/60 border border-zinc-800/80 hover:bg-zinc-800/80 hover:border-zinc-700 transition-all duration-200 text-left"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
             <div 
-              className="w-10 h-10 rounded-xl flex items-center justify-center
-                         bg-zinc-800 group-hover:bg-zinc-700 transition-colors"
-              style={{ 
-                boxShadow: `0 0 20px ${config.glowColor}`,
-              }}
+              className="w-10 h-10 rounded-xl flex items-center justify-center bg-zinc-800 group-hover:bg-zinc-700 transition-colors"
+              style={{ boxShadow: `0 0 20px ${config.glowColor}` }}
             >
-              <action.icon 
-                className="w-5 h-5 transition-colors" 
-                style={{ color: config.accentColor }}
-              />
+              <action.icon className="w-5 h-5" style={{ color: config.accentColor }} />
             </div>
             <span className="text-sm font-medium text-zinc-300 group-hover:text-white transition-colors">
               {action.label}
@@ -255,8 +215,7 @@ function MessageBubble({ message, config, isLast }) {
     >
       {/* Avatar */}
       <div 
-        className={`flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center
-                    ${isUser ? 'bg-zinc-700' : ''}`}
+        className={`flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center ${isUser ? 'bg-zinc-700' : ''}`}
         style={!isUser ? { background: config.accentGradient } : undefined}
       >
         {isUser ? (
@@ -267,20 +226,15 @@ function MessageBubble({ message, config, isLast }) {
       </div>
       
       {/* Bubble */}
-      <div className={`
-        max-w-[80%] rounded-2xl px-4 py-3
-        ${isUser 
-          ? 'bg-zinc-800 text-zinc-100' 
-          : 'bg-zinc-900/80 border border-zinc-800 text-zinc-200'}
-      `}>
+      <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${isUser ? 'bg-zinc-800 text-zinc-100' : 'bg-zinc-900/80 border border-zinc-800 text-zinc-200'}`}>
         {/* Content */}
         <div 
-          className="text-[15px] leading-relaxed whitespace-pre-wrap [&>strong]:font-semibold [&>strong]:text-white [&>code]:px-1.5 [&>code]:py-0.5 [&>code]:bg-zinc-800 [&>code]:rounded [&>code]:text-[13px] [&>code]:font-mono [&>pre]:mt-3 [&>pre]:p-3 [&>pre]:bg-zinc-950 [&>pre]:rounded-xl [&>pre]:overflow-x-auto [&>pre]:text-[13px] [&>pre]:font-mono"
+          className="text-[15px] leading-relaxed whitespace-pre-wrap"
           dangerouslySetInnerHTML={{ 
             __html: message.content
-              .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-              .replace(/`([^`]+)`/g, '<code>$1</code>')
-              .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre>$2</pre>')
+              .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-white">$1</strong>')
+              .replace(/`([^`]+)`/g, '<code class="px-1.5 py-0.5 bg-zinc-800 rounded text-[13px] font-mono">$1</code>')
+              .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="mt-3 p-3 bg-zinc-950 rounded-xl overflow-x-auto text-[13px] font-mono">$2</pre>')
           }} 
         />
         
@@ -372,20 +326,20 @@ function PipelineProgress({ stages, show, config }) {
               : stage.status === 'error' ? AlertCircle 
               : Circle;
             
-            const statusStyles = {
-              complete: { bg: 'bg-emerald-500/10', text: 'text-emerald-500' },
-              running: { bg: 'bg-amber-500/10', text: 'text-amber-500' },
-              error: { bg: 'bg-red-500/10', text: 'text-red-500' },
-              pending: { bg: 'bg-zinc-800/50', text: 'text-zinc-600' },
-            }[stage.status] || { bg: 'bg-zinc-800/50', text: 'text-zinc-600' };
+            const statusClasses = {
+              complete: 'bg-emerald-500/10 text-emerald-500',
+              running: 'bg-amber-500/10 text-amber-500',
+              error: 'bg-red-500/10 text-red-500',
+              pending: 'bg-zinc-800/50 text-zinc-600',
+            }[stage.status] || 'bg-zinc-800/50 text-zinc-600';
             
             return (
               <div 
                 key={stage.id}
-                className={`flex items-center justify-center gap-1.5 p-2 rounded-lg ${statusStyles.bg}`}
+                className={`flex items-center justify-center gap-1.5 p-2 rounded-lg ${statusClasses}`}
               >
-                <StatusIcon className={`w-3.5 h-3.5 ${statusStyles.text} ${stage.status === 'running' ? 'animate-spin' : ''}`} />
-                <span className={`text-[11px] ${statusStyles.text}`}>{stage.icon}</span>
+                <StatusIcon className={`w-3.5 h-3.5 ${stage.status === 'running' ? 'animate-spin' : ''}`} />
+                <span className="text-[11px]">{stage.icon}</span>
               </div>
             );
           })}
@@ -505,29 +459,8 @@ export default function ShadcnChat({ variant = 'biddeed' }) {
   
   return (
     <div className="flex flex-col h-screen bg-zinc-950">
-      {/* CSS Variables */}
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap');
-        
-        :root {
-          --font-geist: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          --font-geist-mono: 'Geist Mono', 'SF Mono', monospace;
-        }
-        
-        body {
-          font-family: var(--font-geist);
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-        }
-        
-        code, pre {
-          font-family: var(--font-geist-mono);
-        }
-      `}</style>
-      
       {/* Header */}
-      <header className="flex items-center justify-between px-5 py-4 
-                        bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-800/80">
+      <header className="flex items-center justify-between px-5 py-4 bg-zinc-950/90 backdrop-blur-xl border-b border-zinc-800/80">
         <div className="flex items-center gap-4">
           <div 
             className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
@@ -549,10 +482,7 @@ export default function ShadcnChat({ variant = 'biddeed' }) {
         {variant === 'biddeed' && (
           <button
             onClick={() => setShowPipeline(!showPipeline)}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl
-                      text-xs font-medium text-zinc-400 hover:text-white
-                      bg-zinc-900 hover:bg-zinc-800 border border-zinc-800
-                      transition-all duration-200"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 transition-all duration-200"
           >
             Pipeline
             <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showPipeline ? 'rotate-180' : ''}`} />
@@ -600,15 +530,7 @@ export default function ShadcnChat({ variant = 'biddeed' }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={config.placeholder}
-              className="w-full bg-zinc-900 text-white text-[15px]
-                        rounded-xl px-4 py-3.5
-                        border border-zinc-800 
-                        placeholder:text-zinc-500
-                        focus:outline-none focus:ring-2 focus:border-transparent
-                        transition-all duration-200"
-              style={{ 
-                '--tw-ring-color': config.accentColor,
-              }}
+              className="w-full bg-zinc-900 text-white text-[15px] rounded-xl px-4 py-3.5 border border-zinc-800 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-transparent transition-all duration-200"
               disabled={isLoading}
             />
           </div>
@@ -616,10 +538,7 @@ export default function ShadcnChat({ variant = 'biddeed' }) {
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
-            className="w-12 h-12 rounded-xl flex items-center justify-center
-                       text-white shadow-lg
-                       disabled:opacity-40 disabled:cursor-not-allowed
-                       hover:opacity-90 active:scale-95 transition-all duration-200"
+            className="w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-lg disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-95 transition-all duration-200"
             style={{ 
               background: config.accentGradient,
               boxShadow: `0 8px 24px ${config.glowColor}`,
