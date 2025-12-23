@@ -1,11 +1,12 @@
 // BidDeed.AI App Router V18
-// Routes: / = Landing, #demo = Real Data, #pipeline = 12-Stage, #chat = V18 Chat
+// Routes: / = Landing, #demo = Real Data, #pipeline = 12-Stage, #chat = V18 Chat, #telemetry = Dashboard
 import React from 'react';
 import { useState, useEffect } from 'react';
 import App from './App';
 import RealDataDemo from './RealDataDemo';
 import PipelineDemo from './PipelineDemo';
 import ChatV18 from './ChatV18';
+import TelemetryDashboard from './components/TelemetryDashboard';
 
 export default function AppRouter() {
   const [route, setRoute] = useState(window.location.hash);
@@ -16,9 +17,14 @@ export default function AppRouter() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  // Route to Telemetry Dashboard
+  if (route === '#telemetry' || route === '#metrics' || route === '#dashboard') {
+    return <TelemetryDashboard />;
+  }
+
   // Route to V18 Chat - Agentic AI Assistant
   if (route === '#chat' || route === '#assistant' || route === '#ai') {
-    return <ChatV18 />;
+    return <ChatV18 />; 
   }
 
   // Route to Pipeline Demo - auto-animated 12-stage walkthrough
