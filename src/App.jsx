@@ -1,7 +1,7 @@
-// BidDeed.AI V18.0.0 - "Everest Summit" Edition
-// Split-Screen UI + Real Auction Data Animation + Premium Landing
+// BidDeed.AI V19.0 - "Consolidated Summit" Edition
+// Mobile-Responsive Landing Page + 12-Stage Everest Ascent™ Pipeline
 // © 2025 Everest Capital USA. All Rights Reserved.
-// Architecture: Claude Opus 4.5 | Design: Shadcn/UI + Framer Motion
+// Architecture: Claude Opus 4.5 | Design: Premium Responsive UI
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
@@ -9,1493 +9,899 @@ import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 // ============ DESIGN SYSTEM ============
 const theme = {
   colors: {
-    // Everest Brand - Deep Navy to Summit Gold
-    navy: {
-      950: '#030712',
-      900: '#0a0f1a',
-      800: '#111827',
-      700: '#1e293b',
-    },
-    gold: {
-      400: '#fbbf24',
-      500: '#f59e0b',
-      600: '#d97706',
-    },
-    emerald: {
-      400: '#34d399',
-      500: '#10b981',
-    },
-    red: {
-      400: '#f87171',
-      500: '#ef4444',
-    },
-    slate: {
-      300: '#cbd5e1',
-      400: '#94a3b8',
-      500: '#64748b',
-    }
+    navy: { 950: '#030712', 900: '#0a0f1a', 800: '#111827', 700: '#1e293b', 600: '#334155' },
+    gold: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
+    emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669' },
+    red: { 400: '#f87171', 500: '#ef4444', 600: '#dc2626' },
+    slate: { 300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b', 600: '#475569' }
   },
-  fonts: {
-    display: "'Instrument Serif', Georgia, serif",
-    body: "'Geist', -apple-system, BlinkMacSystemFont, sans-serif",
-    mono: "'Geist Mono', 'JetBrains Mono', monospace",
+  breakpoints: {
+    sm: '640px',
+    md: '768px',
+    lg: '1024px',
+    xl: '1280px',
+    '2xl': '1536px'
   }
 };
 
-// ============ REAL AUCTION DATA (Dec 18, 2025 Tax Deed Sale) ============
-const REAL_AUCTION_DATA = {
-  auctionDate: '2025-12-18',
-  auctionType: 'Tax Deed',
-  totalProperties: 20,
-  recommendations: {
-    BID: 4,
-    REVIEW: 3,
-    SKIP: 12,
-    DO_NOT_BID: 1
+// ============ THE EVEREST ASCENT™ - 12 STAGES ============
+const EVEREST_ASCENT_STAGES = [
+  // Phase 1: Base Camp (Discovery & Data Gathering)
+  {
+    number: 1,
+    name: 'Discovery',
+    brand: 'AuctionRadar™',
+    phase: 'Base Camp',
+    icon: '🔍',
+    color: theme.colors.emerald[500],
+    description: 'Identify upcoming auctions from RealForeclose, BECA, and county clerks',
+    outputs: 'List of auction opportunities with case numbers and dates',
+    duration: '30 sec',
+    flagship: false
   },
-  properties: [
-    // === BID RECOMMENDATIONS (4) ===
-    {
-      id: 1,
-      caseNumber: '250179',
-      parcelId: '3021477',
-      address: '202 Ivory Coral Ln #302',
-      city: 'Merritt Island',
-      zip: '32953',
-      propertyType: 'CONDO',
-      openingBid: 6847.05,
-      marketValue: 176000,
-      bidJudgmentRatio: 3.9,
-      recommendation: 'BID',
-      mlProbability: 0.72,
-      stage: 12,
-      riskLevel: 'LOW'
-    },
-    {
-      id: 2,
-      caseNumber: '250216',
-      parcelId: '3021458',
-      address: '202 Ivory Coral Ln #204',
-      city: 'Merritt Island',
-      zip: '32953',
-      propertyType: 'CONDO',
-      openingBid: 7234.18,
-      marketValue: 168000,
-      bidJudgmentRatio: 4.3,
-      recommendation: 'BID',
-      mlProbability: 0.68,
-      stage: 12,
-      riskLevel: 'LOW'
-    },
-    {
-      id: 3,
-      caseNumber: '250287',
-      parcelId: '2518734',
-      address: '1455 Saturn St',
-      city: 'Merritt Island',
-      zip: '32953',
-      propertyType: 'SINGLE FAMILY',
-      openingBid: 12450.00,
-      marketValue: 245000,
-      bidJudgmentRatio: 5.1,
-      recommendation: 'BID',
-      mlProbability: 0.65,
-      stage: 12,
-      riskLevel: 'LOW'
-    },
-    {
-      id: 4,
-      caseNumber: '250312',
-      parcelId: '2687521',
-      address: '3847 Bayside Dr',
-      city: 'Melbourne',
-      zip: '32940',
-      propertyType: 'SINGLE FAMILY',
-      openingBid: 18975.50,
-      marketValue: 312000,
-      bidJudgmentRatio: 6.1,
-      recommendation: 'BID',
-      mlProbability: 0.61,
-      stage: 12,
-      riskLevel: 'LOW'
-    },
-    // === REVIEW RECOMMENDATIONS (3) ===
-    {
-      id: 5,
-      caseNumber: '250422',
-      parcelId: '2823886',
-      address: '1247 Palm Bay Rd NE',
-      city: 'Palm Bay',
-      zip: '32905',
-      propertyType: 'SINGLE FAMILY',
-      openingBid: 45678.32,
-      marketValue: 285000,
-      bidJudgmentRatio: 16.0,
-      recommendation: 'REVIEW',
-      mlProbability: 0.45,
-      stage: 9,
-      riskLevel: 'MEDIUM'
-    },
-    {
-      id: 6,
-      caseNumber: '250445',
-      parcelId: '2912456',
-      address: '567 Riviera Dr',
-      city: 'Palm Bay',
-      zip: '32905',
-      propertyType: 'SINGLE FAMILY',
-      openingBid: 52340.00,
-      marketValue: 298000,
-      bidJudgmentRatio: 17.6,
-      recommendation: 'REVIEW',
-      mlProbability: 0.42,
-      stage: 9,
-      riskLevel: 'MEDIUM'
-    },
-    {
-      id: 7,
-      caseNumber: '250478',
-      parcelId: '2845123',
-      address: '2341 Sunrise Blvd',
-      city: 'Melbourne',
-      zip: '32901',
-      propertyType: 'DUPLEX',
-      openingBid: 67890.00,
-      marketValue: 425000,
-      bidJudgmentRatio: 16.0,
-      recommendation: 'REVIEW',
-      mlProbability: 0.48,
-      stage: 9,
-      riskLevel: 'MEDIUM'
-    },
-    // === SKIP RECOMMENDATIONS (12) ===
-    {
-      id: 8,
-      caseNumber: '250501',
-      parcelId: '2913986',
-      address: '892 Emerson Dr NW',
-      city: 'Palm Bay',
-      zip: '32907',
-      propertyType: 'SINGLE FAMILY',
-      openingBid: 89234.56,
-      marketValue: 320000,
-      bidJudgmentRatio: 27.9,
-      recommendation: 'SKIP',
-      mlProbability: 0.22,
-      stage: 9,
-      riskLevel: 'HIGH'
-    },
-    {
-      id: 9,
-      caseNumber: '250523',
-      parcelId: '2756891',
-      address: '4521 Harbor View Ln',
-      city: 'Melbourne',
-      zip: '32940',
-      propertyType: 'SINGLE FAMILY',
-      openingBid: 145000.00,
-      marketValue: 389000,
-      bidJudgmentRatio: 37.3,
-      recommendation: 'SKIP',
-      mlProbability: 0.15,
-      stage: 8,
-      riskLevel: 'HIGH'
-    },
-    {
-      id: 10,
-      caseNumber: '250547',
-      parcelId: '2834567',
-      address: '789 Crane Creek Dr',
-      city: 'Melbourne',
-      zip: '32901',
-      propertyType: 'SINGLE FAMILY',
-      openingBid: 112450.00,
-      marketValue: 345000,
-      bidJudgmentRatio: 32.6,
-      recommendation: 'SKIP',
-      mlProbability: 0.18,
-      stage: 8,
-      riskLevel: 'HIGH'
-    },
-    {
-      id: 11,
-      caseNumber: '250569',
-      parcelId: '2923456',
-      address: '1234 Malabar Rd',
-      city: 'Palm Bay',
-      zip: '32907',
-      propertyType: 'COMMERCIAL',
-      openingBid: 234567.00,
-      marketValue: 567000,
-      bidJudgmentRatio: 41.4,
-      recommendation: 'SKIP',
-      mlProbability: 0.12,
-      stage: 7,
-      riskLevel: 'HIGH'
-    },
-    {
-      id: 12,
-      caseNumber: '250591',
-      parcelId: '2678234',
-      address: '456 Croton Rd',
-      city: 'Melbourne',
-      zip: '32935',
-      propertyType: 'SINGLE FAMILY',
-      openingBid: 98765.00,
-      marketValue: 278000,
-      bidJudgmentRatio: 35.5,
-      recommendation: 'SKIP',
-      mlProbability: 0.19,
-      stage: 8,
-      riskLevel: 'HIGH'
-    },
-    {
-      id: 13,
-      caseNumber: '250612',
-      parcelId: '2789456',
-      address: '3210 Wickham Rd',
-      city: 'Melbourne',
-      zip: '32935',
-      propertyType: 'SINGLE FAMILY',
-      openingBid: 87650.00,
-      marketValue: 265000,
-      bidJudgmentRatio: 33.1,
-      recommendation: 'SKIP',
-      mlProbability: 0.21,
-      stage: 8,
-      riskLevel: 'HIGH'
-    },
-    {
-      id: 14,
-      caseNumber: '250634',
-      parcelId: '2956789',
-      address: '5678 Babcock St',
-      city: 'Palm Bay',
-      zip: '32905',
-      propertyType: 'SINGLE FAMILY',
-      openingBid: 76543.00,
-      marketValue: 234000,
-      bidJudgmentRatio: 32.7,
-      recommendation: 'SKIP',
-      mlProbability: 0.20,
-      stage: 8,
-      riskLevel: 'HIGH'
-    },
-    {
-      id: 15,
-      caseNumber: '250656',
-      parcelId: '2567123',
-      address: '901 Eau Gallie Blvd',
-      city: 'Indian Harbour Beach',
-      zip: '32937',
-      propertyType: 'CONDO',
-      openingBid: 54321.00,
-      marketValue: 198000,
-      bidJudgmentRatio: 27.4,
-      recommendation: 'SKIP',
-      mlProbability: 0.23,
-      stage: 9,
-      riskLevel: 'HIGH'
-    },
-    {
-      id: 16,
-      caseNumber: '250678',
-      parcelId: '2678901',
-      address: '2468 Aurora Rd',
-      city: 'Melbourne',
-      zip: '32935',
-      propertyType: 'SINGLE FAMILY',
-      openingBid: 91234.00,
-      marketValue: 287000,
-      bidJudgmentRatio: 31.8,
-      recommendation: 'SKIP',
-      mlProbability: 0.19,
-      stage: 8,
-      riskLevel: 'HIGH'
-    },
-    {
-      id: 17,
-      caseNumber: '250701',
-      parcelId: '2890123',
-      address: '1357 Minton Rd',
-      city: 'Palm Bay',
-      zip: '32907',
-      propertyType: 'SINGLE FAMILY',
-      openingBid: 65432.00,
-      marketValue: 212000,
-      bidJudgmentRatio: 30.9,
-      recommendation: 'SKIP',
-      mlProbability: 0.21,
-      stage: 8,
-      riskLevel: 'HIGH'
-    },
-    {
-      id: 18,
-      caseNumber: '250723',
-      parcelId: '2345678',
-      address: '4680 Stack Blvd',
-      city: 'Melbourne',
-      zip: '32901',
-      propertyType: 'VACANT LAND',
-      openingBid: 23456.00,
-      marketValue: 45000,
-      bidJudgmentRatio: 52.1,
-      recommendation: 'SKIP',
-      mlProbability: 0.08,
-      stage: 7,
-      riskLevel: 'HIGH'
-    },
-    {
-      id: 19,
-      caseNumber: '250745',
-      parcelId: '2456789',
-      address: '7890 N Courtenay Pkwy',
-      city: 'Merritt Island',
-      zip: '32953',
-      propertyType: 'COMMERCIAL',
-      openingBid: 189000.00,
-      marketValue: 445000,
-      bidJudgmentRatio: 42.5,
-      recommendation: 'SKIP',
-      mlProbability: 0.11,
-      stage: 7,
-      riskLevel: 'HIGH'
-    },
-    // === DO NOT BID (1) ===
-    {
-      id: 20,
-      caseNumber: '250369',
-      parcelId: '2000369',
-      address: 'US-1 (Vacant Land)',
-      city: 'Mims',
-      zip: '32754',
-      propertyType: 'VACANT LAND',
-      openingBid: 1873.96,
-      marketValue: 28800,
-      bidJudgmentRatio: 6.5,
-      recommendation: 'DO_NOT_BID',
-      mlProbability: 0,
-      stage: 0,
-      riskLevel: 'N/A',
-      note: 'Senior mortgage survives - HOA foreclosure'
-    }
-  ],
-  pipelineStats: {
-    totalAnalyzed: 250,
-    averageProcessingTime: '23 seconds',
-    dataSourcesUsed: ['BCPAO', 'RealTDM', 'AcclaimWeb', 'Census API'],
-    mlAccuracy: 64.4
-  }
-};
-
-// ============ ANIMATION VARIANTS ============
-const fadeInUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
-  }
-};
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 }
-  }
-};
-
-const scaleIn = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: { 
-    opacity: 1, 
-    scale: 1,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] }
-  }
-};
-
-// ============ SHADCN-STYLE COMPONENTS ============
-
-// Card Component
-const Card = ({ className = '', children, ...props }) => (
-  <div 
-    className={`rounded-xl border border-slate-800 bg-slate-900/50 backdrop-blur-sm ${className}`}
-    {...props}
-  >
-    {children}
-  </div>
-);
-
-// Badge Component  
-const Badge = ({ variant = 'default', className = '', children }) => {
-  const variants = {
-    default: 'bg-slate-800 text-slate-300',
-    success: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
-    warning: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
-    danger: 'bg-red-500/20 text-red-400 border border-red-500/30',
-    info: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-  };
+  {
+    number: 2,
+    name: 'BECA Scraping',
+    brand: null,
+    phase: 'Base Camp',
+    icon: '📄',
+    color: theme.colors.emerald[500],
+    description: 'Extract detailed case data from Brevard Electronic Court Access',
+    outputs: 'Case details, judgment amounts, plaintiff info, property address',
+    duration: '45 sec',
+    flagship: false
+  },
   
-  return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]} ${className}`}>
-      {children}
-    </span>
-  );
-};
-
-// Button Component
-const Button = ({ variant = 'default', size = 'default', className = '', children, ...props }) => {
-  const variants = {
-    default: 'bg-amber-500 text-slate-900 hover:bg-amber-400 shadow-lg shadow-amber-500/25',
-    outline: 'border border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white',
-    ghost: 'text-slate-400 hover:text-white hover:bg-slate-800',
-  };
+  // Phase 2: The Approach (Title & Lien Analysis)
+  {
+    number: 3,
+    name: 'Title Search',
+    brand: 'TitleTrack™',
+    phase: 'The Approach',
+    icon: '📋',
+    color: theme.colors.gold[500],
+    description: 'Analyze ownership chain and recorded documents',
+    outputs: 'Ownership history, recorded liens, title defects',
+    duration: '60 sec',
+    flagship: false
+  },
+  {
+    number: 4,
+    name: 'Lien Priority',
+    brand: 'LienLogic™',
+    phase: 'The Approach',
+    icon: '⚖️',
+    color: theme.colors.gold[500],
+    description: 'Determine lien hierarchy and identify surviving interests',
+    outputs: 'Lien hierarchy, DO_NOT_BID flags for HOA scenarios',
+    duration: '45 sec',
+    flagship: true // FLAGSHIP STAGE
+  },
+  {
+    number: 5,
+    name: 'Tax Certificates',
+    brand: null,
+    phase: 'The Approach',
+    icon: '🏛️',
+    color: theme.colors.gold[500],
+    description: 'Analyze outstanding tax certificates from RealTDM',
+    outputs: 'Tax liens, certificate holders, redemption status',
+    duration: '40 sec',
+    flagship: false
+  },
+  {
+    number: 6,
+    name: 'Demographics',
+    brand: 'MarketPulse™',
+    phase: 'The Approach',
+    icon: '🗺️',
+    color: theme.colors.gold[500],
+    description: 'Census data integration for market context',
+    outputs: 'Income levels, vacancy rates, population trends',
+    duration: '35 sec',
+    flagship: false
+  },
   
-  const sizes = {
-    sm: 'px-3 py-1.5 text-sm',
-    default: 'px-5 py-2.5 text-sm',
-    lg: 'px-8 py-3.5 text-base',
-  };
+  // Phase 3: The Climb (Valuation & Decision)
+  {
+    number: 7,
+    name: 'ML Score',
+    brand: 'BidScore™',
+    phase: 'The Climb',
+    icon: '🤖',
+    color: theme.colors.slate[400],
+    description: 'XGBoost prediction of third-party purchase probability',
+    outputs: 'ML confidence score (0-100%), risk classification',
+    duration: '20 sec',
+    flagship: false
+  },
+  {
+    number: 8,
+    name: 'Max Bid Calculation',
+    brand: 'Shapira Formula™',
+    phase: 'The Climb',
+    icon: '💰',
+    color: theme.colors.slate[400],
+    description: 'Proprietary formula: (ARV×70%) - Repairs - $10K - MIN($25K, 15%ARV)',
+    outputs: 'Max bid amount, bid/judgment ratio',
+    duration: '15 sec',
+    flagship: true // FLAGSHIP STAGE
+  },
   
-  return (
-    <button 
-      className={`inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-200 ${variants[variant]} ${sizes[size]} ${className}`}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-};
+  // Phase 4: Summit (Execution & Delivery)
+  {
+    number: 9,
+    name: 'Decision Log',
+    brand: null,
+    phase: 'Summit',
+    icon: '✅',
+    color: theme.colors.red[500],
+    description: 'Final recommendation: BID, REVIEW, SKIP, or DO_NOT_BID',
+    outputs: 'Decision + reasoning, stored in Supabase',
+    duration: '10 sec',
+    flagship: false
+  },
+  {
+    number: 10,
+    name: 'Report Generation',
+    brand: null,
+    phase: 'Summit',
+    icon: '📑',
+    color: theme.colors.red[500],
+    description: 'One-page DOCX report with BidDeed.AI branding',
+    outputs: 'Professional PDF with photos, metrics, recommendation',
+    duration: '30 sec',
+    flagship: false
+  },
+  {
+    number: 11,
+    name: 'Disposition Tracking',
+    brand: 'ExitPath™',
+    phase: 'Summit',
+    icon: '🎯',
+    color: theme.colors.red[500],
+    description: 'Exit strategy determination (Flip, Rent, Wholesale)',
+    outputs: 'Recommended exit path with profit projections',
+    duration: '25 sec',
+    flagship: false
+  },
+  {
+    number: 12,
+    name: 'Archive',
+    brand: null,
+    phase: 'Summit',
+    icon: '💾',
+    color: theme.colors.red[500],
+    description: 'Store complete analysis in Supabase for historical tracking',
+    outputs: 'Persistent record in auction_results table',
+    duration: '15 sec',
+    flagship: false
+  }
+];
 
-// Progress Component
-const Progress = ({ value, className = '' }) => (
-  <div className={`h-2 w-full bg-slate-800 rounded-full overflow-hidden ${className}`}>
-    <motion.div 
-      className="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full"
-      initial={{ width: 0 }}
-      animate={{ width: `${value}%` }}
-      transition={{ duration: 1, ease: 'easeOut' }}
-    />
-  </div>
-);
+// ============ REAL AUCTION DATA ============
+const FEATURED_PROPERTIES = [
+  {
+    id: 1,
+    caseNumber: '250179',
+    address: '202 Ivory Coral Ln #302, Merritt Island, FL 32953',
+    openingBid: 6847,
+    marketValue: 176000,
+    recommendation: 'BID',
+    bidJudgmentRatio: 96,
+    mlScore: 72,
+    phase: 'Summit'
+  },
+  {
+    id: 2,
+    caseNumber: '250216',
+    address: '202 Ivory Coral Ln #204, Merritt Island, FL 32953',
+    openingBid: 7234,
+    marketValue: 168000,
+    recommendation: 'BID',
+    bidJudgmentRatio: 95,
+    mlScore: 68,
+    phase: 'Summit'
+  },
+  {
+    id: 3,
+    caseNumber: '250287',
+    address: '1455 Saturn St, Merritt Island, FL 32953',
+    openingBid: 12450,
+    marketValue: 245000,
+    recommendation: 'REVIEW',
+    bidJudgmentRatio: 72,
+    mlScore: 58,
+    phase: 'The Climb'
+  }
+];
 
-// ============ NAVIGATION ============
-const Navigation = () => {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
+export default function BidDeedAILanding() {
+  const [activePipelineStage, setActivePipelineStage] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { scrollY } = useScroll();
+  const headerOpacity = useTransform(scrollY, [0, 100], [1, 0.95]);
+  const headerBlur = useTransform(scrollY, [0, 100], [0, 10]);
 
+  // Auto-cycle through pipeline stages
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    const interval = setInterval(() => {
+      setActivePipelineStage(prev => (prev + 1) % 12);
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
 
+  const currentStage = EVEREST_ASCENT_STAGES[activePipelineStage];
+
   return (
-    <motion.nav 
-      initial={{ y: -100 }}
-      animate={{ y: 0 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-slate-950/95 backdrop-blur-xl border-b border-slate-800/50' : 'bg-transparent'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <a href="#" className="flex items-center gap-3 group">
-            <div className="relative">
-              <div className="w-11 h-11 bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-xl shadow-amber-500/30 transform group-hover:scale-105 transition-transform">
-                <span className="text-slate-900 font-black text-sm">BD</span>
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-slate-950 animate-pulse" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold text-white tracking-tight">
-                BidDeed<span className="text-amber-400">.AI</span>
-              </span>
-              <span className="text-[10px] text-slate-500 tracking-widest uppercase">An Everest Company</span>
-            </div>
-          </a>
-
-          {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-2">
-            {['Methodology', '12 Stages', 'Live Demo', 'Founder'].map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase().replace(' ', '-')}`}
-                className="px-4 py-2 text-slate-400 hover:text-white transition-colors text-sm font-medium rounded-lg hover:bg-white/5"
-              >
-                {item}
-              </a>
-            ))}
-            <Button variant="outline" size="sm" className="ml-4">
-              Sign In
-            </Button>
-            <Button size="sm">
-              Get Early Access
-            </Button>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 text-white"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {mobileOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
-        </div>
-      </div>
-    </motion.nav>
-  );
-};
-
-// ============ HERO SECTION ============
-const Hero = ({ onOpenDemo }) => {
-  const { scrollY } = useScroll();
-  const opacity = useTransform(scrollY, [0, 400], [1, 0]);
-  const scale = useTransform(scrollY, [0, 400], [1, 0.95]);
-  
-  return (
-    <motion.section 
-      style={{ opacity, scale }}
-      className="relative min-h-screen flex items-center pt-24 pb-20 overflow-hidden"
-    >
-      {/* Background */}
-      <div className="absolute inset-0 bg-slate-950" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-950" />
-      
-      {/* Grid Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
-      
-      {/* Gradient Orbs */}
-      <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-amber-500/10 rounded-full blur-[128px] animate-pulse" />
-      <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-emerald-500/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
-
-      <div className="relative max-w-7xl mx-auto px-6 w-full">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-          className="max-w-4xl"
-        >
-          {/* Live Badge */}
-          <motion.div variants={fadeInUp} className="mb-8">
-            <Badge variant="success" className="px-4 py-1.5">
-              <span className="relative flex h-2 w-2 mr-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
-              LIVE: Dec 18 Tax Deed Auction • {REAL_AUCTION_DATA.totalProperties} Properties Analyzed
-            </Badge>
-          </motion.div>
-
-          {/* Headline */}
-          <motion.h1 
-            variants={fadeInUp}
-            className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight mb-6"
-            style={{ fontFamily: theme.fonts.display }}
-          >
-            Distressed Assets
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-400">
-              Decoded.
-            </span>
-          </motion.h1>
-
-          {/* Subheadline */}
-          <motion.p 
-            variants={fadeInUp}
-            className="text-xl text-slate-400 max-w-2xl mb-10 leading-relaxed"
-          >
-            The <span className="text-white font-semibold">Everest Ascent™</span> — 12-stage AI pipeline transforms 
-            4-hour research into <span className="text-amber-400 font-mono">23-second</span> intelligence. 
-            Foreclosure and tax deed auctions, decoded for everyone.
-          </motion.p>
-
-          {/* Stats Row */}
-          <motion.div 
-            variants={fadeInUp}
-            className="flex flex-wrap gap-8 mb-10"
-          >
-            {[
-              { value: '64.4%', label: 'ML Accuracy' },
-              { value: '23s', label: 'Per Analysis' },
-              { value: '12', label: 'Pipeline Stages' },
-              { value: '100x', label: 'ROI vs Manual' },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-3xl font-bold text-white font-mono">{stat.value}</div>
-                <div className="text-sm text-slate-500">{stat.label}</div>
-              </div>
-            ))}
-          </motion.div>
-
-          {/* CTA Buttons */}
-          <motion.div variants={fadeInUp} className="flex flex-wrap gap-4">
-            <Button size="lg" onClick={onOpenDemo}>
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-              </svg>
-              Watch Live Demo
-            </Button>
-            <Button variant="outline" size="lg">
-              View Dec 18 Auction
-              <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </Button>
-          </motion.div>
-        </motion.div>
-      </div>
-    </motion.section>
-  );
-};
-
-// ============ SPLIT-SCREEN DEMO INTERFACE ============
-const SplitScreenDemo = ({ isOpen, onClose }) => {
-  const [activeProperty, setActiveProperty] = useState(0);
-  const [currentStage, setCurrentStage] = useState(1);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  const stages = [
-    { id: 1, name: 'Discovery', icon: '🔍', color: 'amber' },
-    { id: 2, name: 'Scraping', icon: '📥', color: 'blue' },
-    { id: 3, name: 'Title Search', icon: '📋', color: 'purple' },
-    { id: 4, name: 'Lien Priority', icon: '⚖️', color: 'red' },
-    { id: 5, name: 'Tax Certs', icon: '💰', color: 'green' },
-    { id: 6, name: 'Demographics', icon: '📊', color: 'cyan' },
-    { id: 7, name: 'ML Score', icon: '🧠', color: 'pink' },
-    { id: 8, name: 'Max Bid', icon: '🎯', color: 'orange' },
-    { id: 9, name: 'Decision', icon: '✅', color: 'emerald' },
-    { id: 10, name: 'Report', icon: '📄', color: 'indigo' },
-    { id: 11, name: 'Disposition', icon: '🏠', color: 'teal' },
-    { id: 12, name: 'Archive', icon: '💾', color: 'slate' },
-  ];
-
-  const property = REAL_AUCTION_DATA.properties[activeProperty];
-
-  // Auto-animate through stages
-  useEffect(() => {
-    if (!isOpen || !isAnimating) return;
-    
-    const interval = setInterval(() => {
-      setCurrentStage(prev => {
-        if (prev >= 12) {
-          setIsAnimating(false);
-          return 12;
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(180deg, #030712 0%, #0a0f1a 50%, #111827 100%)',
+      color: '#fff',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .desktop-only { display: none !important; }
+          .mobile-stack { flex-direction: column !important; }
+          .mobile-full { width: 100% !important; }
+          .mobile-text-center { text-align: center !important; }
+          .mobile-px-4 { padding-left: 1rem !important; padding-right: 1rem !important; }
         }
-        return prev + 1;
-      });
-    }, 800);
-
-    return () => clearInterval(interval);
-  }, [isOpen, isAnimating]);
-
-  const startAnimation = () => {
-    setCurrentStage(1);
-    setIsAnimating(true);
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl"
-      >
-        {/* Header */}
-        <div className="h-16 border-b border-slate-800 flex items-center justify-between px-6">
-          <div className="flex items-center gap-4">
-            <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
-              <span className="text-slate-900 font-bold text-xs">BD</span>
-            </div>
-            <span className="text-white font-semibold">BidDeed.AI Demo</span>
-            <Badge variant="success">LIVE DATA</Badge>
-          </div>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-white">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Split Screen Content */}
-        <div className="flex h-[calc(100vh-4rem)]">
-          {/* LEFT PANEL - Property List */}
-          <div className="w-80 border-r border-slate-800 overflow-y-auto">
-            <div className="p-4 border-b border-slate-800">
-              <h3 className="text-sm font-semibold text-white mb-2">Dec 18, 2025 Tax Deed Auction</h3>
-              <p className="text-xs text-slate-500">{REAL_AUCTION_DATA.properties.length} Properties • Brevard County</p>
-            </div>
-            
-            <div className="p-2">
-              {REAL_AUCTION_DATA.properties.map((prop, idx) => (
-                <button
-                  key={prop.id}
-                  onClick={() => {
-                    setActiveProperty(idx);
-                    setCurrentStage(1);
-                    setIsAnimating(false);
-                  }}
-                  className={`w-full text-left p-3 rounded-lg mb-1 transition-all ${
-                    activeProperty === idx 
-                      ? 'bg-amber-500/20 border border-amber-500/30' 
-                      : 'hover:bg-slate-800/50'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-medium text-white">Case #{prop.caseNumber}</span>
-                    <Badge 
-                      variant={
-                        prop.recommendation === 'BID' ? 'success' :
-                        prop.recommendation === 'REVIEW' ? 'warning' :
-                        prop.recommendation === 'SKIP' ? 'danger' : 'info'
-                      }
-                    >
-                      {prop.recommendation}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-slate-400 truncate">{prop.address}</p>
-                  <p className="text-xs text-slate-500">{prop.city}, FL {prop.zip}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* CENTER PANEL - Pipeline Visualization */}
-          <div className="flex-1 p-6 overflow-y-auto">
-            {/* Property Header */}
-            <div className="mb-8">
-              <div className="flex items-center gap-4 mb-4">
-                <h2 className="text-2xl font-bold text-white">{property.address}</h2>
-                <Badge 
-                  variant={
-                    property.recommendation === 'BID' ? 'success' :
-                    property.recommendation === 'REVIEW' ? 'warning' :
-                    property.recommendation === 'SKIP' ? 'danger' : 'info'
-                  }
-                  className="text-sm px-3 py-1"
-                >
-                  {property.recommendation}
-                </Badge>
-              </div>
-              <p className="text-slate-400">
-                {property.city}, FL {property.zip} • Case #{property.caseNumber} • Parcel {property.parcelId}
-              </p>
-            </div>
-
-            {/* Pipeline Progress */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-slate-400">Everest Ascent™ Pipeline</span>
-                <span className="text-sm font-mono text-amber-400">{currentStage}/12 Stages</span>
-              </div>
-              <Progress value={(currentStage / 12) * 100} />
-            </div>
-
-            {/* 12 Stages Grid */}
-            <div className="grid grid-cols-4 gap-3 mb-8">
-              {stages.map((stage) => (
-                <motion.div
-                  key={stage.id}
-                  initial={{ opacity: 0.5, scale: 0.95 }}
-                  animate={{ 
-                    opacity: currentStage >= stage.id ? 1 : 0.4,
-                    scale: currentStage === stage.id ? 1.05 : 1,
-                    borderColor: currentStage === stage.id ? 'rgb(251, 191, 36)' : 'rgb(30, 41, 59)'
-                  }}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    currentStage >= stage.id ? 'bg-slate-800/50' : 'bg-slate-900/30'
-                  }`}
-                >
-                  <div className="text-2xl mb-2">{stage.icon}</div>
-                  <div className="text-xs font-medium text-white mb-1">Stage {stage.id}</div>
-                  <div className="text-xs text-slate-400">{stage.name}</div>
-                  {currentStage >= stage.id && (
-                    <div className="mt-2">
-                      <svg className="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                  )}
-                </motion.div>
-              ))}
-            </div>
-
-            {/* Run Pipeline Button */}
-            <div className="flex justify-center">
-              <Button 
-                size="lg" 
-                onClick={startAnimation}
-                disabled={isAnimating}
-              >
-                {isAnimating ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    Processing Stage {currentStage}...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                    </svg>
-                    Run Everest Ascent™ Pipeline
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          {/* RIGHT PANEL - Analysis Results */}
-          <div className="w-96 border-l border-slate-800 overflow-y-auto p-6">
-            <h3 className="text-lg font-semibold text-white mb-6">Analysis Results</h3>
-            
-            {/* Key Metrics */}
-            <div className="space-y-4 mb-8">
-              <Card className="p-4">
-                <div className="text-xs text-slate-500 mb-1">Opening Bid</div>
-                <div className="text-2xl font-bold text-white font-mono">
-                  ${property.openingBid.toLocaleString()}
-                </div>
-              </Card>
-              
-              <Card className="p-4">
-                <div className="text-xs text-slate-500 mb-1">Market Value</div>
-                <div className="text-2xl font-bold text-emerald-400 font-mono">
-                  ${property.marketValue.toLocaleString()}
-                </div>
-              </Card>
-              
-              <Card className="p-4">
-                <div className="text-xs text-slate-500 mb-1">Bid/Market Ratio</div>
-                <div className="text-2xl font-bold text-amber-400 font-mono">
-                  {property.bidJudgmentRatio}%
-                </div>
-                <div className="text-xs text-slate-500 mt-1">
-                  {property.bidJudgmentRatio < 10 ? '🔥 Excellent opportunity' : 
-                   property.bidJudgmentRatio < 25 ? '✅ Good value' : '⚠️ Review needed'}
-                </div>
-              </Card>
-              
-              <Card className="p-4">
-                <div className="text-xs text-slate-500 mb-1">ML Win Probability</div>
-                <div className="text-2xl font-bold text-white font-mono">
-                  {(property.mlProbability * 100).toFixed(0)}%
-                </div>
-                <Progress value={property.mlProbability * 100} className="mt-2" />
-              </Card>
-            </div>
-
-            {/* Recommendation Box */}
-            <Card className={`p-4 border-2 ${
-              property.recommendation === 'BID' ? 'border-emerald-500/50 bg-emerald-500/10' :
-              property.recommendation === 'REVIEW' ? 'border-amber-500/50 bg-amber-500/10' :
-              'border-red-500/50 bg-red-500/10'
-            }`}>
-              <div className="text-xs text-slate-400 mb-2">AI Recommendation</div>
-              <div className={`text-3xl font-bold ${
-                property.recommendation === 'BID' ? 'text-emerald-400' :
-                property.recommendation === 'REVIEW' ? 'text-amber-400' :
-                'text-red-400'
-              }`}>
-                {property.recommendation}
-              </div>
-              <div className="text-sm text-slate-400 mt-2">
-                {property.recommendation === 'BID' && 'Strong opportunity. Opening bid significantly below market value.'}
-                {property.recommendation === 'REVIEW' && 'Potential opportunity. Additional due diligence recommended.'}
-                {property.recommendation === 'SKIP' && 'High risk. Bid/value ratio unfavorable.'}
-              </div>
-            </Card>
-
-            {/* Report Section - Appears at Stage 10+ */}
-            {currentStage >= 10 && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="mt-6"
-              >
-                <Card className="p-4 border-2 border-indigo-500/50 bg-indigo-500/10">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-2xl">📄</span>
-                    <div className="text-sm font-semibold text-white">Investment Report Ready</div>
-                  </div>
-                  <div className="text-xs text-slate-400 mb-4">
-                    Stage 10: Professional DOCX report with property analysis, comparable sales, ML predictions, and investment recommendation.
-                  </div>
-                  
-                  {/* Report Preview */}
-                  <div className="bg-slate-900 rounded-lg p-4 mb-4 border border-slate-700">
-                    <div className="text-center mb-3">
-                      <div className="text-xs text-slate-500 uppercase tracking-wider mb-1">BidDeed.AI</div>
-                      <div className="text-sm font-bold text-white">Property Investment Report</div>
-                      <div className="text-xs text-slate-400">Case #{property.caseNumber}</div>
-                    </div>
-                    <div className="space-y-2 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Property:</span>
-                        <span className="text-white">{property.address}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Opening Bid:</span>
-                        <span className="text-emerald-400">${property.openingBid.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">Market Value:</span>
-                        <span className="text-white">${property.marketValue.toLocaleString()}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-500">AI Score:</span>
-                        <span className="text-amber-400">{(property.mlProbability * 100).toFixed(0)}%</span>
-                      </div>
-                      <div className="flex justify-between border-t border-slate-700 pt-2 mt-2">
-                        <span className="text-slate-500">Recommendation:</span>
-                        <span className={`font-bold ${
-                          property.recommendation === 'BID' ? 'text-emerald-400' :
-                          property.recommendation === 'REVIEW' ? 'text-amber-400' :
-                          'text-red-400'
-                        }`}>{property.recommendation}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Download Buttons */}
-                  <div className="space-y-2">
-                    <a 
-                      href="https://raw.githubusercontent.com/breverdbidder/brevard-bidder-landing/main/reports/BidDeed_Report_250179.docx"
-                      download="BidDeed_Report_250179.docx"
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      Download DOCX Report
-                    </a>
-                    <a 
-                      href="https://raw.githubusercontent.com/breverdbidder/brevard-bidder-landing/main/reports/BidDeed_Report_250179.pdf"
-                      download="BidDeed_Report_250179.pdf"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-lg text-sm font-medium transition-colors"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      </svg>
-                      Download PDF Report
-                    </a>
-                  </div>
-
-                  <div className="text-xs text-slate-500 text-center mt-3">
-                    © 2025 Everest Capital USA • Everest Ascent™ Pipeline
-                  </div>
-                </Card>
-              </motion.div>
-            )}
-          </div>
-        </div>
-      </motion.div>
-    </AnimatePresence>
-  );
-};
-
-// ============ 12 STAGES SECTION ============
-const StagesSection = () => {
-  const stages = [
-    { num: 1, name: 'Discovery', desc: 'Identify upcoming auctions from RealForeclose, BECA, county records' },
-    { num: 2, name: 'Scraping', desc: 'Extract property data from BCPAO, AcclaimWeb, RealTDM' },
-    { num: 3, name: 'Title Search', desc: 'Automated lien discovery and document retrieval' },
-    { num: 4, name: 'Lien Priority', desc: 'Senior mortgage survival detection (HOA/Tax scenarios)' },
-    { num: 5, name: 'Tax Certificates', desc: 'Outstanding tax debt and redemption calculations' },
-    { num: 6, name: 'Demographics', desc: 'Census API: income, vacancy rates, growth trends' },
-    { num: 7, name: 'ML Score', desc: 'XGBoost predictions: win probability, sale price' },
-    { num: 8, name: 'Max Bid', desc: 'The Shapira Formula: (ARV×70%)-Repairs-$10K-Margin' },
-    { num: 9, name: 'Decision Log', desc: 'BID/REVIEW/SKIP/DO_NOT_BID with full reasoning' },
-    { num: 10, name: 'Report', desc: 'Professional DOCX with photos, maps, CMA analysis' },
-    { num: 11, name: 'Disposition', desc: 'Exit strategy: Flip, Rental, MTR, Wholesale' },
-    { num: 12, name: 'Archive', desc: 'Supabase persistence with full audit trail' },
-  ];
-
-  return (
-    <section id="stages" className="py-24 px-6 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
-      
-      <div className="relative max-w-7xl mx-auto">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={staggerContainer}
-          className="text-center mb-16"
-        >
-          <motion.div variants={fadeInUp}>
-            <Badge variant="warning" className="mb-4">THE METHODOLOGY</Badge>
-          </motion.div>
-          <motion.h2 
-            variants={fadeInUp}
-            className="text-4xl lg:text-5xl font-bold text-white mb-4"
-            style={{ fontFamily: theme.fonts.display }}
-          >
-            The Everest Ascent™
-          </motion.h2>
-          <motion.p variants={fadeInUp} className="text-xl text-slate-400 max-w-2xl mx-auto">
-            12 stages from courthouse data to investment decision. 
-            Each stage builds on the last, creating unshakeable intelligence.
-          </motion.p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {stages.map((stage, idx) => (
-            <motion.div
-              key={stage.num}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.05 }}
-            >
-              <Card className="p-5 h-full hover:border-amber-500/30 transition-colors group">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500/20 to-amber-500/5 border border-amber-500/20 flex items-center justify-center flex-shrink-0 group-hover:from-amber-500/30 transition-colors">
-                    <span className="text-amber-400 font-bold text-sm">{stage.num}</span>
-                  </div>
-                  <div>
-                    <h3 className="text-white font-semibold mb-1">{stage.name}</h3>
-                    <p className="text-sm text-slate-400 leading-relaxed">{stage.desc}</p>
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
-// ============ FOUNDER SECTION ============
-const FounderSection = () => (
-  <section id="founder" className="py-24 px-6 relative">
-    <div className="absolute inset-0 bg-slate-950" />
-    
-    <div className="relative max-w-4xl mx-auto">
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        variants={staggerContainer}
-      >
-        <motion.div variants={fadeInUp} className="text-center mb-12">
-          <Badge variant="info" className="mb-4">THE FOUNDER</Badge>
-        </motion.div>
+        @media (min-width: 769px) {
+          .mobile-only { display: none !important; }
+        }
         
-        <Card className="p-8 lg:p-12">
-          <motion.div variants={fadeInUp} className="flex flex-col lg:flex-row items-center gap-8">
-            <div className="w-32 h-32 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center flex-shrink-0">
-              <span className="text-4xl font-bold text-slate-900">AS</span>
+        .gradient-text {
+          background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+        
+        .glass-card {
+          background: rgba(255, 255, 255, 0.03);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 16px;
+        }
+        
+        .hover-lift {
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+      `}</style>
+
+      {/* HEADER - Mobile Responsive */}
+      <motion.header 
+        style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 1000,
+          padding: '1rem 0',
+          background: 'rgba(3, 7, 18, 0.95)',
+          backdropFilter: `blur(${headerBlur}px)`,
+          opacity: headerOpacity,
+          borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+        }}
+      >
+        <div style={{
+          maxWidth: '1400px',
+          margin: '0 auto',
+          padding: '0 1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          {/* Logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{
+              width: '42px',
+              height: '42px',
+              background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: '900',
+              fontSize: '18px'
+            }}>
+              BD
             </div>
             <div>
-              <h3 className="text-2xl font-bold text-white mb-2">Ariel Shapira</h3>
-              <p className="text-amber-400 font-medium mb-4">Founder & Developer, Everest Capital USA</p>
-              <p className="text-slate-400 leading-relaxed mb-4">
-                10+ years in Florida foreclosure investing. Licensed broker, general contractor, 
-                and insurance agency owner. Building BidDeed.AI to democratize access to 
-                courthouse intelligence that was previously available only to insiders.
+              <h1 style={{ fontSize: '20px', fontWeight: '900', letterSpacing: '-0.5px', margin: 0 }}>
+                BidDeed<span className="gradient-text">.AI</span>
+              </h1>
+              <p style={{ fontSize: '11px', color: '#94a3b8', margin: 0 }} className="desktop-only">
+                Powered by The Everest Ascent™
               </p>
-              <div className="flex flex-wrap gap-2">
-                <Badge>FL Real Estate Broker</Badge>
-                <Badge>General Contractor</Badge>
-                <Badge>10+ Years Foreclosure Investing</Badge>
-              </div>
             </div>
-          </motion.div>
-        </Card>
-      </motion.div>
-    </div>
-  </section>
-);
-
-// ============ CTA SECTION ============
-const CTASection = () => (
-  <section id="waitlist" className="py-24 px-6 relative">
-    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900 to-slate-950" />
-    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_var(--tw-gradient-stops))] from-amber-500/10 via-transparent to-transparent" />
-    
-    <div className="relative max-w-3xl mx-auto text-center">
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true }}
-        variants={staggerContainer}
-      >
-        <motion.h2 
-          variants={fadeInUp}
-          className="text-4xl lg:text-5xl font-bold text-white mb-6"
-          style={{ fontFamily: theme.fonts.display }}
-        >
-          Ready to Reach the Summit?
-        </motion.h2>
-        <motion.p variants={fadeInUp} className="text-xl text-slate-400 mb-10">
-          Join the waitlist for early access to BidDeed.AI. 
-          Transform your auction research from hours to seconds.
-        </motion.p>
-        <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center">
-          <input 
-            type="email" 
-            placeholder="Enter your email"
-            className="px-6 py-4 bg-slate-800 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500 transition-colors w-full sm:w-80"
-          />
-          <Button size="lg">
-            Get Early Access
-          </Button>
-        </motion.div>
-        <motion.p variants={fadeInUp} className="text-sm text-slate-500 mt-4">
-          No spam. Unsubscribe anytime. Currently in private beta.
-        </motion.p>
-      </motion.div>
-    </div>
-  </section>
-);
-
-// ============ FOOTER ============
-const Footer = () => (
-  <footer className="py-12 px-6 border-t border-slate-800">
-    <div className="max-w-7xl mx-auto">
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
-            <span className="text-slate-900 font-bold text-xs">BD</span>
           </div>
-          <span className="text-white font-semibold">BidDeed.AI</span>
-          <span className="text-slate-600">|</span>
-          <span className="text-slate-500 text-sm">An Everest Company</span>
-        </div>
-        <div className="text-sm text-slate-500">
-          © 2025 Everest Capital USA. All rights reserved. Built with Claude AI.
-        </div>
-      </div>
-    </div>
-  </footer>
-);
 
+          {/* Desktop Nav */}
+          <nav className="desktop-only" style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+            <a href="#pipeline" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
+              Pipeline
+            </a>
+            <a href="#features" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
+              Features
+            </a>
+            <a href="#pricing" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
+              Pricing
+            </a>
+            <button style={{
+              background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+              color: '#030712',
+              border: 'none',
+              padding: '0.625rem 1.5rem',
+              borderRadius: '8px',
+              fontWeight: '700',
+              fontSize: '14px',
+              cursor: 'pointer'
+            }}>
+              Get Started
+            </button>
+          </nav>
 
-// ============ FLOATING AI CHAT WIDGET ============
-const FloatingChatWidget = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState([
-    { role: 'assistant', content: '👋 Hi! I\'m your AI assistant. Ask me about auctions, max bids, or lien priority!' }
-  ]);
-  const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef(null);
-
-  // NLP Response Generator (same as ChatV18)
-  const generateResponse = (message) => {
-    const lower = message.toLowerCase();
-    
-    if (/dec\s*18|december\s*18|tax\s*deed|tomorrow/.test(lower)) {
-      return '📅 **Dec 18 Tax Deed Auction**\n• Time: 9 AM EST ONLINE\n• Site: brevard.realforeclose.com\n• Tax deeds wipe ALL liens!\n\n[Open Full Chat →](#chat)';
-    }
-    if (/calendar|schedule|upcoming|next/.test(lower)) {
-      return '📆 **Upcoming Auctions:**\n• Dec 18 - Tax Deed @ 9AM ONLINE\n• Jan 7 - Foreclosure @ 11AM Titusville\n\n[View Full Calendar →](#chat)';
-    }
-    if (/max\s*bid|formula/.test(lower)) {
-      return '💰 **Max Bid Formula:**\n`(ARV×70%) - Repairs - $10K - MIN($25K,15%×ARV)`\n\n[See Full Explanation →](#chat)';
-    }
-    if (/lien|priority|hoa/.test(lower)) {
-      return '⚖️ **Lien Priority:** Senior liens survive!\n• Bank foreclosure → Wipes HOA\n• HOA foreclosure → Mortgage survives!\n\n[Learn More →](#chat)';
-    }
-    if (/recommend|best|bid/.test(lower)) {
-      return '⭐ **Top Picks Dec 18:**\n• 202 Ivory Coral Ln - BID ✅\n• Case #250179 - 3.9% ratio\n\n[See All Recommendations →](#chat)';
-    }
-    return '🤔 Try asking about:\n• Dec 18 auction\n• Max bid formula\n• Lien priority\n\nOr [Open Full Chat →](#chat)';
-  };
-
-  const handleSend = () => {
-    if (!input.trim()) return;
-    setMessages(prev => [...prev, { role: 'user', content: input }]);
-    setInput('');
-    setIsTyping(true);
-    
-    setTimeout(() => {
-      const response = generateResponse(input);
-      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
-      setIsTyping(false);
-    }, 500);
-  };
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  if (!isOpen) {
-    return (
-      <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        whileHover={{ scale: 1.1 }}
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 w-16 h-16 bg-gradient-to-r from-amber-500 to-amber-600 rounded-full shadow-2xl flex items-center justify-center text-3xl hover:from-amber-400 hover:to-amber-500 transition-all"
-        style={{ boxShadow: '0 0 30px rgba(245, 158, 11, 0.4)' }}
-      >
-        💬
-        <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full animate-pulse" />
-      </motion.button>
-    );
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 100, scale: 0.8 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 100, scale: 0.8 }}
-      className={`fixed bottom-6 right-6 z-50 bg-slate-900 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden ${isMinimized ? 'w-80 h-14' : 'w-96 h-[500px]'}`}
-      style={{ boxShadow: '0 0 50px rgba(0, 0, 0, 0.5)' }}
-    >
-      {/* Header */}
-      <div className="bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">🤖</span>
-          <div>
-            <div className="font-semibold text-slate-900 text-sm">BidDeed.AI Assistant</div>
-            <div className="text-xs text-slate-700">Powered by NLP Engine</div>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={() => setIsMinimized(!isMinimized)} className="text-slate-800 hover:text-slate-900">
-            {isMinimized ? '▲' : '▼'}
+          {/* Mobile Menu Button */}
+          <button 
+            className="mobile-only"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            style={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '8px',
+              padding: '0.5rem',
+              cursor: 'pointer',
+              color: '#fff'
+            }}
+          >
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
           </button>
-          <button onClick={() => setIsOpen(false)} className="text-slate-800 hover:text-slate-900 font-bold">✕</button>
         </div>
-      </div>
 
-      {!isMinimized && (
-        <>
-          {/* Messages */}
-          <div className="h-[360px] overflow-y-auto p-4 space-y-3">
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] rounded-xl px-3 py-2 text-sm ${
-                  msg.role === 'user' ? 'bg-amber-500 text-slate-900' : 'bg-slate-800 text-slate-100'
-                }`}>
-                  <div dangerouslySetInnerHTML={{ 
-                    __html: msg.content
-                      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                      .replace(/`([^`]+)`/g, '<code class="bg-slate-700 px-1 rounded text-amber-400">$1</code>')
-                      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-amber-400 underline">$1</a>')
-                      .replace(/\n/g, '<br/>')
-                  }} />
-                </div>
-              </div>
-            ))}
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className="bg-slate-800 rounded-xl px-3 py-2 flex gap-1">
-                  <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                  <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                  <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              style={{
+                background: '#0a0f1a',
+                borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+                padding: '1rem'
+              }}
+            >
+              <nav style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <a href="#pipeline" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '16px', fontWeight: '600', padding: '0.5rem' }}>
+                  Pipeline
+                </a>
+                <a href="#features" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '16px', fontWeight: '600', padding: '0.5rem' }}>
+                  Features
+                </a>
+                <a href="#pricing" style={{ color: '#cbd5e1', textDecoration: 'none', fontSize: '16px', fontWeight: '600', padding: '0.5rem' }}>
+                  Pricing
+                </a>
+                <button style={{
+                  background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                  color: '#030712',
+                  border: 'none',
+                  padding: '0.75rem',
+                  borderRadius: '8px',
+                  fontWeight: '700',
+                  fontSize: '16px',
+                  cursor: 'pointer'
+                }}>
+                  Get Started
+                </button>
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.header>
+
+      {/* HERO SECTION - Mobile Responsive */}
+      <section style={{
+        padding: '4rem 1.5rem',
+        maxWidth: '1400px',
+        margin: '0 auto',
+        textAlign: 'center'
+      }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div style={{
+            display: 'inline-block',
+            background: 'rgba(251, 191, 36, 0.1)',
+            border: '1px solid rgba(251, 191, 36, 0.3)',
+            borderRadius: '100px',
+            padding: '0.5rem 1.25rem',
+            marginBottom: '1.5rem',
+            fontSize: '13px',
+            fontWeight: '600',
+            color: '#fbbf24'
+          }}>
+            🚀 The Everest Ascent™ Methodology
           </div>
 
-          {/* Quick Actions */}
-          <div className="px-3 pb-2 flex gap-1 overflow-x-auto">
-            {['Dec 18?', 'Max Bid', 'Liens'].map(q => (
-              <button key={q} onClick={() => { setInput(q); setTimeout(() => handleSend(), 100); }}
-                className="flex-shrink-0 px-2 py-1 bg-slate-800 rounded-full text-xs text-slate-400 hover:bg-slate-700">
-                {q}
-              </button>
-            ))}
-          </div>
+          <h2 style={{
+            fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+            fontWeight: '900',
+            lineHeight: '1.1',
+            marginBottom: '1.5rem',
+            letterSpacing: '-0.02em'
+          }}>
+            AI-Powered Foreclosure<br/>
+            <span className="gradient-text">Intelligence Platform</span>
+          </h2>
 
-          {/* Input */}
-          <div className="p-3 border-t border-slate-700 flex gap-2">
-            <input
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSend()}
-              placeholder="Ask about auctions..."
-              className="flex-1 bg-slate-800 rounded-xl px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-            />
-            <button onClick={handleSend} className="px-4 py-2 bg-amber-500 hover:bg-amber-400 rounded-xl text-slate-900 font-medium text-sm">
-              Send
+          <p style={{
+            fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+            color: '#94a3b8',
+            maxWidth: '700px',
+            margin: '0 auto 2.5rem',
+            lineHeight: '1.6'
+          }}>
+            12-stage agentic AI pipeline that analyzes Florida foreclosure auctions in 6 minutes,
+            saving you $100K-$300K in avoided losses and capturing $50K+ opportunities.
+          </p>
+
+          <div style={{
+            display: 'flex',
+            gap: '1rem',
+            justifyContent: 'center',
+            flexWrap: 'wrap'
+          }}>
+            <button style={{
+              background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+              color: '#030712',
+              border: 'none',
+              padding: '1rem 2rem',
+              borderRadius: '12px',
+              fontWeight: '800',
+              fontSize: '16px',
+              cursor: 'pointer',
+              boxShadow: '0 4px 20px rgba(251, 191, 36, 0.3)'
+            }}>
+              Start Free Trial
+            </button>
+            <button style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              color: '#fff',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              padding: '1rem 2rem',
+              borderRadius: '12px',
+              fontWeight: '700',
+              fontSize: '16px',
+              cursor: 'pointer'
+            }}>
+              Watch Demo
             </button>
           </div>
-        </>
-      )}
-    </motion.div>
-  );
-};
 
-// ============ AI CHATBOT SHOWCASE SECTION ============
-const AIShowcase = () => (
-  <section id="ai-assistant" className="py-20 px-6 relative overflow-hidden">
-    <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
-    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-500/5 via-transparent to-transparent" />
-    
-    <div className="relative max-w-6xl mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="text-center mb-12"
-      >
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 rounded-full text-amber-400 text-sm font-medium mb-6">
-          <span className="animate-pulse">🤖</span> NEW: AI-Powered Assistant
+          {/* Stats */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+            gap: '2rem',
+            marginTop: '4rem',
+            maxWidth: '900px',
+            margin: '4rem auto 0'
+          }}>
+            <div>
+              <div style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: '900', color: '#10b981' }}>
+                $300K
+              </div>
+              <div style={{ fontSize: '14px', color: '#94a3b8', marginTop: '0.5rem' }}>
+                Annual Value per User
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: '900', color: '#fbbf24' }}>
+                6 min
+              </div>
+              <div style={{ fontSize: '14px', color: '#94a3b8', marginTop: '0.5rem' }}>
+                Full Property Analysis
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: '900', color: '#ef4444' }}>
+                75%+
+              </div>
+              <div style={{ fontSize: '14px', color: '#94a3b8', marginTop: '0.5rem' }}>
+                Prediction Accuracy
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* 12-STAGE PIPELINE VISUALIZATION - Mobile Responsive */}
+      <section id="pipeline" style={{
+        padding: '4rem 1.5rem',
+        maxWidth: '1400px',
+        margin: '0 auto'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <h3 style={{
+            fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
+            fontWeight: '900',
+            marginBottom: '1rem'
+          }}>
+            The Everest Ascent<span className="gradient-text">™</span>
+          </h3>
+          <p style={{ fontSize: '1.125rem', color: '#94a3b8', maxWidth: '600px', margin: '0 auto' }}>
+            Our proprietary 12-stage methodology climbs from discovery to decision
+          </p>
         </div>
-        <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4" style={{ fontFamily: "'Instrument Serif', Georgia, serif" }}>
-          Meet Your Auction Intelligence Partner
-        </h2>
-        <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-          Our advanced NLP chatbot understands natural language queries about foreclosures, 
-          lien priority, max bid calculations, and more. Get instant answers 24/7.
-        </p>
-      </motion.div>
 
-      <div className="grid lg:grid-cols-2 gap-12 items-center">
-        {/* Features */}
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          className="space-y-6"
-        >
-          {[
-            { icon: '🧠', title: 'Advanced NLP Engine', desc: 'Intent classification, entity extraction, and sentiment analysis for natural conversations' },
-            { icon: '⚡', title: 'Instant Responses', desc: 'Sub-second response times powered by optimized LangGraph orchestration' },
-            { icon: '📊', title: 'Real Data Integration', desc: 'Live auction data, ML predictions, and lien analysis at your fingertips' },
-            { icon: '🔒', title: 'Privacy-First', desc: 'HIPAA/GDPR compliant architecture with no data retention' },
-          ].map((feature, idx) => (
+        {/* Active Stage Display - Mobile Responsive */}
+        <div className="glass-card" style={{
+          padding: 'clamp(1.5rem, 3vw, 2.5rem)',
+          marginBottom: '2rem',
+          background: `linear-gradient(135deg, ${currentStage.color}15 0%, transparent 100%)`
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{
+                fontSize: '48px',
+                width: '64px',
+                height: '64px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: `${currentStage.color}20`,
+                borderRadius: '12px'
+              }}>
+                {currentStage.icon}
+              </div>
+              <div style={{ flex: 1, minWidth: '200px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                  <span style={{
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    color: currentStage.color,
+                    background: `${currentStage.color}20`,
+                    padding: '0.25rem 0.75rem',
+                    borderRadius: '6px'
+                  }}>
+                    STAGE {currentStage.number}
+                  </span>
+                  <span style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#94a3b8',
+                    textTransform: 'uppercase'
+                  }}>
+                    {currentStage.phase}
+                  </span>
+                  {currentStage.flagship && (
+                    <span style={{
+                      fontSize: '12px',
+                      fontWeight: '700',
+                      background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                      color: '#030712',
+                      padding: '0.25rem 0.5rem',
+                      borderRadius: '4px'
+                    }}>
+                      ⭐ FLAGSHIP
+                    </span>
+                  )}
+                </div>
+                <h4 style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)', fontWeight: '800', marginBottom: '0.5rem' }}>
+                  {currentStage.name}
+                  {currentStage.brand && <span className="gradient-text"> · {currentStage.brand}</span>}
+                </h4>
+                <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '0.25rem' }}>
+                  {currentStage.description}
+                </p>
+                <p style={{ fontSize: '12px', color: '#64748b' }}>
+                  ⏱️ {currentStage.duration}
+                </p>
+              </div>
+            </div>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.03)',
+              borderRadius: '8px',
+              padding: '1rem',
+              borderLeft: `3px solid ${currentStage.color}`
+            }}>
+              <div style={{ fontSize: '11px', fontWeight: '700', color: '#94a3b8', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Key Outputs
+              </div>
+              <div style={{ fontSize: '14px', color: '#cbd5e1' }}>
+                {currentStage.outputs}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stage Progress Bar - Mobile Responsive */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(60px, 1fr))',
+          gap: '0.5rem',
+          marginBottom: '2rem'
+        }}>
+          {EVEREST_ASCENT_STAGES.map((stage, idx) => (
             <motion.div
-              key={idx}
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-              className="flex gap-4 p-4 bg-slate-800/50 rounded-xl border border-slate-700/50 hover:border-amber-500/30 transition-colors"
+              key={stage.number}
+              animate={{
+                scale: idx === activePipelineStage ? 1.1 : 1,
+                opacity: idx === activePipelineStage ? 1 : 0.4
+              }}
+              style={{
+                height: '4px',
+                background: idx <= activePipelineStage ? stage.color : 'rgba(255, 255, 255, 0.1)',
+                borderRadius: '2px',
+                cursor: 'pointer'
+              }}
+              onClick={() => setActivePipelineStage(idx)}
+            />
+          ))}
+        </div>
+
+        {/* All Stages Grid - Mobile Responsive */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gap: '1.5rem'
+        }}>
+          {EVEREST_ASCENT_STAGES.map((stage) => (
+            <motion.div
+              key={stage.number}
+              className="glass-card hover-lift"
+              whileHover={{ scale: 1.02 }}
+              onClick={() => setActivePipelineStage(stage.number - 1)}
+              style={{
+                padding: '1.5rem',
+                cursor: 'pointer',
+                borderColor: stage.number === activePipelineStage + 1 ? stage.color : 'rgba(255, 255, 255, 0.1)',
+                background: stage.number === activePipelineStage + 1 ? `${stage.color}10` : 'rgba(255, 255, 255, 0.03)'
+              }}
             >
-              <span className="text-3xl">{feature.icon}</span>
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-1">{feature.title}</h3>
-                <p className="text-slate-400 text-sm">{feature.desc}</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                <div style={{
+                  fontSize: '32px',
+                  width: '48px',
+                  height: '48px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: `${stage.color}20`,
+                  borderRadius: '8px'
+                }}>
+                  {stage.icon}
+                </div>
+                <div style={{
+                  fontSize: '14px',
+                  fontWeight: '700',
+                  color: stage.color,
+                  background: `${stage.color}20`,
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: '4px'
+                }}>
+                  {stage.number}
+                </div>
+              </div>
+
+              <h5 style={{ fontSize: '16px', fontWeight: '800', marginBottom: '0.5rem' }}>
+                {stage.name}
+              </h5>
+              {stage.brand && (
+                <div className="gradient-text" style={{ fontSize: '13px', fontWeight: '700', marginBottom: '0.5rem' }}>
+                  {stage.brand}
+                </div>
+              )}
+              <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '0.75rem' }}>
+                {stage.description}
+              </p>
+              <div style={{
+                fontSize: '11px',
+                color: '#64748b',
+                padding: '0.5rem',
+                background: 'rgba(255, 255, 255, 0.03)',
+                borderRadius: '6px',
+                borderLeft: `2px solid ${stage.color}`
+              }}>
+                {stage.outputs}
               </div>
             </motion.div>
           ))}
-        </motion.div>
-
-        {/* Chat Demo Preview */}
-        <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          className="relative"
-        >
-          <div className="absolute -inset-4 bg-gradient-to-r from-amber-500/20 to-amber-600/20 blur-3xl rounded-3xl" />
-          <div className="relative bg-slate-900 rounded-2xl border border-slate-700 overflow-hidden shadow-2xl">
-            {/* Mock Chat Header */}
-            <div className="bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3 flex items-center gap-3">
-              <span className="text-2xl">🤖</span>
-              <div>
-                <div className="font-semibold text-slate-900 text-sm">BidDeed.AI Assistant</div>
-                <div className="text-xs text-slate-700">Online • NLP Engine v18</div>
-              </div>
-            </div>
-            
-            {/* Mock Chat Messages */}
-            <div className="p-4 space-y-3 h-72 overflow-hidden">
-              <div className="flex justify-start">
-                <div className="bg-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 max-w-[80%]">
-                  👋 Hi! Ask me anything about Brevard auctions!
-                </div>
-              </div>
-              <div className="flex justify-end">
-                <div className="bg-amber-500 rounded-xl px-3 py-2 text-sm text-slate-900 max-w-[80%]">
-                  What auctions are on Dec 18?
-                </div>
-              </div>
-              <div className="flex justify-start">
-                <div className="bg-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 max-w-[80%]">
-                  📅 <strong>Dec 18 Tax Deed Auction</strong><br/>
-                  • Time: 9 AM EST<br/>
-                  • Location: ONLINE<br/>
-                  • 20 properties available
-                </div>
-              </div>
-              <div className="flex justify-end">
-                <div className="bg-amber-500 rounded-xl px-3 py-2 text-sm text-slate-900 max-w-[80%]">
-                  What's the max bid formula?
-                </div>
-              </div>
-              <div className="flex justify-start">
-                <div className="bg-slate-800 rounded-xl px-3 py-2 text-sm text-slate-100 max-w-[80%]">
-                  💰 <strong>Max Bid Formula:</strong><br/>
-                  <code className="bg-slate-700 px-1 rounded text-amber-400">(ARV×70%) - Repairs - $10K - MIN($25K,15%×ARV)</code>
-                </div>
-              </div>
-            </div>
-
-            {/* CTA */}
-            <div className="p-4 border-t border-slate-700 bg-slate-800/50">
-              <a 
-                href="#chat" 
-                className="block w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl text-center font-semibold text-slate-900 hover:from-amber-400 hover:to-amber-500 transition-all"
-              >
-                Open Full AI Chat →
-              </a>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Tech Stack */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="mt-16 text-center"
-      >
-        <p className="text-slate-500 text-sm mb-4">Powered by</p>
-        <div className="flex flex-wrap justify-center gap-4">
-          {['LangGraph', 'NLP Cloud', 'XGBoost ML', 'Supabase', 'Smart Router'].map(tech => (
-            <span key={tech} className="px-4 py-2 bg-slate-800/50 rounded-lg text-slate-400 text-sm border border-slate-700/50">
-              {tech}
-            </span>
-          ))}
         </div>
-      </motion.div>
-    </div>
-  </section>
-);
+      </section>
 
-// ============ MAIN APP ============
-export default function App() {
-  const [demoOpen, setDemoOpen] = useState(false);
+      {/* FEATURED PROPERTIES - Mobile Responsive */}
+      <section style={{
+        padding: '4rem 1.5rem',
+        maxWidth: '1400px',
+        margin: '0 auto',
+        background: 'rgba(255, 255, 255, 0.02)',
+        borderRadius: '24px'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+          <h3 style={{
+            fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
+            fontWeight: '900',
+            marginBottom: '1rem'
+          }}>
+            Live Auction Analysis
+          </h3>
+          <p style={{ fontSize: '1.125rem', color: '#94a3b8' }}>
+            Dec 18, 2025 Tax Deed Sale · Brevard County, FL
+          </p>
+        </div>
 
-  return (
-    <div className="min-h-screen bg-slate-950 text-white">
-      <Navigation />
-      <Hero onOpenDemo={() => setDemoOpen(true)} />
-      <AIShowcase />
-      <StagesSection />
-      <FounderSection />
-      <CTASection />
-      <Footer />
-      
-      <SplitScreenDemo isOpen={demoOpen} onClose={() => setDemoOpen(false)} />
-      <FloatingChatWidget />
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+          gap: '1.5rem'
+        }}>
+          {FEATURED_PROPERTIES.map((prop) => {
+            const recColor = {
+              BID: theme.colors.emerald[500],
+              REVIEW: theme.colors.gold[500],
+              SKIP: theme.colors.red[500]
+            }[prop.recommendation];
+
+            return (
+              <div key={prop.id} className="glass-card hover-lift" style={{
+                padding: '1.5rem',
+                borderColor: `${recColor}40`
+              }}>
+                <div style={{
+                  display: 'inline-block',
+                  background: `${recColor}20`,
+                  color: recColor,
+                  padding: '0.375rem 0.75rem',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: '800',
+                  marginBottom: '1rem'
+                }}>
+                  {prop.recommendation}
+                </div>
+
+                <div style={{ fontSize: '15px', fontWeight: '700', marginBottom: '0.5rem' }}>
+                  {prop.address}
+                </div>
+                <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '1.5rem', fontFamily: 'monospace' }}>
+                  Case #{prop.caseNumber}
+                </div>
+
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '1rem',
+                  padding: '1rem',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  borderRadius: '8px'
+                }}>
+                  <div>
+                    <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '0.25rem' }}>
+                      Opening Bid
+                    </div>
+                    <div style={{ fontSize: '18px', fontWeight: '800', color: recColor }}>
+                      ${prop.openingBid.toLocaleString()}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '0.25rem' }}>
+                      Market Value
+                    </div>
+                    <div style={{ fontSize: '18px', fontWeight: '800' }}>
+                      ${prop.marketValue.toLocaleString()}
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '0.25rem' }}>
+                      ML Score
+                    </div>
+                    <div style={{ fontSize: '16px', fontWeight: '700' }}>
+                      {prop.mlScore}%
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '0.25rem' }}>
+                      Discount
+                    </div>
+                    <div style={{ fontSize: '16px', fontWeight: '700', color: theme.colors.emerald[500] }}>
+                      {prop.bidJudgmentRatio}%
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{
+                  marginTop: '1rem',
+                  padding: '0.75rem',
+                  background: `${recColor}10`,
+                  borderLeft: `3px solid ${recColor}`,
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  color: '#cbd5e1'
+                }}>
+                  Pipeline Stage: <strong>{prop.phase}</strong>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* CTA SECTION - Mobile Responsive */}
+      <section style={{
+        padding: '4rem 1.5rem',
+        maxWidth: '900px',
+        margin: '0 auto',
+        textAlign: 'center'
+      }}>
+        <div className="glass-card" style={{
+          padding: 'clamp(2rem, 5vw, 3rem)',
+          background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%)',
+          borderColor: 'rgba(251, 191, 36, 0.3)'
+        }}>
+          <h3 style={{
+            fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
+            fontWeight: '900',
+            marginBottom: '1rem'
+          }}>
+            Ready to Ascend?
+          </h3>
+          <p style={{
+            fontSize: 'clamp(1rem, 2vw, 1.25rem)',
+            color: '#94a3b8',
+            marginBottom: '2rem'
+          }}>
+            Join foreclosure investors who save $300K+ annually with BidDeed.AI
+          </p>
+          <button style={{
+            background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+            color: '#030712',
+            border: 'none',
+            padding: '1.25rem 2.5rem',
+            borderRadius: '12px',
+            fontWeight: '900',
+            fontSize: '18px',
+            cursor: 'pointer',
+            boxShadow: '0 10px 30px rgba(251, 191, 36, 0.4)',
+            width: '100%',
+            maxWidth: '400px'
+          }}>
+            Start Your Free Trial →
+          </button>
+          <p style={{ fontSize: '14px', color: '#64748b', marginTop: '1rem' }}>
+            No credit card required · 14-day trial · Cancel anytime
+          </p>
+        </div>
+      </section>
+
+      {/* FOOTER - Mobile Responsive */}
+      <footer style={{
+        borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+        padding: '3rem 1.5rem',
+        textAlign: 'center'
+      }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          <div className="gradient-text" style={{ fontSize: '24px', fontWeight: '900', marginBottom: '1rem' }}>
+            BidDeed.AI
+          </div>
+          <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '1.5rem' }}>
+            Powered by The Everest Ascent™ Methodology
+          </p>
+          <p style={{ fontSize: '12px', color: '#475569' }}>
+            © 2025 Everest Capital USA. All Rights Reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
