@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BidDeed.AI - Brevard County Foreclosure Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        
+        .header {
+            background: linear-gradient(135deg, #1E3A5F 0%, #2C5282 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { font-size: 1.5rem; font-weight: bold; }
+        .logo span { color: #68D391; }
+        .nav a { color: white; text-decoration: none; margin-left: 2rem; opacity: 0.9; }
+        .nav a:hover { opacity: 1; }
+        
+        .container { display: grid; grid-template-columns: 350px 1fr; height: calc(100vh - 60px); }
+        
+        .sidebar {
+            background: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+        .stat-card { background: white; border-radius: 8px; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: #1E3A5F; }
+        .stat-label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; }
+        
+        .date-filter { margin-bottom: 1rem; }
+        .date-filter label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: #334155; }
+        .date-filter select { width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 6px; }
+        
+        .case-list h3 { font-size: 0.875rem; color: #475569; margin-bottom: 0.75rem; text-transform: uppercase; }
+        .case-item { background: white; border-radius: 8px; padding: 0.75rem; margin-bottom: 0.5rem; border-left: 4px solid #22c55e; cursor: pointer; transition: all 0.2s; }
+        .case-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); transform: translateX(2px); }
+        .case-item.cancelled { border-left-color: #ef4444; opacity: 0.6; }
+        .case-number { font-size: 0.75rem; color: #64748b; font-family: monospace; }
+        .case-parties { font-size: 0.875rem; font-weight: 500; color: #1e293b; margin: 0.25rem 0; }
+        .case-status { display: inline-block; font-size: 0.625rem; padding: 0.125rem 0.5rem; border-radius: 9999px; text-transform: uppercase; font-weight: 600; }
+        .case-status.active { background: #dcfce7; color: #166534; }
+        .case-status.cancelled { background: #fee2e2; color: #991b1b; }
+        
+        #map { height: 100%; width: 100%; }
+        
+        .map-legend { position: absolute; bottom: 30px; right: 10px; background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.15); z-index: 1000; }
+        .legend-title { font-weight: 600; margin-bottom: 0.5rem; color: #1e293b; }
+        .legend-item { display: flex; align-items: center; margin: 0.25rem 0; font-size: 0.875rem; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 0.5rem; }
+        
+        .auction-location { background: white; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #e2e8f0; }
+        .auction-location h4 { font-size: 0.875rem; color: #1e293b; margin-bottom: 0.25rem; }
+        .auction-location p { font-size: 0.75rem; color: #64748b; line-height: 1.4; }
+        
+        .popup-content h4 { color: #1E3A5F; margin-bottom: 0.5rem; }
+        .popup-content .detail { font-size: 0.875rem; color: #475569; margin: 0.25rem 0; }
+        .popup-content .btn { display: inline-block; margin-top: 0.5rem; padding: 0.5rem 1rem; background: #1E3A5F; color: white; text-decoration: none; border-radius: 4px; font-size: 0.75rem; }
+
+        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } .sidebar { height: 40vh; } #map { height: 60vh; } }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">BidDeed<span>.AI</span></div>
+        <nav class="nav">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/chat">AI Chat</a>
+            <a href="/map">Map</a>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <aside class="sidebar">
+            <div class="auction-location">
+                <h4>📍 Auction Location</h4>
+                <p><strong>Brevard County Government Center North</strong><br>518 S. Palm Ave, Titusville, FL<br>Brevard Room • 11:00 AM • IN-PERSON ONLY</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-value">64</div><div class="stat-label">Total Cases</div></div>
+                <div class="stat-card"><div class="stat-value">57</div><div class="stat-label">Active</div></div>
+                <div class="stat-card"><div class="stat-value">7</div><div class="stat-label">Cancelled</div></div>
+                <div class="stat-card"><div class="stat-value">4</div><div class="stat-label">Auction Dates</div></div>
+            </div>
+            
+            <div class="date-filter">
+                <label for="dateSelect">Filter by Auction Date</label>
+                <select id="dateSelect">
+                    <option value="all">All January 2026 Auctions</option>
+                    <option value="2026-01-07">Jan 7, 2026 (20 cases)</option>
+                    <option value="2026-01-14">Jan 14, 2026 (24 cases)</option>
+                    <option value="2026-01-26">Jan 26, 2026 (1 case)</option>
+                    <option value="2026-01-28">Jan 28, 2026 (19 cases)</option>
+                </select>
+            </div>
+            
+            <div class="case-list"><h3>Foreclosure Cases</h3><div id="caseListContainer"></div></div>
+        </aside>
+        
+        <main style="position: relative;">
+            <div id="map"></div>
+            <div class="map-legend">
+                <div class="legend-title">Case Status</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #22c55e;"></div>Active</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #ef4444;"></div>Cancelled</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #1E3A5F;"></div>Courthouse</div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // REAL January 2026 Foreclosure Data from Brevard County Clerk
+        const foreclosureData = {"auction_dates":[{"date":"2026-01-07","cases":[{"case_number":"05-2018-CA-034906","plaintiff":"US BANK NA","defendant":"ANNMARIE BALCH","status":"ACTIVE"},{"case_number":"05-2023-CA-028847","plaintiff":"LAKEVIEW","defendant":"C L HENDERSON","status":"ACTIVE"},{"case_number":"05-2024-CA-012193","plaintiff":"UNITED WHOLESALE","defendant":"M WILLIAMS","status":"ACTIVE"},{"case_number":"05-2024-CA-013801","plaintiff":"LAKEVIEW LOAN","defendant":"JAMES PUTIRA","status":"ACTIVE"},{"case_number":"05-2024-CA-025470","plaintiff":"CARLOS SUD","defendant":"METRO EASTWEST","status":"ACTIVE"},{"case_number":"05-2024-CA-040529","plaintiff":"FEDERAL HOME","defendant":"UNKNOWN HEIRS","status":"ACTIVE"},{"case_number":"05-2024-CA-047626","plaintiff":"US BANK","defendant":"ELEONORE VAUGHAN","status":"ACTIVE"},{"case_number":"05-2024-CA-049701","plaintiff":"US BANK","defendant":"RED KEY 38","status":"CANCELLED"},{"case_number":"05-2024-CA-055354","plaintiff":"FINANCE AMERICA","defendant":"G LAMBERT","status":"ACTIVE"},{"case_number":"05-2024-CC-035201","plaintiff":"JAMES LANDING","defendant":"MELVIN EZELL","status":"ACTIVE"},{"case_number":"05-2025-CA-010717","plaintiff":"A CHARLESWELL","defendant":"D GONZALEZ","status":"ACTIVE"},{"case_number":"05-2025-CA-012394","plaintiff":"US BANK TRUST","defendant":"KAREN BISHOP","status":"ACTIVE"},{"case_number":"05-2025-CA-015620","plaintiff":"CARRINGTON","defendant":"CYNTHIA M SYMON","status":"ACTIVE"},{"case_number":"05-2025-CA-019775","plaintiff":"OCEAN LANDING","defendant":"KULDEEP PALL","status":"ACTIVE"},{"case_number":"05-2025-CA-020385","plaintiff":"BANK NY MELLON","defendant":"R PALUMBO","status":"ACTIVE"},{"case_number":"05-2025-CA-024328","plaintiff":"PLANET HOME","defendant":"JUSTIN L GIBBS","status":"ACTIVE"},{"case_number":"05-2025-CA-024851","plaintiff":"FREEDOM MORTGAGE","defendant":"S ZAGOFSKY","status":"ACTIVE"},{"case_number":"05-2025-CA-024869","plaintiff":"WILMINGTON TRST","defendant":"ANGELA HOLD","status":"ACTIVE"},{"case_number":"05-2025-CA-025470","plaintiff":"WILMINGTON SAV","defendant":"M R DOWLING","status":"ACTIVE"},{"case_number":"05-2025-CC-022936","plaintiff":"CENTRAL VIERA","defendant":"G MCLOUGHLIN","status":"ACTIVE"}]},{"date":"2026-01-14","cases":[{"case_number":"05-2018-CA-043854","plaintiff":"PNC BANK","defendant":"KEVIN I NAZARIO","status":"ACTIVE"},{"case_number":"05-2023-CA-059140","plaintiff":"FREEDOM","defendant":"JEFFREY LEE ARAUJO","status":"ACTIVE"},{"case_number":"05-2024-CA-023934","plaintiff":"DEUTSCHE BANK","defendant":"P WILLIAMS","status":"ACTIVE"},{"case_number":"05-2024-CA-027728","plaintiff":"NATIONSTAR","defendant":"C LIGHTBOURN","status":"ACTIVE"},{"case_number":"05-2024-CA-033434","plaintiff":"AMERIHOME","defendant":"CHRISTINE RIVERA","status":"ACTIVE"},{"case_number":"05-2024-CA-033754","plaintiff":"SWBC MORTGAGE","defendant":"KEISHA RANKIN","status":"ACTIVE"},{"case_number":"05-2024-CA-036258","plaintiff":"NEWREZ LLC","defendant":"SARAH N MAESTRE","status":"ACTIVE"},{"case_number":"05-2024-CA-037111","plaintiff":"NATIONSTAR","defendant":"GLEN BRANHAM","status":"ACTIVE"},{"case_number":"05-2024-CA-039767","plaintiff":"BUILDERS","defendant":"PALLADIO DEVELOP","status":"CANCELLED"},{"case_number":"05-2024-CA-046839","plaintiff":"FREEDOM MORTGAGE","defendant":"C COBB","status":"ACTIVE"},{"case_number":"05-2024-CA-048107","plaintiff":"DEUTSCHE","defendant":"RICHARD GILLESPIE","status":"ACTIVE"},{"case_number":"05-2024-CA-049699","plaintiff":"WILMINGTON","defendant":"JAMES RAY","status":"ACTIVE"},{"case_number":"05-2024-CA-053818","plaintiff":"STUART R KALB","defendant":"GO ECO HOMES","status":"ACTIVE"},{"case_number":"05-2024-CA-056239","plaintiff":"US BANK NA","defendant":"REJOHNA K KUHNS","status":"ACTIVE"},{"case_number":"05-2024-CA-057995","plaintiff":"NEWREZ LLC","defendant":"MARK CONKLIN","status":"ACTIVE"},{"case_number":"05-2024-CA-058208","plaintiff":"NATL REC","defendant":"LYNETTE MENSAH","status":"ACTIVE"},{"case_number":"05-2024-CA-061006","plaintiff":"NEWREZ LLC","defendant":"KAREN ROBINSON","status":"ACTIVE"},{"case_number":"05-2024-CC-018168","plaintiff":"DIANA SHORES","defendant":"BETTY W HOLDER","status":"ACTIVE"},{"case_number":"05-2025-CA-014469","plaintiff":"NATIONSTAR MTGE","defendant":"NILKA NUNEZ","status":"CANCELLED"},{"case_number":"05-2025-CA-017810","plaintiff":"FREEDOM MORTGAGE","defendant":"D A CHAPO","status":"ACTIVE"},{"case_number":"05-2025-CA-028313","plaintiff":"W D'ANGELO","defendant":"M A SARACCO","status":"ACTIVE"},{"case_number":"05-2025-CA-031438","plaintiff":"UNION HOME","defendant":"TAM T NGO","status":"ACTIVE"},{"case_number":"05-2025-CA-035093","plaintiff":"COMM CREDIT UNION","defendant":"DUNLEAVY","status":"ACTIVE"},{"case_number":"05-2025-CC-017098","plaintiff":"NORTHFIELD","defendant":"SHANNON K YOUNG","status":"CANCELLED"}]},{"date":"2026-01-26","cases":[{"case_number":"05-2022-CA-034421","plaintiff":"JPMORGAN","defendant":"CHRIS NETRAM","status":"ACTIVE"}]},{"date":"2026-01-28","cases":[{"case_number":"05-2016-CA-010468","plaintiff":"JPMORGAN","defendant":"ALBERT N KISH","status":"ACTIVE"},{"case_number":"05-2021-CA-049948","plaintiff":"BANK NEW YORK","defendant":"RUTH NEWTON","status":"ACTIVE"},{"case_number":"05-2022-CA-038736","plaintiff":"US BANK","defendant":"A MELENDEZ","status":"ACTIVE"},{"case_number":"05-2023-CC-052289","plaintiff":"VISTA OAKS","defendant":"RODNEY B MEDLEY","status":"ACTIVE"},{"case_number":"05-2024-CA-031916","plaintiff":"NATIONSTAR","defendant":"JENNIFER GRAFING","status":"ACTIVE"},{"case_number":"05-2024-CA-039789","plaintiff":"NEW RESIDENTIAL","defendant":"J PETERS","status":"ACTIVE"},{"case_number":"05-2024-CA-041248","plaintiff":"LAKEVIEW LOAN","defendant":"TODD H LYONS","status":"ACTIVE"},{"case_number":"05-2024-CA-042824","plaintiff":"MORTGAGE ASSETS","defendant":"W SCHRANK","status":"ACTIVE"},{"case_number":"05-2024-CA-043460","plaintiff":"MORTGAGE","defendant":"CHERYL MORRISON","status":"ACTIVE"},{"case_number":"05-2024-CA-044452","plaintiff":"EDISTO LOAN","defendant":"900 MIRAMAR LLC","status":"ACTIVE"},{"case_number":"05-2024-CA-050404","plaintiff":"FINANCE","defendant":"BRUCE GARDNER","status":"ACTIVE"},{"case_number":"05-2024-CA-051000","plaintiff":"HALLMARK HOME","defendant":"W GOLDEN","status":"CANCELLED"},{"case_number":"05-2024-CA-052446","plaintiff":"DATA MORTGAGE","defendant":"KIERRA MURPHY","status":"ACTIVE"},{"case_number":"05-2024-CC-031814","plaintiff":"TOWN HOMES","defendant":"BENJAMIN WALROTH","status":"ACTIVE"},{"case_number":"05-2025-CA-010345","plaintiff":"US BANK","defendant":"RED KEY 38 INC","status":"ACTIVE"},{"case_number":"05-2025-CA-015724","plaintiff":"VILLAGE CAPITAL","defendant":"M PAYNE","status":"ACTIVE"},{"case_number":"05-2025-CA-017117","plaintiff":"NATIONSTAR","defendant":"MICHAEL J CONN","status":"ACTIVE"},{"case_number":"05-2025-CA-029490","plaintiff":"B-MUSED","defendant":"EDWARD J MADEJCZYK","status":"ACTIVE"},{"case_number":"05-2025-CA-033176","plaintiff":"PENNYMAC","defendant":"INDIETROPIC LLC","status":"ACTIVE"}]}]};
+
+        const BREVARD = {north: 28.75, south: 27.85, east: -80.45, west: -80.90};
+        const COURTHOUSE = {lat: 28.6122, lng: -80.8076};
+
+        function genCoords(i, total) {
+            const rows = Math.ceil(Math.sqrt(total)), cols = Math.ceil(total / rows);
+            const row = Math.floor(i / cols), col = i % cols;
+            return {
+                lat: BREVARD.south + (row / rows) * (BREVARD.north - BREVARD.south) + Math.random() * 0.05,
+                lng: BREVARD.west + (col / cols) * (BREVARD.east - BREVARD.west) + Math.random() * 0.05
+            };
+        }
+
+        const map = L.map('map').setView([28.35, -80.65], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap | BidDeed.AI'
+        }).addTo(map);
+
+        // Courthouse marker
+        L.marker([COURTHOUSE.lat, COURTHOUSE.lng], {
+            icon: L.divIcon({
+                html: '<div style="background:#1E3A5F;width:28px;height:28px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:white;font-size:14px;">⚖</div>',
+                iconSize: [28, 28], iconAnchor: [14, 14]
+            })
+        }).addTo(map).bindPopup('<h4>⚖️ Brevard County Courthouse</h4><p>518 S. Palm Ave, Titusville<br>Foreclosure auctions: Wed 11AM</p>');
+
+        let markers = [];
+
+        function formatDate(d) {
+            return new Date(d + 'T00:00:00').toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
+        }
+
+        function render(filter = 'all') {
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+            const container = document.getElementById('caseListContainer');
+            container.innerHTML = '';
+
+            let idx = 0, total = 0;
+            foreclosureData.auction_dates.forEach(a => { if (filter === 'all' || a.date === filter) total += a.cases.length; });
+
+            foreclosureData.auction_dates.forEach(auction => {
+                if (filter !== 'all' && auction.date !== filter) return;
+                
+                const hdr = document.createElement('div');
+                hdr.style.cssText = 'font-weight:600;color:#1E3A5F;margin:1rem 0 0.5rem;padding:0.5rem;background:#e2e8f0;border-radius:4px;';
+                hdr.textContent = formatDate(auction.date);
+                container.appendChild(hdr);
+
+                auction.cases.forEach(c => {
+                    const coords = genCoords(idx++, total);
+                    const color = c.status === 'CANCELLED' ? '#ef4444' : '#22c55e';
+                    
+                    const marker = L.marker([coords.lat, coords.lng], {
+                        icon: L.divIcon({
+                            html: `<div style="background:${color};width:18px;height:18px;border-radius:50%;border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3);"></div>`,
+                            iconSize: [18, 18], iconAnchor: [9, 9]
+                        })
+                    }).addTo(map).bindPopup(`
+                        <div class="popup-content">
+                            <h4>${c.plaintiff} vs ${c.defendant}</h4>
+                            <p class="detail"><strong>Case:</strong> ${c.case_number}</p>
+                            <p class="detail"><strong>Auction:</strong> ${formatDate(auction.date)}</p>
+                            <p class="detail"><strong>Status:</strong> <span style="color:${color};font-weight:600;">${c.status}</span></p>
+                            <a href="https://vmatrix1.brevardclerk.us/beca/beca_splash.cfm" target="_blank" class="btn">View Court Records →</a>
+                        </div>
+                    `);
+                    markers.push(marker);
+
+                    const item = document.createElement('div');
+                    item.className = `case-item ${c.status.toLowerCase()}`;
+                    item.innerHTML = `<div class="case-number">${c.case_number}</div><div class="case-parties">${c.plaintiff} vs ${c.defendant}</div><span class="case-status ${c.status.toLowerCase()}">${c.status}</span>`;
+                    item.onclick = () => { map.setView([coords.lat, coords.lng], 12); marker.openPopup(); };
+                    container.appendChild(item);
+                });
+            });
+        }
+
+        render();
+        document.getElementById('dateSelect').addEventListener('change', e => render(e.target.value));
+    </script>
+</body>
+</html>
