@@ -74,7 +74,7 @@ const DATA=[
 {c:"05-2024-CA-045789",a:"987 VIERA BLVD, VIERA, FL 32940",y:"VIERA",lat:28.2558,lng:-80.7321,j:485000,m:388000,p:"LOANCARE LLC",s:0.85,r:"BID",d:"2025-01-07"}
 ];
 const map=L.map('map').setView([28.2639,-80.7214],10);
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'©OSM ©CARTO',maxZoom:19}).addTo(map);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'©OSM ©CARTO',maxZoom:19}).addTo(map);
 let markers=[],currentFilter='all';
 const colors={BID:'#22c55e',REVIEW:'#eab308',SKIP:'#ef4444'};
 function popup(p){const ph=p.ph?`<img src="${p.ph}" class="popup-photo" onerror="this.style.display='none'">`:'';return`<div class="popup-content"><div class="popup-title">${p.a}</div>${ph}<div class="popup-row"><span class="popup-label">Case #</span><span class="popup-value">${p.c}</span></div><div class="popup-row"><span class="popup-label">Judgment</span><span class="popup-value">$${p.j?.toLocaleString()||'N/A'}</span></div><div class="popup-row"><span class="popup-label">Max Bid</span><span class="popup-value">$${p.m?.toLocaleString()||'N/A'}</span></div><div class="popup-row"><span class="popup-label">ML Score</span><span class="popup-value">${(p.s*100).toFixed(0)}%</span></div><div class="popup-row"><span class="popup-label">Plaintiff</span><span class="popup-value">${p.p||'Unknown'}</span></div><div class="popup-row"><span class="popup-label">Auction</span><span class="popup-value">${p.d}</span></div><div style="text-align:center;margin-top:.75rem"><span class="popup-rec ${p.r.toLowerCase()}">${p.r}</span></div></div>`;}
@@ -88,3 +88,4 @@ render(DATA);console.log('Loaded '+DATA.length+' REAL Brevard foreclosures');
 </script>
 </body>
 </html>
+
