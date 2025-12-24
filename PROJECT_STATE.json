@@ -1,9 +1,9 @@
 {
   "project_name": "BidDeed.AI",
-  "version": "16.3.0",
+  "version": "16.4.0",
   "parent_company": "EVEREST CAPITAL USA",
   "methodology": "The Everest Ascent™",
-  "last_updated": "2025-12-19T03:42:00Z",
+  "last_updated": "2025-12-24T14:00:00Z",
   "updated_by": "Claude Opus 4.5 (AI Architect)",
   "stack_status": {
     "scrapers": {
@@ -38,22 +38,59 @@
     "supabase_schema": {
       "everest_brand": "deployed",
       "foreclosure_auctions": "deployed",
+      "auction_results": "deployed",
       "checkpoints": "deployed"
     },
     "frontend": {
       "decision_panel": "deployed",
       "pipeline_progress": "deployed",
       "biddeed_chat": "deployed",
+      "foreclosure_map": "deployed",
       "design_tokens": "deployed",
       "shadcn_preset": "v2_deployed",
       "typography": "geist"
     }
+  },
+  "live_urls": {
+    "landing": "https://brevard-bidder-landing.pages.dev",
+    "chat": "https://brevard-bidder-landing.pages.dev/chat",
+    "map": "https://brevard-bidder-landing.pages.dev/map",
+    "map_standalone": "https://biddeed-foreclosure-map.pages.dev"
   },
   "repositories": {
     "primary": "breverdbidder/brevard-bidder-scraper",
     "landing": "breverdbidder/brevard-bidder-landing"
   },
   "recent_decisions": [
+    {
+      "date": "2025-12-24",
+      "decision": "Deploy Brevard County Foreclosure Map V16.4.0",
+      "rationale": "Interactive Leaflet map with BID/REVIEW/SKIP markers, connects to auction_results table",
+      "features": [
+        "Dark-themed Leaflet map centered on Brevard County",
+        "Color-coded markers: green=BID, yellow=REVIEW, red=SKIP",
+        "Property sidebar with click-to-zoom",
+        "BCPAO photos in popups",
+        "ML score display",
+        "Stats dashboard"
+      ],
+      "urls": {
+        "primary": "https://brevard-bidder-landing.pages.dev/map",
+        "standalone": "https://biddeed-foreclosure-map.pages.dev"
+      },
+      "outcome": "deployed"
+    },
+    {
+      "date": "2025-12-24",
+      "decision": "Update insert_results.py with geocoding",
+      "rationale": "Pipeline Stage 10 now inserts lat/lng for map visualization",
+      "features": [
+        "Brevard ZIP code centroid fallback",
+        "Auto-populates auction_results table",
+        "Map-ready coordinates"
+      ],
+      "outcome": "deployed"
+    },
     {
       "date": "2025-12-15",
       "decision": "AnimatedDemo integrated into landing page V16.2.0",
@@ -65,89 +102,11 @@
       "decision": "Mobile Auction Calendar deployed",
       "rationale": "FullCalendar with dark theme, list/month views, tap-to-detail modal",
       "outcome": "deployed"
-    },
-    {
-      "date": "2025-12-12",
-      "decision": "Full stack merge from BrevardBidderAI to BidDeed.AI",
-      "files_deployed": 76,
-      "status": "completed"
-    },
-    {
-      "date": "2025-12-19",
-      "decision": "Deploy Shadcn new-york preset V2 with Geist typography",
-      "commits": [
-        "62e6b5b",
-        "4d4f595"
-      ],
-      "source": "YouTube learning: 5 Ways To Build Beautiful Websites Using Claude Code"
     }
   ],
-  "pipeline_stages": [
-    {
-      "id": "discovery",
-      "name": "Discovery",
-      "source": "RealForeclose"
-    },
-    {
-      "id": "scraping",
-      "name": "Scraping",
-      "source": "BECA V22"
-    },
-    {
-      "id": "title-search",
-      "name": "Title Search",
-      "source": "AcclaimWeb"
-    },
-    {
-      "id": "lien-priority",
-      "name": "Lien Priority",
-      "source": "AcclaimWeb"
-    },
-    {
-      "id": "tax-certs",
-      "name": "Tax Certs",
-      "source": "RealTDM"
-    },
-    {
-      "id": "demographics",
-      "name": "Demographics",
-      "source": "Census API"
-    },
-    {
-      "id": "ml-score",
-      "name": "ML Score",
-      "source": "XGBoost"
-    },
-    {
-      "id": "max-bid",
-      "name": "Max Bid",
-      "source": "Formula"
-    },
-    {
-      "id": "decision",
-      "name": "Decision",
-      "source": "Smart Router"
-    },
-    {
-      "id": "report",
-      "name": "Report",
-      "source": "python-docx"
-    },
-    {
-      "id": "disposition",
-      "name": "Disposition",
-      "source": "Supabase"
-    },
-    {
-      "id": "archive",
-      "name": "Archive",
-      "source": "Supabase"
-    }
-  ],
-  "valuation": {
-    "annual_value": 350000,
-    "annual_cost": 3300,
-    "roi_multiple": 100,
-    "model": "internal_alpha"
+  "next_auction": {
+    "date": "2025-01-07",
+    "location": "Titusville Courthouse",
+    "type": "in-person"
   }
 }
