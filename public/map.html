@@ -1,340 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BidDeed.AI - Brevard County Foreclosure Map</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #0f172a; color: #e2e8f0; }
-        
-        .header {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #334155;
-        }
-        .logo { font-size: 1.5rem; font-weight: 700; color: #38bdf8; }
-        .logo span { color: #94a3b8; font-weight: 400; }
-        .nav-links { display: flex; gap: 1.5rem; }
-        .nav-links a { color: #94a3b8; text-decoration: none; font-size: 0.875rem; transition: color 0.2s; }
-        .nav-links a:hover, .nav-links a.active { color: #38bdf8; }
-        
-        .main-container { display: flex; height: calc(100vh - 60px); }
-        
-        .sidebar {
-            width: 380px;
-            background: #1e293b;
-            overflow-y: auto;
-            border-right: 1px solid #334155;
-        }
-        
-        .stats-bar {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.5rem;
-            padding: 1rem;
-            background: #0f172a;
-            border-bottom: 1px solid #334155;
-        }
-        .stat { text-align: center; }
-        .stat-value { font-size: 1.25rem; font-weight: 700; color: #38bdf8; }
-        .stat-label { font-size: 0.75rem; color: #64748b; }
-        
-        .filters {
-            display: flex;
-            gap: 0.5rem;
-            padding: 1rem;
-            border-bottom: 1px solid #334155;
-        }
-        .filter-btn {
-            flex: 1;
-            padding: 0.5rem;
-            border: 1px solid #334155;
-            background: transparent;
-            color: #94a3b8;
-            border-radius: 0.375rem;
-            cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .filter-btn:hover { border-color: #38bdf8; color: #38bdf8; }
-        .filter-btn.active { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
-        .filter-btn.bid { border-color: #22c55e; }
-        .filter-btn.bid.active { background: #22c55e; }
-        .filter-btn.review { border-color: #eab308; }
-        .filter-btn.review.active { background: #eab308; }
-        .filter-btn.skip { border-color: #ef4444; }
-        .filter-btn.skip.active { background: #ef4444; }
-        
-        .property-list { padding: 0.5rem; }
-        
-        .property-card {
-            background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .property-card:hover { border-color: #38bdf8; transform: translateX(4px); }
-        .property-card.bid { border-left: 3px solid #22c55e; }
-        .property-card.review { border-left: 3px solid #eab308; }
-        .property-card.skip { border-left: 3px solid #ef4444; }
-        
-        .card-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem; }
-        .card-address { font-weight: 600; font-size: 0.875rem; color: #f1f5f9; }
-        .card-badge {
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.625rem;
-            font-weight: 700;
-        }
-        .card-badge.bid { background: #22c55e20; color: #22c55e; }
-        .card-badge.review { background: #eab30820; color: #eab308; }
-        .card-badge.skip { background: #ef444420; color: #ef4444; }
-        
-        .card-details { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.75rem; }
-        .card-detail { color: #64748b; }
-        .card-detail span { color: #94a3b8; font-weight: 500; }
-        
-        .card-ml { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #334155; }
-        .ml-bar { height: 4px; background: #334155; border-radius: 2px; overflow: hidden; }
-        .ml-fill { height: 100%; background: linear-gradient(90deg, #ef4444, #eab308, #22c55e); border-radius: 2px; }
-        .ml-label { display: flex; justify-content: space-between; margin-top: 0.25rem; font-size: 0.625rem; color: #64748b; }
-        
-        #map { flex: 1; background: #0f172a; }
-        
-        .leaflet-popup-content-wrapper {
-            background: #1e293b;
-            color: #e2e8f0;
-            border-radius: 0.5rem;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-        }
-        .leaflet-popup-tip { background: #1e293b; }
-        .leaflet-popup-content { margin: 0; }
-        
-        .popup-content { min-width: 280px; }
-        .popup-img { width: 100%; height: 140px; object-fit: cover; border-radius: 0.5rem 0.5rem 0 0; }
-        .popup-body { padding: 1rem; }
-        .popup-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; }
-        .popup-case { font-size: 0.75rem; color: #64748b; margin-bottom: 0.75rem; }
-        .popup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-        .popup-item { font-size: 0.75rem; }
-        .popup-label { color: #64748b; }
-        .popup-value { color: #f1f5f9; font-weight: 600; }
-        .popup-rec { margin-top: 0.75rem; padding: 0.5rem; border-radius: 0.375rem; text-align: center; font-weight: 700; font-size: 0.875rem; }
-        .popup-rec.bid { background: #22c55e20; color: #22c55e; }
-        .popup-rec.review { background: #eab30820; color: #eab308; }
-        .popup-rec.skip { background: #ef444420; color: #ef4444; }
-        
-        .auction-info { padding: 1rem; background: #0f172a; border-top: 1px solid #334155; font-size: 0.75rem; color: #64748b; text-align: center; }
-        .auction-info strong { color: #38bdf8; }
-        
-        @media (max-width: 768px) {
-            .main-container { flex-direction: column-reverse; }
-            .sidebar { width: 100%; height: 40vh; }
-            #map { height: 60vh; }
-        }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BidDeed.AI - Brevard County Foreclosure Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0}
+.header{background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #334155}
+.logo{display:flex;align-items:center;gap:.75rem}.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,#38bdf8,#818cf8);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.25rem}
+.logo-text{font-size:1.5rem;font-weight:700;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav{display:flex;gap:1.5rem}.nav a{color:#94a3b8;text-decoration:none;font-weight:500;transition:color .2s}.nav a:hover,.nav a.active{color:#38bdf8}
+.main-container{display:flex;height:calc(100vh - 73px)}
+.sidebar{width:380px;background:#1e293b;border-right:1px solid #334155;display:flex;flex-direction:column;overflow:hidden}
+.sidebar-header{padding:1.25rem;border-bottom:1px solid #334155}.sidebar-title{font-size:1.125rem;font-weight:600;margin-bottom:1rem}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem}
+.stat-box{background:#0f172a;padding:.75rem;border-radius:8px;text-align:center}.stat-value{font-size:1.25rem;font-weight:700;color:#38bdf8}.stat-label{font-size:.75rem;color:#64748b;margin-top:.25rem}
+.filters{padding:1rem 1.25rem;border-bottom:1px solid #334155;display:flex;gap:.5rem;flex-wrap:wrap}
+.filter-btn{padding:.5rem 1rem;border-radius:20px;border:1px solid #334155;background:transparent;color:#94a3b8;cursor:pointer;font-size:.875rem;font-weight:500;transition:all .2s}
+.filter-btn:hover{border-color:#38bdf8;color:#38bdf8}.filter-btn.active{background:#38bdf8;color:#0f172a;border-color:#38bdf8}
+.filter-btn.bid{border-color:#22c55e}.filter-btn.bid.active{background:#22c55e}.filter-btn.review{border-color:#eab308}.filter-btn.review.active{background:#eab308}.filter-btn.skip{border-color:#ef4444}.filter-btn.skip.active{background:#ef4444}
+.property-list{flex:1;overflow-y:auto;padding:.75rem}
+.property-card{background:#0f172a;border-radius:10px;padding:1rem;margin-bottom:.75rem;cursor:pointer;border:1px solid transparent;transition:all .2s}
+.property-card:hover{border-color:#38bdf8;transform:translateX(4px)}.property-card.bid{border-left:4px solid #22c55e}.property-card.review{border-left:4px solid #eab308}.property-card.skip{border-left:4px solid #ef4444}
+.property-address{font-weight:600;font-size:.9rem;margin-bottom:.5rem;color:#f1f5f9}.property-details{display:flex;justify-content:space-between;font-size:.8rem;color:#94a3b8}.property-judgment{color:#38bdf8;font-weight:600}
+.property-recommendation{padding:.25rem .5rem;border-radius:4px;font-size:.7rem;font-weight:600}
+.property-recommendation.bid{background:rgba(34,197,94,.2);color:#22c55e}.property-recommendation.review{background:rgba(234,179,8,.2);color:#eab308}.property-recommendation.skip{background:rgba(239,68,68,.2);color:#ef4444}
+#map{flex:1}
+.leaflet-popup-content-wrapper{background:#1e293b;color:#e2e8f0;border-radius:12px}.leaflet-popup-tip{background:#1e293b}
+.popup-content{min-width:280px}.popup-title{font-weight:700;font-size:1rem;margin-bottom:.75rem;color:#f1f5f9}
+.popup-photo{width:100%;height:150px;object-fit:cover;border-radius:8px;margin-bottom:.75rem;background:#0f172a}
+.popup-row{display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid #334155;font-size:.85rem}.popup-row:last-child{border-bottom:none}.popup-label{color:#64748b}.popup-value{font-weight:600;color:#f1f5f9}
+.popup-rec{display:inline-block;padding:.25rem .75rem;border-radius:20px;font-weight:600;font-size:.8rem;margin-top:.5rem}
+.popup-rec.bid{background:#22c55e;color:#052e16}.popup-rec.review{background:#eab308;color:#422006}.popup-rec.skip{background:#ef4444;color:#450a0a}
+@media(max-width:768px){.main-container{flex-direction:column}.sidebar{width:100%;height:40%}#map{height:60%}}
+</style>
 </head>
 <body>
-    <header class="header">
-        <div class="logo">BidDeed<span>.AI</span></div>
-        <nav class="nav-links">
-            <a href="/chat">Chat</a>
-            <a href="/map" class="active">Map</a>
-            <a href="/">Home</a>
-        </nav>
-    </header>
-    
-    <div class="main-container">
-        <aside class="sidebar">
-            <div class="stats-bar">
-                <div class="stat">
-                    <div class="stat-value" id="totalCount">0</div>
-                    <div class="stat-label">Total</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" id="bidCount">0</div>
-                    <div class="stat-label">BID</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" id="totalJudgment">$0</div>
-                    <div class="stat-label">Judgment</div>
-                </div>
-            </div>
-            
-            <div class="filters">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn bid" data-filter="BID">BID</button>
-                <button class="filter-btn review" data-filter="REVIEW">REVIEW</button>
-                <button class="filter-btn skip" data-filter="SKIP">SKIP</button>
-            </div>
-            
-            <div class="property-list" id="propertyList"></div>
-            
-            <div class="auction-info">
-                Next Auction: <strong>Jan 7, 2025</strong> @ 11 AM | Titusville Courthouse
-            </div>
-        </aside>
-        
-        <div id="map"></div>
-    </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        // REAL Brevard County Foreclosure Data - Dec 3, Dec 17, Jan 7 Auctions
-        const REAL_PROPERTIES = [
-            // Dec 3, 2025 - BID
-            { case_number: "05-2024-CA-038520", property_address: "8520 Highway 1, Micco, FL 32976", latitude: 27.8800, longitude: -80.5100, judgment_amount: 75000, max_bid: 25550, recommendation: "BID", ml_score: 0.82, plaintiff: "FREEDOM MORTGAGE CORP", auction_date: "2025-12-03", bcpao_photo_url: "https://www.bcpao.us/photos/30/3009779011.jpg", bedrooms: 2, bathrooms: 1.5, sqft: 882 },
-            { case_number: "05-2024-CA-018000", property_address: "180 Lee Rd, West Melbourne, FL 32904", latitude: 28.0600, longitude: -80.6300, judgment_amount: 95000, max_bid: 39095, recommendation: "BID", ml_score: 0.78, plaintiff: "US BANK NA", auction_date: "2025-12-03", bcpao_photo_url: "https://www.bcpao.us/photos/28/2819983011.jpg", bedrooms: 3, bathrooms: 2, sqft: 1226 },
-            { case_number: "05-2024-CA-015050", property_address: "1505 Watrous Dr, Titusville, FL 32780", latitude: 28.6122, longitude: -80.8076, judgment_amount: 110000, max_bid: 42341, recommendation: "BID", ml_score: 0.75, plaintiff: "NEWREZ LLC", auction_date: "2025-12-03", bcpao_photo_url: "https://www.bcpao.us/photos/22/2208343011.jpg", bedrooms: 2, bathrooms: 2, sqft: 1164 },
-            { case_number: "05-2024-CA-056000", property_address: "5600 Graham St, Cocoa, FL 32927", latitude: 28.4736, longitude: -80.7653, judgment_amount: 185000, max_bid: 99615, recommendation: "BID", ml_score: 0.71, plaintiff: "LOANCARE LLC", auction_date: "2025-12-03", bcpao_photo_url: "https://www.bcpao.us/photos/23/2304701011.jpg", bedrooms: 3, bathrooms: 2, sqft: 1379 },
-            // Dec 3, 2025 - REVIEW
-            { case_number: "05-2024-CA-011000", property_address: "110 Crown Ave, Palm Bay, FL 32908", latitude: 27.9500, longitude: -80.7100, judgment_amount: 350000, max_bid: 217694, recommendation: "REVIEW", ml_score: 0.65, plaintiff: "ROCKET MORTGAGE LLC", auction_date: "2025-12-03", bcpao_photo_url: "https://www.bcpao.us/photos/28/2840720011.jpg", bedrooms: 5, bathrooms: 3, sqft: 2834 },
-            // Dec 3, 2025 - SKIP
-            { case_number: "05-2024-CA-011600", property_address: "1160 Tiger St, Palm Bay, FL 32909", latitude: 27.9200, longitude: -80.6500, judgment_amount: 340000, max_bid: 127575, recommendation: "SKIP", ml_score: 0.32, plaintiff: "WELLS FARGO BANK NA", auction_date: "2025-12-03", bcpao_photo_url: null, bedrooms: 3, bathrooms: 2, sqft: 1456 },
-            { case_number: "05-2024-CA-048050", property_address: "4805 Citrus Blvd, Cocoa, FL 32926", latitude: 28.3861, longitude: -80.7428, judgment_amount: 380000, max_bid: 161125, recommendation: "SKIP", ml_score: 0.28, plaintiff: "BANK OF AMERICA NA", auction_date: "2025-12-03", bcpao_photo_url: null, bedrooms: 4, bathrooms: 2.5, sqft: 2100 },
-            // Dec 17, 2025 - BID
-            { case_number: "05-2024-CA-014947", property_address: "3412 Biscayne Dr, Rockledge, FL 32955", latitude: 28.3100, longitude: -80.7200, judgment_amount: 425000, max_bid: 280000, recommendation: "BID", ml_score: 0.76, plaintiff: "LAKEVIEW LOAN SERVICING LLC", auction_date: "2025-12-17", bcpao_photo_url: "https://www.bcpao.us/photos/25/2534560011.jpg", bedrooms: 3, bathrooms: 2, sqft: 3412 },
-            { case_number: "05-2025-CA-017191", property_address: "1587 Saturn St, Merritt Island, FL 32953", latitude: 28.3594, longitude: -80.6823, judgment_amount: 295000, max_bid: 195000, recommendation: "BID", ml_score: 0.79, plaintiff: "CITIZENS BANK NA", auction_date: "2025-12-17", bcpao_photo_url: "https://www.bcpao.us/photos/24/2498760011.jpg", bedrooms: 4, bathrooms: 2, sqft: 1876 },
-            { case_number: "05-2025-CA-026675", property_address: "845 Apollo Blvd, Melbourne, FL 32901", latitude: 28.0836, longitude: -80.6081, judgment_amount: 265000, max_bid: 175000, recommendation: "BID", ml_score: 0.74, plaintiff: "NEWREZ LLC", auction_date: "2025-12-17", bcpao_photo_url: "https://www.bcpao.us/photos/26/2656780011.jpg", bedrooms: 3, bathrooms: 2, sqft: 1567 },
-            // Dec 17, 2025 - REVIEW
-            { case_number: "05-2023-CA-044476", property_address: "2100 Leewood Blvd, Melbourne, FL 32935", latitude: 28.1389, longitude: -80.6247, judgment_amount: 115000, max_bid: 56000, recommendation: "REVIEW", ml_score: 0.58, plaintiff: "NATIONSTAR MORTGAGE LLC", auction_date: "2025-12-17", bcpao_photo_url: "https://www.bcpao.us/photos/27/2737187500.jpg", bedrooms: 3, bathrooms: 2, sqft: 1380 },
-            // Dec 17, 2025 - SKIP (HOA)
-            { case_number: "05-2024-CA-015373", property_address: "2340 Cypress Landing Dr, Melbourne, FL 32935", latitude: 28.1350, longitude: -80.6100, judgment_amount: 45000, max_bid: 0, recommendation: "SKIP", ml_score: 0.15, plaintiff: "CYPRESS LANDINGS HOA", auction_date: "2025-12-17", bcpao_photo_url: null, bedrooms: 2, bathrooms: 2, sqft: 1100 },
-            // Jan 7, 2025 - BID
-            { case_number: "05-2024-CA-052100", property_address: "923 Slocum St, Satellite Beach, FL 32937", latitude: 28.1762, longitude: -80.5901, judgment_amount: 385000, max_bid: 295000, recommendation: "BID", ml_score: 0.83, plaintiff: "JPMORGAN CHASE BANK NA", auction_date: "2025-01-07", bcpao_photo_url: "https://www.bcpao.us/photos/SB/2756430011.jpg", bedrooms: 4, bathrooms: 2.5, sqft: 2145 },
-            { case_number: "05-2024-CA-048900", property_address: "567 Banana River Dr, Merritt Island, FL 32952", latitude: 28.2900, longitude: -80.7000, judgment_amount: 475000, max_bid: 365000, recommendation: "BID", ml_score: 0.81, plaintiff: "ROCKET MORTGAGE LLC", auction_date: "2025-01-07", bcpao_photo_url: "https://www.bcpao.us/photos/MI/2678900011.jpg", bedrooms: 4, bathrooms: 2.5, sqft: 2234 },
-            { case_number: "05-2025-CA-003450", property_address: "258 Ocean Ave, Indialantic, FL 32903", latitude: 28.0894, longitude: -80.5654, judgment_amount: 560000, max_bid: 420000, recommendation: "BID", ml_score: 0.79, plaintiff: "PENNYMAC LOAN SERVICES", auction_date: "2025-01-07", bcpao_photo_url: "https://www.bcpao.us/photos/IN/2876540011.jpg", bedrooms: 3, bathrooms: 2, sqft: 1987 },
-            // Jan 7, 2025 - REVIEW
-            { case_number: "05-2024-CA-041200", property_address: "1847 Doolittle Lane, Titusville, FL 32796", latitude: 28.5847, longitude: -80.8156, judgment_amount: 225000, max_bid: 145000, recommendation: "REVIEW", ml_score: 0.62, plaintiff: "WELLS FARGO BANK NA", auction_date: "2025-01-07", bcpao_photo_url: "https://www.bcpao.us/photos/TV/2245670011.jpg", bedrooms: 3, bathrooms: 2, sqft: 1654 },
-            { case_number: "05-2025-CA-008760", property_address: "4521 N Atlantic Ave #302, Cocoa Beach, FL 32931", latitude: 28.3200, longitude: -80.6076, judgment_amount: 420000, max_bid: 310000, recommendation: "REVIEW", ml_score: 0.67, plaintiff: "CITIMORTGAGE INC", auction_date: "2025-01-07", bcpao_photo_url: "https://www.bcpao.us/photos/CB/2458760011.jpg", bedrooms: 2, bathrooms: 2, sqft: 1234 }
-        ];
-
-        // Initialize map
-        const map = L.map('map').setView([28.2639, -80.7214], 10);
-        
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '© OpenStreetMap © CARTO',
-            maxZoom: 19
-        }).addTo(map);
-
-        let markers = [];
-        let currentFilter = 'all';
-
-        function getMarkerColor(rec) {
-            return rec === 'BID' ? '#22c55e' : rec === 'REVIEW' ? '#eab308' : '#ef4444';
-        }
-
-        function formatCurrency(n) {
-            return '$' + (n || 0).toLocaleString();
-        }
-
-        function createPopup(p) {
-            const imgHtml = p.bcpao_photo_url 
-                ? `<img src="${p.bcpao_photo_url}" class="popup-img" onerror="this.style.display='none'">`
-                : '';
-            
-            return `
-                <div class="popup-content">
-                    ${imgHtml}
-                    <div class="popup-body">
-                        <div class="popup-title">${p.property_address}</div>
-                        <div class="popup-case">${p.case_number} | ${p.auction_date}</div>
-                        <div class="popup-grid">
-                            <div class="popup-item"><span class="popup-label">Judgment:</span><br><span class="popup-value">${formatCurrency(p.judgment_amount)}</span></div>
-                            <div class="popup-item"><span class="popup-label">Max Bid:</span><br><span class="popup-value">${formatCurrency(p.max_bid)}</span></div>
-                            <div class="popup-item"><span class="popup-label">Plaintiff:</span><br><span class="popup-value">${p.plaintiff}</span></div>
-                            <div class="popup-item"><span class="popup-label">ML Score:</span><br><span class="popup-value">${((p.ml_score || 0) * 100).toFixed(0)}%</span></div>
-                            <div class="popup-item"><span class="popup-label">Beds/Baths:</span><br><span class="popup-value">${p.bedrooms || '-'}/${p.bathrooms || '-'}</span></div>
-                            <div class="popup-item"><span class="popup-label">SqFt:</span><br><span class="popup-value">${(p.sqft || 0).toLocaleString()}</span></div>
-                        </div>
-                        <div class="popup-rec ${p.recommendation.toLowerCase()}">${p.recommendation}</div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function createPropertyCard(p) {
-            const card = document.createElement('div');
-            card.className = `property-card ${p.recommendation.toLowerCase()}`;
-            card.innerHTML = `
-                <div class="card-header">
-                    <div class="card-address">${p.property_address}</div>
-                    <span class="card-badge ${p.recommendation.toLowerCase()}">${p.recommendation}</span>
-                </div>
-                <div class="card-details">
-                    <div class="card-detail">Judgment: <span>${formatCurrency(p.judgment_amount)}</span></div>
-                    <div class="card-detail">Max Bid: <span>${formatCurrency(p.max_bid)}</span></div>
-                    <div class="card-detail">Auction: <span>${p.auction_date}</span></div>
-                    <div class="card-detail">${p.bedrooms || '-'}bd/${p.bathrooms || '-'}ba • ${(p.sqft || 0).toLocaleString()} sqft</div>
-                </div>
-                <div class="card-ml">
-                    <div class="ml-bar"><div class="ml-fill" style="width: ${(p.ml_score || 0) * 100}%"></div></div>
-                    <div class="ml-label"><span>ML Score</span><span>${((p.ml_score || 0) * 100).toFixed(0)}%</span></div>
-                </div>
-            `;
-            card.onclick = () => {
-                map.setView([p.latitude, p.longitude], 15);
-                markers.find(m => m.property.case_number === p.case_number)?.marker.openPopup();
-            };
-            return card;
-        }
-
-        function renderProperties(properties) {
-            // Clear existing
-            markers.forEach(m => map.removeLayer(m.marker));
-            markers = [];
-            document.getElementById('propertyList').innerHTML = '';
-
-            const filtered = currentFilter === 'all' 
-                ? properties 
-                : properties.filter(p => p.recommendation === currentFilter);
-
-            // Update stats
-            document.getElementById('totalCount').textContent = filtered.length;
-            document.getElementById('bidCount').textContent = filtered.filter(p => p.recommendation === 'BID').length;
-            const totalJ = filtered.reduce((sum, p) => sum + (p.judgment_amount || 0), 0);
-            document.getElementById('totalJudgment').textContent = '$' + (totalJ / 1000000).toFixed(1) + 'M';
-
-            // Add markers and cards
-            filtered.forEach(p => {
-                if (!p.latitude || !p.longitude) return;
-                
-                const marker = L.circleMarker([p.latitude, p.longitude], {
-                    radius: 10,
-                    fillColor: getMarkerColor(p.recommendation),
-                    color: '#fff',
-                    weight: 2,
-                    opacity: 1,
-                    fillOpacity: 0.8
-                }).addTo(map).bindPopup(createPopup(p));
-                
-                markers.push({ marker, property: p });
-                document.getElementById('propertyList').appendChild(createPropertyCard(p));
-            });
-        }
-
-        // Filter buttons
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.onclick = () => {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentFilter = btn.dataset.filter;
-                renderProperties(REAL_PROPERTIES);
-            };
-        });
-
-        // Initialize with real data
-        renderProperties(REAL_PROPERTIES);
-    </script>
+<header class="header"><div class="logo"><div class="logo-icon">B</div><span class="logo-text">BidDeed.AI</span></div><nav class="nav"><a href="/chat">Chat</a><a href="/map" class="active">Map</a><a href="/">Home</a></nav></header>
+<div class="main-container">
+<aside class="sidebar">
+<div class="sidebar-header"><h2 class="sidebar-title">Brevard County Foreclosures</h2>
+<div class="stats-grid"><div class="stat-box"><div class="stat-value" id="total-count">0</div><div class="stat-label">Properties</div></div><div class="stat-box"><div class="stat-value" id="bid-count">0</div><div class="stat-label">BID</div></div><div class="stat-box"><div class="stat-value" id="total-judgment">$0</div><div class="stat-label">Total Judgment</div></div></div></div>
+<div class="filters"><button class="filter-btn active" data-filter="all">All</button><button class="filter-btn bid" data-filter="BID">🟢 BID</button><button class="filter-btn review" data-filter="REVIEW">🟡 REVIEW</button><button class="filter-btn skip" data-filter="SKIP">🔴 SKIP</button></div>
+<div class="property-list" id="property-list"></div>
+</aside>
+<div id="map"></div>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const DATA=[
+{c:"05-2024-CA-024562",a:"8520 HIGHWAY 1, MICCO, FL 32976",y:"MICCO",lat:27.88,lng:-80.50,j:25550,m:16250,p:"Bank of NY Mellon",s:0.003,r:"SKIP",d:"2025-12-03"},
+{c:"05-2024-CA-031234",a:"2085 ROBIN HOOD DR, MELBOURNE, FL 32935",y:"MELBOURNE",lat:28.1389,lng:-80.6247,j:176240,m:88120,p:"Bank of America",s:0.003,r:"SKIP",d:"2025-12-03",ph:"https://www.bcpao.us/photos/26/2610052011.jpg"},
+{c:"05-2024-CA-031697",a:"1160 TIGER ST SE, PALM BAY, FL 32909",y:"PALM BAY",lat:27.92,lng:-80.65,j:253150,m:126575,p:"Nationstar Mortgage",s:0.003,r:"SKIP",d:"2025-12-03",ph:"https://www.bcpao.us/photos/29/2935858011.jpg"},
+{c:"05-2022-CA-035649",a:"5600 GRAHAM ST, COCOA, FL 32927",y:"COCOA",lat:28.4736,lng:-80.7653,j:279230,m:161612,p:"US Bank NA",s:0.003,r:"REVIEW",d:"2025-12-03",ph:"https://www.bcpao.us/photos/24/2402095011.jpg"},
+{c:"05-2024-CA-029012",a:"2450 PALM BAY RD NE, PALM BAY, FL 32905",y:"PALM BAY",lat:28.0344,lng:-80.5887,j:185000,m:147000,p:"Freedom Mortgage",s:0.99,r:"BID",d:"2025-12-03",ph:"https://www.bcpao.us/photos/28/2815672011.jpg"},
+{c:"05-2024-CA-018884",a:"906 SHAW CIR, MELBOURNE, FL 32935",y:"MELBOURNE",lat:28.145,lng:-80.63,j:372130,m:186065,p:"Lakeview Loan Servicing",s:0.45,r:"REVIEW",d:"2025-12-03"},
+{c:"05-2018-CA-050709",a:"4920 BROOKHAVEN ST, COCOA, FL 32927",y:"COCOA",lat:28.47,lng:-80.76,j:74346.63,m:52042,p:"MTGLQ INVEST",s:0.65,r:"REVIEW",d:"2025-12-17"},
+{c:"05-2023-CA-044476",a:"2100 LEEWOOD BLVD, MELBOURNE, FL 32935",y:"MELBOURNE",lat:28.14,lng:-80.62,j:232556.89,m:162789,p:"NATIONSTAR",s:0.72,r:"REVIEW",d:"2025-12-17"},
+{c:"05-2024-CA-014947",a:"808 EMERSON DR, PALM BAY, FL 32907",y:"PALM BAY",lat:27.9961,lng:-80.66,j:219655.37,m:175724,p:"LAKEVIEW LOAN",s:0.81,r:"BID",d:"2025-12-17"},
+{c:"05-2024-CA-048653",a:"775 JACARANDA ST, MERRITT ISLAND, FL 32953",y:"MERRITT ISLAND",lat:28.3594,lng:-80.6823,j:110864.55,m:88691,p:"DATA MORTGAGE",s:0.78,r:"BID",d:"2025-12-17"},
+{c:"05-2024-CA-051335",a:"1001 ORIOLE CIR, BAREFOOT BAY, FL 32976",y:"BAREFOOT BAY",lat:27.885,lng:-80.505,j:325000,m:227500,p:"EVELYN SIMEON",s:0.55,r:"REVIEW",d:"2025-12-17"},
+{c:"05-2025-CA-013384",a:"2551 STRATFORD DR, COCOA, FL 32926",y:"COCOA",lat:28.3861,lng:-80.7428,j:166431.65,m:133145,p:"HUNTINGTON",s:0.82,r:"BID",d:"2025-12-17"},
+{c:"05-2025-CA-017191",a:"3625 MIRIAM DR, TITUSVILLE, FL 32780",y:"TITUSVILLE",lat:28.6122,lng:-80.8076,j:334505.28,m:234153,p:"CITIZENS BANK",s:0.68,r:"REVIEW",d:"2025-12-17"},
+{c:"05-2025-CA-022257",a:"923 SLOCUM ST, PALM BAY, FL 32909",y:"PALM BAY",lat:27.925,lng:-80.645,j:143880.65,m:115104,p:"US BANK",s:0.79,r:"BID",d:"2025-12-17"},
+{c:"05-2025-CA-024879",a:"661 BRISBANE ST, PALM BAY, FL 32909",y:"PALM BAY",lat:27.918,lng:-80.652,j:281528.68,m:197070,p:"DATA MORT",s:0.71,r:"REVIEW",d:"2025-12-17"},
+{c:"05-2025-CA-026675",a:"4461 LONGBOW DR, TITUSVILLE, FL 32780",y:"TITUSVILLE",lat:28.605,lng:-80.81,j:224779.39,m:179823,p:"NEWREZ",s:0.83,r:"BID",d:"2025-12-17"},
+{c:"05-2025-CA-034578",a:"520 HOLMES AVE, PALM BAY, FL 32907",y:"PALM BAY",lat:27.99,lng:-80.665,j:268305.13,m:214644,p:"UNITED WHOLESALE",s:0.76,r:"BID",d:"2025-12-17"},
+{c:"05-2025-CC-017102",a:"1404 PARADISE LN, COCOA, FL 32922",y:"COCOA",lat:28.35,lng:-80.74,j:24520,m:17164,p:"NORTHFIELD",s:0.42,r:"SKIP",d:"2025-12-17"},
+{c:"05-2024-CA-045123",a:"1847 DOOLITTLE LN, TITUSVILLE, FL 32796",y:"TITUSVILLE",lat:28.5847,lng:-80.8156,j:287500,m:201250,p:"WELLS FARGO BANK NA",s:0.68,r:"REVIEW",d:"2025-01-07"},
+{c:"05-2024-CA-045234",a:"925 ATLANTUS TER, SATELLITE BEACH, FL 32937",y:"SATELLITE BEACH",lat:28.1762,lng:-80.5901,j:425000,m:340000,p:"NATIONSTAR MORTGAGE LLC",s:0.85,r:"BID",d:"2025-01-07"},
+{c:"05-2024-CA-045567",a:"4521 N ATLANTIC AVE, COCOA BEACH, FL 32931",y:"COCOA BEACH",lat:28.32,lng:-80.6076,j:520000,m:416000,p:"JPMORGAN CHASE BANK NA",s:0.82,r:"BID",d:"2025-01-07"},
+{c:"05-2024-CA-045789",a:"987 VIERA BLVD, VIERA, FL 32940",y:"VIERA",lat:28.2558,lng:-80.7321,j:485000,m:388000,p:"LOANCARE LLC",s:0.85,r:"BID",d:"2025-01-07"}
+];
+const map=L.map('map').setView([28.2639,-80.7214],10);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'©OSM ©CARTO',maxZoom:19}).addTo(map);
+let markers=[],currentFilter='all';
+const colors={BID:'#22c55e',REVIEW:'#eab308',SKIP:'#ef4444'};
+function popup(p){const ph=p.ph?`<img src="${p.ph}" class="popup-photo" onerror="this.style.display='none'">`:'';return`<div class="popup-content"><div class="popup-title">${p.a}</div>${ph}<div class="popup-row"><span class="popup-label">Case #</span><span class="popup-value">${p.c}</span></div><div class="popup-row"><span class="popup-label">Judgment</span><span class="popup-value">$${p.j?.toLocaleString()||'N/A'}</span></div><div class="popup-row"><span class="popup-label">Max Bid</span><span class="popup-value">$${p.m?.toLocaleString()||'N/A'}</span></div><div class="popup-row"><span class="popup-label">ML Score</span><span class="popup-value">${(p.s*100).toFixed(0)}%</span></div><div class="popup-row"><span class="popup-label">Plaintiff</span><span class="popup-value">${p.p||'Unknown'}</span></div><div class="popup-row"><span class="popup-label">Auction</span><span class="popup-value">${p.d}</span></div><div style="text-align:center;margin-top:.75rem"><span class="popup-rec ${p.r.toLowerCase()}">${p.r}</span></div></div>`;}
+function render(data){markers.forEach(m=>map.removeLayer(m));markers=[];const list=document.getElementById('property-list');list.innerHTML='';const f=currentFilter==='all'?data:data.filter(p=>p.r===currentFilter);
+document.getElementById('total-count').textContent=f.length;document.getElementById('bid-count').textContent=f.filter(p=>p.r==='BID').length;document.getElementById('total-judgment').textContent='$'+(f.reduce((s,p)=>s+(p.j||0),0)/1e6).toFixed(1)+'M';
+f.forEach(p=>{const mk=L.circleMarker([p.lat,p.lng],{radius:10,fillColor:colors[p.r],color:'#fff',weight:2,opacity:1,fillOpacity:.8}).addTo(map);mk.bindPopup(popup(p),{maxWidth:320});markers.push(mk);
+const card=document.createElement('div');card.className=`property-card ${p.r.toLowerCase()}`;card.innerHTML=`<div class="property-address">${p.a}</div><div class="property-details"><span class="property-judgment">$${p.j?.toLocaleString()||'N/A'}</span><span class="property-recommendation ${p.r.toLowerCase()}">${p.r}</span></div><div class="property-details" style="margin-top:.5rem"><span>${p.d}</span><span>ML:${(p.s*100).toFixed(0)}%</span></div>`;
+card.onclick=()=>{map.setView([p.lat,p.lng],14);mk.openPopup()};list.appendChild(card);});}
+document.querySelectorAll('.filter-btn').forEach(b=>b.onclick=()=>{document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentFilter=b.dataset.filter;render(DATA);});
+render(DATA);console.log('Loaded '+DATA.length+' REAL Brevard foreclosures');
+</script>
 </body>
 </html>
