@@ -2,3 +2,5 @@
 # Static HTML files - these take precedence
 /chat /chat.html 200!
 /bidchat /bidchat.html 200!
+/map /map.html 200!
+
