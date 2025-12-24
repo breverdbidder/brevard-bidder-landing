@@ -4,138 +4,65 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BidDeed.AI - Brevard County Foreclosure Map</title>
-  <meta name="description" content="Interactive foreclosure auction map for Brevard County, Florida. ML-powered recommendations for real estate investors.">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #0f172a;
-      color: #f8fafc;
-    }
+    body { font-family: 'Inter', sans-serif; background: #0f172a; color: #f8fafc; }
     
     .header {
       background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
-      padding: 0.75rem 1.5rem;
+      padding: 1rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid #334155;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 2000;
-      height: 56px;
     }
-    
-    .logo {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #38bdf8;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    
+    .logo { font-size: 1.5rem; font-weight: 700; color: #38bdf8; }
     .logo span { color: #f8fafc; }
-    
-    .logo-icon {
-      width: 28px;
-      height: 28px;
-      background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-    }
-    
-    .nav-links {
-      display: flex;
-      gap: 1.5rem;
-    }
-    
-    .nav-links a {
-      color: #94a3b8;
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 0.875rem;
-      transition: color 0.2s;
-    }
-    
+    .nav-links { display: flex; gap: 1.5rem; }
+    .nav-links a { color: #94a3b8; text-decoration: none; font-weight: 500; transition: color 0.2s; }
     .nav-links a:hover, .nav-links a.active { color: #38bdf8; }
     
-    .container {
-      display: flex;
-      height: calc(100vh - 56px);
-      margin-top: 56px;
-    }
+    .container { display: flex; height: calc(100vh - 64px); }
     
     .sidebar {
-      width: 400px;
+      width: 380px;
       background: #1e293b;
       border-right: 1px solid #334155;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    
-    .sidebar-header {
+      overflow-y: auto;
       padding: 1rem;
-      border-bottom: 1px solid #334155;
-      flex-shrink: 0;
     }
-    
-    .sidebar-title-row {
+    .sidebar-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.75rem;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #334155;
     }
-    
-    .sidebar-title {
-      font-size: 1rem;
-      font-weight: 600;
-    }
-    
-    .auction-info {
-      font-size: 0.75rem;
-      color: #64748b;
-      margin-bottom: 0.75rem;
-    }
-    
-    .auction-info strong { color: #94a3b8; }
-    
+    .sidebar-title { font-size: 1.1rem; font-weight: 600; }
     .property-count {
       background: #38bdf8;
       color: #0f172a;
-      padding: 0.2rem 0.6rem;
+      padding: 0.25rem 0.75rem;
       border-radius: 9999px;
-      font-size: 0.75rem;
+      font-size: 0.875rem;
       font-weight: 600;
     }
     
-    .filters {
-      display: flex;
-      gap: 0.4rem;
-      flex-wrap: wrap;
-    }
-    
+    .filters { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
     .filter-btn {
-      padding: 0.4rem 0.75rem;
+      padding: 0.5rem 1rem;
       border: 1px solid #334155;
       background: transparent;
       color: #94a3b8;
-      border-radius: 0.375rem;
+      border-radius: 0.5rem;
       cursor: pointer;
-      font-size: 0.75rem;
+      font-size: 0.875rem;
       font-weight: 500;
       transition: all 0.2s;
     }
-    
     .filter-btn:hover { border-color: #38bdf8; color: #38bdf8; }
     .filter-btn.active { background: #38bdf8; border-color: #38bdf8; color: #0f172a; }
     .filter-btn.bid { border-color: #22c55e; color: #22c55e; }
@@ -145,136 +72,58 @@
     .filter-btn.skip { border-color: #ef4444; color: #ef4444; }
     .filter-btn.skip.active { background: #ef4444; color: #fff; }
     
-    .property-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 0.75rem;
-    }
-    
+    .property-list { display: flex; flex-direction: column; gap: 0.75rem; }
     .property-card {
       background: #0f172a;
       border: 1px solid #334155;
-      border-radius: 0.5rem;
-      padding: 0.75rem;
-      margin-bottom: 0.5rem;
+      border-radius: 0.75rem;
+      padding: 1rem;
       cursor: pointer;
       transition: all 0.2s;
     }
-    
-    .property-card:hover {
-      border-color: #38bdf8;
-      transform: translateX(2px);
-    }
-    
-    .property-card.bid { border-left: 3px solid #22c55e; }
-    .property-card.review { border-left: 3px solid #eab308; }
-    .property-card.skip { border-left: 3px solid #ef4444; }
-    .property-card.hoa { border-left: 3px solid #dc2626; background: #1f0a0a; }
-    
-    .property-address {
-      font-weight: 600;
-      font-size: 0.85rem;
-      margin-bottom: 0.25rem;
-      color: #f8fafc;
-    }
-    
-    .property-case {
-      font-size: 0.7rem;
-      color: #64748b;
-      margin-bottom: 0.5rem;
-    }
-    
-    .property-meta {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 0.4rem;
-      font-size: 0.75rem;
-    }
-    
+    .property-card:hover { border-color: #38bdf8; transform: translateX(4px); }
+    .property-card.bid { border-left: 4px solid #22c55e; }
+    .property-card.review { border-left: 4px solid #eab308; }
+    .property-card.skip { border-left: 4px solid #ef4444; }
+    .property-address { font-weight: 600; margin-bottom: 0.5rem; color: #f8fafc; }
+    .property-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem; }
     .meta-item { display: flex; flex-direction: column; }
-    .meta-label { color: #64748b; font-size: 0.65rem; }
+    .meta-label { color: #64748b; font-size: 0.75rem; }
     .meta-value { color: #e2e8f0; font-weight: 500; }
     .meta-value.positive { color: #22c55e; }
     .meta-value.warning { color: #eab308; }
     .meta-value.negative { color: #ef4444; }
-    
-    .property-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 0.5rem;
-      padding-top: 0.5rem;
-      border-top: 1px solid #334155;
-    }
-    
     .recommendation-badge {
-      padding: 0.2rem 0.5rem;
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
       border-radius: 9999px;
-      font-size: 0.65rem;
+      font-size: 0.75rem;
       font-weight: 600;
+      margin-top: 0.5rem;
     }
-    
     .recommendation-badge.bid { background: #22c55e20; color: #22c55e; }
     .recommendation-badge.review { background: #eab30820; color: #eab308; }
     .recommendation-badge.skip { background: #ef444420; color: #ef4444; }
     
-    .ml-score {
-      font-size: 0.7rem;
-      color: #94a3b8;
-    }
-    
-    .ml-score strong { color: #38bdf8; }
-    
-    .hoa-warning {
-      background: #dc262620;
-      color: #fca5a5;
-      padding: 0.25rem 0.5rem;
-      border-radius: 0.25rem;
-      font-size: 0.65rem;
-      font-weight: 500;
-      margin-top: 0.5rem;
-    }
-    
     .map-container { flex: 1; position: relative; }
-    
     #map { width: 100%; height: 100%; }
     
     .map-legend {
       position: absolute;
-      bottom: 1.5rem;
+      bottom: 2rem;
       left: 1rem;
       background: #1e293b;
       border: 1px solid #334155;
-      border-radius: 0.5rem;
-      padding: 0.75rem;
+      border-radius: 0.75rem;
+      padding: 1rem;
       z-index: 1000;
-      font-size: 0.75rem;
     }
-    
-    .legend-title {
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      font-size: 0.7rem;
-      color: #94a3b8;
-    }
-    
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.35rem;
-    }
-    
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-    
+    .legend-title { font-weight: 600; margin-bottom: 0.75rem; font-size: 0.875rem; }
+    .legend-item { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
     .legend-dot.bid { background: #22c55e; }
     .legend-dot.review { background: #eab308; }
     .legend-dot.skip { background: #ef4444; }
-    .legend-dot.hoa { background: #dc2626; border: 2px solid #fca5a5; }
     
     .stats-bar {
       position: absolute;
@@ -282,136 +131,103 @@
       right: 1rem;
       background: #1e293b;
       border: 1px solid #334155;
-      border-radius: 0.5rem;
-      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      padding: 1rem;
       z-index: 1000;
       display: flex;
-      gap: 1.25rem;
+      gap: 1.5rem;
     }
-    
     .stat-item { text-align: center; }
-    .stat-value { font-size: 1.25rem; font-weight: 700; color: #38bdf8; }
-    .stat-label { font-size: 0.65rem; color: #64748b; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: #38bdf8; }
+    .stat-label { font-size: 0.75rem; color: #64748b; }
     
     .leaflet-popup-content-wrapper {
       background: #1e293b;
       color: #f8fafc;
-      border-radius: 0.5rem;
+      border-radius: 0.75rem;
       border: 1px solid #334155;
     }
-    
     .leaflet-popup-tip { background: #1e293b; }
-    
-    .popup-content { padding: 0.25rem; min-width: 280px; }
-    .popup-content h3 {
-      font-size: 0.9rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: #38bdf8;
-    }
-    .popup-content .popup-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.4rem;
-    }
+    .popup-content { padding: 0.5rem; min-width: 280px; }
+    .popup-content h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: #38bdf8; }
+    .popup-content .popup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
     .popup-content .popup-item { display: flex; flex-direction: column; }
-    .popup-content .popup-label { font-size: 0.65rem; color: #64748b; }
-    .popup-content .popup-value { font-weight: 600; color: #e2e8f0; font-size: 0.8rem; }
-    .popup-rationale {
-      margin-top: 0.5rem;
-      padding-top: 0.5rem;
-      border-top: 1px solid #334155;
-      font-size: 0.7rem;
-      color: #94a3b8;
-      line-height: 1.4;
-    }
-    .popup-photo {
-      width: 100%;
-      height: 100px;
-      object-fit: cover;
-      border-radius: 0.375rem;
-      margin-top: 0.5rem;
-    }
+    .popup-content .popup-label { font-size: 0.7rem; color: #64748b; }
+    .popup-content .popup-value { font-weight: 600; color: #e2e8f0; }
+    .popup-photo { width: 100%; height: 120px; object-fit: cover; border-radius: 0.5rem; margin-top: 0.75rem; }
     
-    @media (max-width: 768px) {
-      .sidebar { width: 100%; position: absolute; bottom: 0; height: 40vh; z-index: 1500; }
-      .map-container { height: 60vh; }
+    .auction-date-badge {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: #1e3a5f;
+      border: 1px solid #38bdf8;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      z-index: 1000;
     }
+    .auction-date-badge .label { font-size: 0.75rem; color: #94a3b8; }
+    .auction-date-badge .date { font-size: 1.1rem; font-weight: 700; color: #38bdf8; }
   </style>
 </head>
 <body>
   <header class="header">
-    <div class="logo">
-      <div class="logo-icon">🏠</div>
-      BidDeed<span>.AI</span>
-    </div>
+    <div class="logo">BidDeed<span>.AI</span></div>
     <nav class="nav-links">
       <a href="/chat">Chat</a>
       <a href="/map" class="active">Map</a>
-      <a href="/">Home</a>
+      <a href="/">Dashboard</a>
     </nav>
   </header>
   
   <div class="container">
     <aside class="sidebar">
       <div class="sidebar-header">
-        <div class="sidebar-title-row">
-          <h2 class="sidebar-title">Upcoming Auctions</h2>
-          <span class="property-count" id="property-count">12</span>
-        </div>
-        <div class="auction-info">
-          <strong>Next:</strong> Jan 7, 2025 @ 11:00 AM<br>
-          <strong>Location:</strong> Brevard Room, Titusville Courthouse
-        </div>
-        <div class="filters">
-          <button class="filter-btn active" data-filter="all">All</button>
-          <button class="filter-btn bid" data-filter="BID">BID (4)</button>
-          <button class="filter-btn review" data-filter="REVIEW">Review (4)</button>
-          <button class="filter-btn skip" data-filter="SKIP">Skip (4)</button>
-        </div>
+        <h2 class="sidebar-title">January 7, 2025 Auction</h2>
+        <span class="property-count" id="property-count">0</span>
       </div>
+      
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn bid" data-filter="BID">BID</button>
+        <button class="filter-btn review" data-filter="REVIEW">Review</button>
+        <button class="filter-btn skip" data-filter="SKIP">Skip</button>
+      </div>
+      
       <div class="property-list" id="property-list"></div>
     </aside>
     
     <main class="map-container">
       <div id="map"></div>
       
+      <div class="auction-date-badge">
+        <div class="label">Next Foreclosure Auction</div>
+        <div class="date">Jan 7, 2025 @ 11AM</div>
+      </div>
+      
       <div class="map-legend">
-        <div class="legend-title">ML RECOMMENDATION</div>
-        <div class="legend-item">
-          <div class="legend-dot bid"></div>
-          <span>BID (≥70% ratio)</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot review"></div>
-          <span>REVIEW (60-69%)</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot skip"></div>
-          <span>SKIP (&lt;60%)</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-dot hoa"></div>
-          <span>HOA Risk ⚠️</span>
-        </div>
+        <div class="legend-title">BidDeed.AI Recommendation</div>
+        <div class="legend-item"><div class="legend-dot bid"></div><span>BID (≥75% ratio)</span></div>
+        <div class="legend-item"><div class="legend-dot review"></div><span>REVIEW (60-74%)</span></div>
+        <div class="legend-item"><div class="legend-dot skip"></div><span>SKIP (&lt;60%)</span></div>
       </div>
       
       <div class="stats-bar" id="stats-bar">
         <div class="stat-item">
-          <div class="stat-value" id="stat-total">12</div>
-          <div class="stat-label">Properties</div>
+          <div class="stat-value" id="stat-total">-</div>
+          <div class="stat-label">Total</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value" id="stat-bid" style="color: #22c55e">4</div>
+          <div class="stat-value" id="stat-bid" style="color: #22c55e">-</div>
           <div class="stat-label">BID</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value" id="stat-review" style="color: #eab308">4</div>
+          <div class="stat-value" id="stat-review" style="color: #eab308">-</div>
           <div class="stat-label">REVIEW</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value" id="stat-judgment">$3.4M</div>
-          <div class="stat-label">Judgment</div>
+          <div class="stat-value" id="stat-judgment">-</div>
+          <div class="stat-label">Total Judgment</div>
         </div>
       </div>
     </main>
@@ -419,309 +235,195 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    // ============================================
-    // HARDCODED REAL BREVARD COUNTY FORECLOSURE DATA
-    // Based on January 2025 Auction - BidDeed.AI V15.0
-    // ============================================
+    // Supabase config
+    const SUPABASE_URL = 'https://mocerqjnksmhcjzxrewo.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vY2VycWpua3NtaGNqenhyZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI1NjA0MDYsImV4cCI6MjA0ODEzNjQwNn0.QXeJnNAHLFnk7DsIWkn5EhEOHvmRwkNGMFNJdLbfL3Y';
     
-    const foreclosures = [
+    // Hardcoded sample data - Real Brevard County addresses
+    const sampleForeclosures = [
       {
-        id: 1,
-        case_number: "05-2023-CA-044476-XXXX-XX",
-        property_address: "2100 Leewood Blvd, Melbourne, FL 32935",
-        city: "Melbourne",
-        zipcode: "32935",
-        latitude: 28.1087,
-        longitude: -80.6629,
-        plaintiff: "NATIONSTAR MORTGAGE LLC",
-        defendant: "JEREMY C. FRAMPTON",
-        judgment_amount: 185000,
-        max_bid: 56000,
-        bid_judgment_ratio: 30.3,
-        ml_score: 0.42,
-        recommendation: "SKIP",
-        decision_rationale: "Low ARV fixer upper in 32935 (not target zip). Bid/Judgment ratio 30.3% below 60% threshold.",
-        bedrooms: 3,
-        bathrooms: 2,
-        sqft: 1380,
-        year_built: 1961,
-        bcpao_photo_url: "https://www.bcpao.us/photos/MB/2737187500000020200.jpg",
-        is_hoa_foreclosure: false
-      },
-      {
-        id: 2,
-        case_number: "05-2024-CA-014947-XXCA-BC",
-        property_address: "1425 Malabar Rd NE, Palm Bay, FL 32907",
-        city: "Palm Bay",
-        zipcode: "32907",
-        latitude: 28.0058,
-        longitude: -80.6012,
-        plaintiff: "LAKEVIEW LOAN SERVICING LLC",
-        defendant: "ERNEST HIVELY",
-        judgment_amount: 425000,
-        max_bid: 255000,
-        bid_judgment_ratio: 60.0,
-        ml_score: 0.68,
-        recommendation: "REVIEW",
-        decision_rationale: "Large 3,412 sqft property. Bid/Judgment ratio at 60% threshold. Third Sword potential - verify condition.",
-        bedrooms: 4,
-        bathrooms: 3,
-        sqft: 3412,
-        year_built: 2005,
-        bcpao_photo_url: "https://www.bcpao.us/photos/PB/2836240000125000100.jpg",
-        is_hoa_foreclosure: false
-      },
-      {
-        id: 3,
-        case_number: "05-2023-CA-020534-XXXX-XX",
-        property_address: "945 Emerson Dr NE, Palm Bay, FL 32907",
-        city: "Palm Bay",
-        zipcode: "32907",
-        latitude: 28.0234,
-        longitude: -80.6156,
-        plaintiff: "US BANK NATIONAL ASSOCIATION",
-        defendant: "MICHAEL R. JOHNSON",
-        judgment_amount: 195000,
-        max_bid: 121000,
-        bid_judgment_ratio: 62.1,
-        ml_score: 0.71,
-        recommendation: "REVIEW",
-        decision_rationale: "Good ratio at 62.1%. US Bank tends to bid to judgment. Verify opening bid day of auction.",
-        bedrooms: 3,
-        bathrooms: 2,
-        sqft: 1650,
-        year_built: 1988,
-        bcpao_photo_url: "https://www.bcpao.us/photos/PB/2836180000234001500.jpg",
-        is_hoa_foreclosure: false
-      },
-      {
-        id: 4,
-        case_number: "05-2025-CA-017191-XXCA-BC",
-        property_address: "3250 Knox McRae Dr, Titusville, FL 32780",
-        city: "Titusville",
-        zipcode: "32780",
-        latitude: 28.5751,
-        longitude: -80.8193,
-        plaintiff: "CITIZENS BANK NA",
-        defendant: "ROBERT T. WILLIAMS",
-        judgment_amount: 285000,
-        max_bid: 182000,
-        bid_judgment_ratio: 63.9,
-        ml_score: 0.65,
-        recommendation: "REVIEW",
-        decision_rationale: "Titusville location near Space Coast. Ratio at 63.9%. Monitor for third-party bidding activity.",
-        bedrooms: 4,
-        bathrooms: 2.5,
-        sqft: 2100,
-        year_built: 1995,
-        bcpao_photo_url: "https://www.bcpao.us/photos/TV/2235300000456000800.jpg",
-        is_hoa_foreclosure: false
-      },
-      {
-        id: 5,
-        case_number: "05-2025-CA-024879-XXCA-BC",
-        property_address: "789 S Banana River Blvd, Cocoa Beach, FL 32931",
-        city: "Cocoa Beach",
-        zipcode: "32931",
-        latitude: 28.3200,
-        longitude: -80.6076,
-        plaintiff: "DATA MORTGAGE INC",
-        defendant: "SARAH M. CHEN",
-        judgment_amount: 520000,
-        max_bid: 350000,
-        bid_judgment_ratio: 67.3,
-        ml_score: 0.82,
-        recommendation: "REVIEW",
-        decision_rationale: "Cocoa Beach beachside location - high demand. Strong 67.3% ratio. Premium Third Sword candidate if repairs verify.",
-        bedrooms: 3,
-        bathrooms: 2,
-        sqft: 1850,
-        year_built: 1978,
-        bcpao_photo_url: "https://www.bcpao.us/photos/CB/2537180000789001100.jpg",
-        is_hoa_foreclosure: false
-      },
-      {
-        id: 6,
-        case_number: "05-2025-CA-026675-XXCA-BC",
-        property_address: "456 Atlantic Ave, Satellite Beach, FL 32937",
-        city: "Satellite Beach",
-        zipcode: "32937",
+        case_number: '05-2024-CA-045123',
+        property_address: '1450 Highway A1A, Satellite Beach, FL 32937',
         latitude: 28.1762,
         longitude: -80.5901,
-        plaintiff: "NEWREZ LLC",
-        defendant: "DAVID A. MARTINEZ",
-        judgment_amount: 385000,
-        max_bid: 279000,
-        bid_judgment_ratio: 72.5,
-        ml_score: 0.85,
-        recommendation: "BID",
-        decision_rationale: "TARGET ZIP 32937 Satellite Beach - Third Sword optimal. Excellent 72.5% ratio. High median income $82K. Strong BID.",
-        bedrooms: 4,
-        bathrooms: 2.5,
-        sqft: 2450,
-        year_built: 2001,
-        bcpao_photo_url: "https://www.bcpao.us/photos/SB/2737080000456002300.jpg",
-        is_hoa_foreclosure: false
+        judgment_amount: 485000,
+        max_bid: 388000,
+        recommendation: 'BID',
+        ml_score: 0.82,
+        auction_date: '2025-01-07',
+        plaintiff: 'Wells Fargo Bank NA',
+        bcpao_account: '2745450',
+        bcpao_photo_url: 'https://www.bcpao.us/photos/MB/2745450011.jpg'
       },
       {
-        id: 7,
-        case_number: "05-2025-CA-034578-XXCA-BC",
-        property_address: "2890 Viera Blvd, Viera, FL 32940",
-        city: "Viera",
-        zipcode: "32940",
+        case_number: '05-2024-CA-044892',
+        property_address: '3250 Suntree Blvd, Melbourne, FL 32940',
         latitude: 28.2558,
         longitude: -80.7321,
-        plaintiff: "UNITED WHOLESALE MORTGAGE",
-        defendant: "JENNIFER L. THOMPSON",
-        judgment_amount: 445000,
-        max_bid: 323500,
-        bid_judgment_ratio: 72.7,
-        ml_score: 0.88,
-        recommendation: "BID",
-        decision_rationale: "TARGET ZIP 32940 Viera - Third Sword optimal. 72.7% ratio with minimal repairs. High income area $78K. STRONG BID.",
-        bedrooms: 4,
-        bathrooms: 3,
-        sqft: 2850,
-        year_built: 2012,
-        bcpao_photo_url: "https://www.bcpao.us/photos/VR/2436150002890004500.jpg",
-        is_hoa_foreclosure: false
+        judgment_amount: 425000,
+        max_bid: 340000,
+        recommendation: 'BID',
+        ml_score: 0.78,
+        auction_date: '2025-01-07',
+        plaintiff: 'JPMorgan Chase Bank',
+        bcpao_account: '2654320',
+        bcpao_photo_url: 'https://www.bcpao.us/photos/VR/2654320011.jpg'
       },
       {
-        id: 8,
-        case_number: "05-2024-CA-051335-XXCA-BC",
-        property_address: "1567 Aurora Rd, Melbourne, FL 32935",
-        city: "Melbourne",
-        zipcode: "32935",
-        latitude: 28.1156,
-        longitude: -80.6534,
-        plaintiff: "EVELYN SIMEON",
-        defendant: "J CASSELL",
-        judgment_amount: 125000,
-        max_bid: 71000,
-        bid_judgment_ratio: 56.8,
-        ml_score: 0.38,
-        recommendation: "SKIP",
-        decision_rationale: "Individual plaintiff - private mortgage note. Low ratio 56.8%. High repair needs. Unusual foreclosure type - SKIP.",
-        bedrooms: 3,
-        bathrooms: 1.5,
-        sqft: 1250,
-        year_built: 1955,
-        bcpao_photo_url: null,
-        is_hoa_foreclosure: false
-      },
-      {
-        id: 9,
-        case_number: "05-2024-CA-015373-XXCA-BC",
-        property_address: "234 Cypress Landing Dr, Melbourne, FL 32901",
-        city: "Melbourne",
-        zipcode: "32901",
-        latitude: 28.0789,
-        longitude: -80.6234,
-        plaintiff: "CYPRESS LANDINGS HOA",
-        defendant: "MARK A. ROBINSON",
-        judgment_amount: 18500,
-        max_bid: 0,
-        bid_judgment_ratio: 0,
-        ml_score: 0.15,
-        recommendation: "SKIP",
-        decision_rationale: "🔴 HOA FORECLOSURE - Senior mortgage survives! DO NOT BID. AcclaimWeb shows $245K first mortgage to Wells Fargo.",
-        bedrooms: 3,
-        bathrooms: 2,
-        sqft: 1720,
-        year_built: 2004,
-        bcpao_photo_url: "https://www.bcpao.us/photos/MB/2736250000234001800.jpg",
-        is_hoa_foreclosure: true,
-        senior_lien: { holder: "Wells Fargo", amount: 245000 }
-      },
-      {
-        id: 10,
-        case_number: "05-2025-CC-017102-XXCA-BC",
-        property_address: "567 Northfield Ct, Cocoa, FL 32922",
-        city: "Cocoa",
-        zipcode: "32922",
-        latitude: 28.3867,
-        longitude: -80.7423,
-        plaintiff: "NORTHFIELD CONDO ASSOC",
-        defendant: "LISA M. PARKER",
-        judgment_amount: 12500,
-        max_bid: 0,
-        bid_judgment_ratio: 0,
-        ml_score: 0.12,
-        recommendation: "SKIP",
-        decision_rationale: "🔴 CONDO FORECLOSURE - Senior mortgage survives! DO NOT BID. Verified $142K mortgage to Rocket Mortgage.",
-        bedrooms: 2,
-        bathrooms: 2,
-        sqft: 1100,
-        year_built: 1998,
-        bcpao_photo_url: "https://www.bcpao.us/photos/CO/2335220000567003400.jpg",
-        is_hoa_foreclosure: true,
-        senior_lien: { holder: "Rocket Mortgage", amount: 142000 }
-      },
-      {
-        id: 11,
-        case_number: "05-2025-CA-022257-XXCA-BC",
-        property_address: "890 S Tropical Trail, Merritt Island, FL 32952",
-        city: "Merritt Island",
-        zipcode: "32952",
-        latitude: 28.3256,
-        longitude: -80.6512,
-        plaintiff: "US BANK NA",
-        defendant: "THOMAS R. ANDERSON",
-        judgment_amount: 365000,
-        max_bid: 256500,
-        bid_judgment_ratio: 70.3,
-        ml_score: 0.79,
-        recommendation: "BID",
-        decision_rationale: "Merritt Island waterfront area. Strong 70.3% ratio. US Bank often bids to judgment - monitor. Third Sword potential.",
-        bedrooms: 3,
-        bathrooms: 2.5,
-        sqft: 2200,
-        year_built: 1989,
-        bcpao_photo_url: "https://www.bcpao.us/photos/MI/2437100000890002800.jpg",
-        is_hoa_foreclosure: false
-      },
-      {
-        id: 12,
-        case_number: "05-2025-CA-013384-XXCA-BC",
-        property_address: "3456 Highland Ave, Indialantic, FL 32903",
-        city: "Indialantic",
-        zipcode: "32903",
+        case_number: '05-2024-CA-043567',
+        property_address: '789 Ocean Ave, Indialantic, FL 32903',
         latitude: 28.0894,
         longitude: -80.5654,
-        plaintiff: "HUNTINGTON NATIONAL BANK",
-        defendant: "KAREN S. MITCHELL",
-        judgment_amount: 485000,
-        max_bid: 357500,
-        bid_judgment_ratio: 73.7,
-        ml_score: 0.91,
-        recommendation: "BID",
-        decision_rationale: "TARGET ZIP 32903 Indialantic - Third Sword optimal. Excellent 73.7% ratio. Beachside premium location. STRONG BID.",
-        bedrooms: 4,
-        bathrooms: 3,
-        sqft: 2650,
-        year_built: 1998,
-        bcpao_photo_url: "https://www.bcpao.us/photos/IN/2737060003456001900.jpg",
-        is_hoa_foreclosure: false
+        judgment_amount: 560000,
+        max_bid: 448000,
+        recommendation: 'BID',
+        ml_score: 0.79,
+        auction_date: '2025-01-07',
+        plaintiff: 'Bank of America NA',
+        bcpao_account: '2876540',
+        bcpao_photo_url: 'https://www.bcpao.us/photos/IN/2876540011.jpg'
+      },
+      {
+        case_number: '05-2024-CA-042981',
+        property_address: '456 N Atlantic Ave, Cocoa Beach, FL 32931',
+        latitude: 28.3200,
+        longitude: -80.6076,
+        judgment_amount: 520000,
+        max_bid: 416000,
+        recommendation: 'BID',
+        ml_score: 0.85,
+        auction_date: '2025-01-07',
+        plaintiff: 'US Bank Trust NA',
+        bcpao_account: '2458760',
+        bcpao_photo_url: 'https://www.bcpao.us/photos/CB/2458760011.jpg'
+      },
+      {
+        case_number: '05-2024-CA-044215',
+        property_address: '2890 Courtenay Pkwy, Merritt Island, FL 32953',
+        latitude: 28.3594,
+        longitude: -80.6823,
+        judgment_amount: 445000,
+        max_bid: 311500,
+        recommendation: 'REVIEW',
+        ml_score: 0.68,
+        auction_date: '2025-01-07',
+        plaintiff: 'Nationstar Mortgage',
+        bcpao_account: '2398450',
+        bcpao_photo_url: 'https://www.bcpao.us/photos/MI/2398450011.jpg'
+      },
+      {
+        case_number: '05-2024-CA-043789',
+        property_address: '1234 S Patrick Dr, Melbourne Beach, FL 32951',
+        latitude: 28.0683,
+        longitude: -80.5598,
+        judgment_amount: 380000,
+        max_bid: 266000,
+        recommendation: 'REVIEW',
+        ml_score: 0.62,
+        auction_date: '2025-01-07',
+        plaintiff: 'Freedom Mortgage Corp',
+        bcpao_account: '2567120',
+        bcpao_photo_url: null
+      },
+      {
+        case_number: '05-2024-CA-041654',
+        property_address: '567 Rockledge Dr, Rockledge, FL 32955',
+        latitude: 28.2900,
+        longitude: -80.7000,
+        judgment_amount: 315000,
+        max_bid: 220500,
+        recommendation: 'REVIEW',
+        ml_score: 0.64,
+        auction_date: '2025-01-07',
+        plaintiff: 'Carrington Mortgage',
+        bcpao_account: '2234560',
+        bcpao_photo_url: null
+      },
+      {
+        case_number: '05-2024-CA-044567',
+        property_address: '4521 Babcock St NE, Palm Bay, FL 32905',
+        latitude: 28.0344,
+        longitude: -80.5887,
+        judgment_amount: 285000,
+        max_bid: 142500,
+        recommendation: 'SKIP',
+        ml_score: 0.35,
+        auction_date: '2025-01-07',
+        plaintiff: 'Brevard County HOA',
+        bcpao_account: '2789010',
+        bcpao_photo_url: null
+      },
+      {
+        case_number: '05-2024-CA-042345',
+        property_address: '890 Garden St, Titusville, FL 32780',
+        latitude: 28.6122,
+        longitude: -80.8076,
+        judgment_amount: 195000,
+        max_bid: 97500,
+        recommendation: 'SKIP',
+        ml_score: 0.28,
+        auction_date: '2025-01-07',
+        plaintiff: 'Palm Bay HOA Inc',
+        bcpao_account: '2456780',
+        bcpao_photo_url: null
+      },
+      {
+        case_number: '05-2024-CA-040987',
+        property_address: '2341 Malabar Rd, Palm Bay, FL 32907',
+        latitude: 28.0100,
+        longitude: -80.6700,
+        judgment_amount: 225000,
+        max_bid: 112500,
+        recommendation: 'SKIP',
+        ml_score: 0.32,
+        auction_date: '2025-01-07',
+        plaintiff: 'Hammock Trace HOA',
+        bcpao_account: '2890120',
+        bcpao_photo_url: null
+      },
+      {
+        case_number: '05-2024-CA-043210',
+        property_address: '678 Tropical Trl, Merritt Island, FL 32952',
+        latitude: 28.3117,
+        longitude: -80.6311,
+        judgment_amount: 245000,
+        max_bid: 122500,
+        recommendation: 'SKIP',
+        ml_score: 0.38,
+        auction_date: '2025-01-07',
+        plaintiff: 'Merritt Shores Condo',
+        bcpao_account: '2345670',
+        bcpao_photo_url: null
+      },
+      {
+        case_number: '05-2024-CA-041876',
+        property_address: '1567 Aurora Rd, Melbourne, FL 32935',
+        latitude: 28.1300,
+        longitude: -80.6500,
+        judgment_amount: 265000,
+        max_bid: 132500,
+        recommendation: 'SKIP',
+        ml_score: 0.41,
+        auction_date: '2025-01-07',
+        plaintiff: 'Aurora Estates HOA',
+        bcpao_account: '2678900',
+        bcpao_photo_url: null
       }
     ];
 
     // Initialize map centered on Brevard County
     const map = L.map('map').setView([28.2639, -80.7214], 10);
     
-    // Dark tile layer
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
+      attribution: '&copy; OpenStreetMap &copy; CARTO | BidDeed.AI',
       maxZoom: 19
     }).addTo(map);
 
     let markers = [];
+    let foreclosures = [];
     let currentFilter = 'all';
 
-    const colors = {
-      BID: '#22c55e',
-      REVIEW: '#eab308',
-      SKIP: '#ef4444'
-    };
+    const colors = { BID: '#22c55e', REVIEW: '#eab308', SKIP: '#ef4444' };
 
     function formatCurrency(amount) {
       return new Intl.NumberFormat('en-US', {
@@ -732,15 +434,14 @@
       }).format(amount);
     }
 
+    function formatPercent(value) {
+      return (value * 100).toFixed(1) + '%';
+    }
+
     function createPopupContent(prop) {
+      const ratio = ((prop.max_bid / prop.judgment_amount) * 100).toFixed(0);
       const photoHtml = prop.bcpao_photo_url 
         ? `<img src="${prop.bcpao_photo_url}" class="popup-photo" onerror="this.style.display='none'" />`
-        : '';
-      
-      const hoaWarning = prop.is_hoa_foreclosure 
-        ? `<div style="background:#dc262640;color:#fca5a5;padding:0.25rem;border-radius:0.25rem;margin-top:0.5rem;font-size:0.7rem;">
-            ⚠️ HOA/CONDO - Senior mortgage ${formatCurrency(prop.senior_lien?.amount || 0)} to ${prop.senior_lien?.holder || 'Unknown'} survives!
-           </div>`
         : '';
       
       return `
@@ -748,48 +449,42 @@
           <h3>${prop.property_address}</h3>
           <div class="popup-grid">
             <div class="popup-item">
+              <span class="popup-label">Case #</span>
+              <span class="popup-value">${prop.case_number}</span>
+            </div>
+            <div class="popup-item">
+              <span class="popup-label">Plaintiff</span>
+              <span class="popup-value">${prop.plaintiff || 'N/A'}</span>
+            </div>
+            <div class="popup-item">
               <span class="popup-label">Judgment</span>
               <span class="popup-value">${formatCurrency(prop.judgment_amount)}</span>
             </div>
             <div class="popup-item">
               <span class="popup-label">Max Bid</span>
-              <span class="popup-value" style="color:${colors[prop.recommendation]}">${formatCurrency(prop.max_bid)}</span>
+              <span class="popup-value" style="color: ${colors[prop.recommendation]}">${formatCurrency(prop.max_bid)}</span>
             </div>
             <div class="popup-item">
-              <span class="popup-label">Bid Ratio</span>
-              <span class="popup-value">${prop.bid_judgment_ratio.toFixed(1)}%</span>
+              <span class="popup-label">Bid/Judgment</span>
+              <span class="popup-value">${ratio}%</span>
             </div>
             <div class="popup-item">
               <span class="popup-label">ML Score</span>
-              <span class="popup-value">${(prop.ml_score * 100).toFixed(0)}%</span>
-            </div>
-            <div class="popup-item">
-              <span class="popup-label">Beds/Baths</span>
-              <span class="popup-value">${prop.bedrooms}/${prop.bathrooms}</span>
-            </div>
-            <div class="popup-item">
-              <span class="popup-label">SqFt</span>
-              <span class="popup-value">${prop.sqft.toLocaleString()}</span>
+              <span class="popup-value">${formatPercent(prop.ml_score)}</span>
             </div>
           </div>
-          ${hoaWarning}
-          <div class="popup-rationale"><strong>${prop.recommendation}:</strong> ${prop.decision_rationale}</div>
           ${photoHtml}
         </div>
       `;
     }
 
     function createPropertyCard(prop) {
+      const ratio = ((prop.max_bid / prop.judgment_amount) * 100).toFixed(0);
       const recClass = prop.recommendation.toLowerCase();
-      const hoaClass = prop.is_hoa_foreclosure ? ' hoa' : '';
-      const hoaWarning = prop.is_hoa_foreclosure 
-        ? `<div class="hoa-warning">⚠️ HOA/CONDO - Senior lien ${formatCurrency(prop.senior_lien?.amount || 0)} survives!</div>`
-        : '';
       
       return `
-        <div class="property-card ${recClass}${hoaClass}" data-id="${prop.id}" data-lat="${prop.latitude}" data-lng="${prop.longitude}">
+        <div class="property-card ${recClass}" data-lat="${prop.latitude}" data-lng="${prop.longitude}">
           <div class="property-address">${prop.property_address}</div>
-          <div class="property-case">${prop.case_number} | ${prop.plaintiff}</div>
           <div class="property-meta">
             <div class="meta-item">
               <span class="meta-label">Judgment</span>
@@ -800,15 +495,15 @@
               <span class="meta-value ${recClass === 'bid' ? 'positive' : recClass === 'review' ? 'warning' : 'negative'}">${formatCurrency(prop.max_bid)}</span>
             </div>
             <div class="meta-item">
-              <span class="meta-label">Ratio</span>
-              <span class="meta-value">${prop.bid_judgment_ratio.toFixed(1)}%</span>
+              <span class="meta-label">Bid Ratio</span>
+              <span class="meta-value">${ratio}%</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">ML Score</span>
+              <span class="meta-value">${formatPercent(prop.ml_score)}</span>
             </div>
           </div>
-          ${hoaWarning}
-          <div class="property-footer">
-            <span class="recommendation-badge ${recClass}">${prop.recommendation}</span>
-            <span class="ml-score">ML: <strong>${(prop.ml_score * 100).toFixed(0)}%</strong></span>
-          </div>
+          <span class="recommendation-badge ${recClass}">${prop.recommendation}</span>
         </div>
       `;
     }
@@ -818,39 +513,44 @@
       markers = [];
 
       data.forEach(prop => {
-        const isHoa = prop.is_hoa_foreclosure;
+        if (!prop.latitude || !prop.longitude) return;
+        
         const marker = L.circleMarker([prop.latitude, prop.longitude], {
-          radius: isHoa ? 12 : 10,
-          fillColor: isHoa ? '#dc2626' : colors[prop.recommendation],
-          color: isHoa ? '#fca5a5' : '#fff',
-          weight: isHoa ? 3 : 2,
+          radius: 12,
+          fillColor: colors[prop.recommendation],
+          color: '#fff',
+          weight: 2,
           opacity: 1,
           fillOpacity: 0.8
         });
 
         marker.bindPopup(createPopupContent(prop));
         marker.addTo(map);
-        markers.push({ marker, id: prop.id });
+        markers.push(marker);
       });
     }
 
     function updatePropertyList(data) {
       const listEl = document.getElementById('property-list');
+      
       if (data.length === 0) {
-        listEl.innerHTML = '<div style="text-align:center;padding:2rem;color:#64748b;">No properties match filter</div>';
+        listEl.innerHTML = '<div style="text-align:center;padding:2rem;color:#64748b">No properties match filter</div>';
         return;
       }
+
       listEl.innerHTML = data.map(createPropertyCard).join('');
 
       listEl.querySelectorAll('.property-card').forEach(card => {
         card.addEventListener('click', () => {
           const lat = parseFloat(card.dataset.lat);
           const lng = parseFloat(card.dataset.lng);
-          const id = parseInt(card.dataset.id);
           map.setView([lat, lng], 14);
           
           markers.forEach(m => {
-            if (m.id === id) m.marker.openPopup();
+            const mLatLng = m.getLatLng();
+            if (Math.abs(mLatLng.lat - lat) < 0.0001 && Math.abs(mLatLng.lng - lng) < 0.0001) {
+              m.openPopup();
+            }
           });
         });
       });
@@ -864,9 +564,7 @@
       document.getElementById('stat-total').textContent = data.length;
       document.getElementById('stat-bid').textContent = bidCount;
       document.getElementById('stat-review').textContent = reviewCount;
-      document.getElementById('stat-judgment').textContent = totalJudgment >= 1000000 
-        ? `$${(totalJudgment / 1000000).toFixed(1)}M` 
-        : formatCurrency(totalJudgment);
+      document.getElementById('stat-judgment').textContent = formatCurrency(totalJudgment);
       document.getElementById('property-count').textContent = data.length;
     }
 
@@ -887,14 +585,45 @@
       });
     }
 
-    // Initialize
-    addMarkers(foreclosures);
-    updatePropertyList(foreclosures);
-    updateStats(foreclosures);
+    async function fetchForeclosures() {
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/rest/v1/auction_results?select=*&auction_date=gte.${new Date().toISOString().split('T')[0]}&order=auction_date.asc`,
+          {
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          }
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            return data;
+          }
+        }
+      } catch (error) {
+        console.log('Using hardcoded sample data:', error);
+      }
+      
+      return sampleForeclosures;
+    }
 
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-      btn.addEventListener('click', () => applyFilter(btn.dataset.filter));
-    });
+    async function init() {
+      foreclosures = await fetchForeclosures();
+      addMarkers(foreclosures);
+      updatePropertyList(foreclosures);
+      updateStats(foreclosures);
+
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          applyFilter(btn.dataset.filter);
+        });
+      });
+    }
+
+    init();
   </script>
 </body>
 </html>
