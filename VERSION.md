@@ -1,6 +1,35 @@
 # BidDeed.AI Version History
 
-## V18.2.0 - December 18, 2025 (CURRENT)
+## V19.0.0 - December 24, 2025 (CURRENT)
+
+### 🗺️ Foreclosure Map Feature
+- **Interactive Leaflet map** at `/map` route
+- **Color-coded markers**: 🟢 BID | 🟡 REVIEW | 🔴 SKIP
+- **Property popups**: Judgment, Max Bid, ML Score, BCPAO photo
+- **Sidebar**: Scrollable property cards with click-to-zoom
+- **Filter buttons**: All/BID/REVIEW/SKIP recommendations
+- **Stats bar**: Total properties, BID count, total judgment
+- **Dark theme**: Matches BidDeed.AI brand
+- **Supabase integration** with hardcoded fallback
+
+### 📍 Geocoding System
+- **BCPAO GIS**: Primary lat/lng source
+- **ZIP fallback**: 40 Brevard ZIP centroids
+- **Pipeline integration**: Stage 10 now includes coordinates
+
+### 📊 Data Schema
+- `auction_results` table with lat/lng columns
+- Indexes for map queries (location, date, recommendation)
+- RLS policies for public read access
+
+### 🔗 Live URLs
+- Map: https://brevard-bidder-landing.pages.dev/map
+- Chat: https://brevard-bidder-landing.pages.dev/chat
+- Standalone: https://biddeed-foreclosure-map.pages.dev
+
+---
+
+## V18.2.0 - December 18, 2025
 
 ### Mapbox Heatmap Integration
 - **Mapbox GL JS** integrated via npm package (proper React pattern)
@@ -35,10 +64,16 @@
 - Smart Router V5 with Gemini FREE tier
 - NLP intent classification (92% accuracy)
 
+## V15.0.0 - December 2025
+- V15 PIVOT: Legitimate data sources only
+- Auction.com, RealtyTrac, HUD/GSE REO integration
+- HOA Lien Discovery V14.4
+
 ## V13.4.0 - December 2025
 - BECA Scraper V2.0
 - 12-stage Everest Ascent pipeline
 - XGBoost ML predictions (64.4% accuracy)
 
 ---
+
 © 2025 Ariel Shapira, Everest Capital USA
