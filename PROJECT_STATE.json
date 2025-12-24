@@ -1,9 +1,9 @@
 {
   "project_name": "BidDeed.AI",
-  "version": "16.4.0",
+  "version": "16.5.0",
   "parent_company": "EVEREST CAPITAL USA",
   "methodology": "The Everest Ascent™",
-  "last_updated": "2025-12-24T14:00:00Z",
+  "last_updated": "2025-12-24T17:00:00Z",
   "updated_by": "Claude Opus 4.5 (AI Architect)",
   "stack_status": {
     "scrapers": {
@@ -11,7 +11,6 @@
       "bcpao": "deployed",
       "acclaimweb": "deployed",
       "realtdm": "deployed",
-      "census_api": "deployed",
       "beca_v21": "deployed"
     },
     "smart_router": {
@@ -31,10 +30,6 @@
       "checkpointing": true,
       "status": "deployed"
     },
-    "github_actions": {
-      "beca_v22": "deployed",
-      "insert_insight": "deployed"
-    },
     "supabase_schema": {
       "everest_brand": "deployed",
       "foreclosure_auctions": "deployed",
@@ -45,6 +40,7 @@
       "decision_panel": "deployed",
       "pipeline_progress": "deployed",
       "biddeed_chat": "deployed",
+      "conversational_agent": "deployed",
       "foreclosure_map": "deployed",
       "design_tokens": "deployed",
       "shadcn_preset": "v2_deployed",
@@ -54,8 +50,8 @@
   "live_urls": {
     "landing": "https://brevard-bidder-landing.pages.dev",
     "chat": "https://brevard-bidder-landing.pages.dev/chat",
-    "map": "https://brevard-bidder-landing.pages.dev/map",
-    "map_standalone": "https://biddeed-foreclosure-map.pages.dev"
+    "agent": "https://brevard-bidder-landing.pages.dev/agent",
+    "map": "https://brevard-bidder-landing.pages.dev/map"
   },
   "repositories": {
     "primary": "breverdbidder/brevard-bidder-scraper",
@@ -64,43 +60,35 @@
   "recent_decisions": [
     {
       "date": "2025-12-24",
-      "decision": "Deploy Brevard County Foreclosure Map V16.4.0",
-      "rationale": "Interactive Leaflet map with BID/REVIEW/SKIP markers, connects to auction_results table",
+      "decision": "Deploy Conversational AI Agent V16.5.0 (Manus-style)",
+      "rationale": "Split-screen UI with chat + agent workspace, following OpenManus architecture patterns",
       "features": [
-        "Dark-themed Leaflet map centered on Brevard County",
-        "Color-coded markers: green=BID, yellow=REVIEW, red=SKIP",
-        "Property sidebar with click-to-zoom",
-        "BCPAO photos in popups",
-        "ML score display",
-        "Stats dashboard"
+        "NLP query parser for foreclosure research",
+        "Split-screen UI (Chat + Agent Workspace)",
+        "Voice input with Web Speech API",
+        "Activity log with real-time agent actions",
+        "Property results grid with ML scores",
+        "Terminal view for pipeline commands",
+        "Quick action buttons for common queries",
+        "22 real Brevard properties hardcoded"
       ],
-      "urls": {
-        "primary": "https://brevard-bidder-landing.pages.dev/map",
-        "standalone": "https://biddeed-foreclosure-map.pages.dev"
-      },
+      "architecture": "OpenManus-inspired: BaseAgent -> ReActAgent -> ToolCallAgent pattern",
+      "url": "https://brevard-bidder-landing.pages.dev/agent",
       "outcome": "deployed"
     },
     {
       "date": "2025-12-24",
-      "decision": "Update insert_results.py with geocoding",
-      "rationale": "Pipeline Stage 10 now inserts lat/lng for map visualization",
-      "features": [
-        "Brevard ZIP code centroid fallback",
-        "Auto-populates auction_results table",
-        "Map-ready coordinates"
-      ],
+      "decision": "Deploy Foreclosure Map with REAL data V16.4.0",
+      "rationale": "22 actual Brevard properties from Dec 3, Dec 17, Jan 7 auctions",
+      "urls": {
+        "primary": "https://brevard-bidder-landing.pages.dev/map"
+      },
       "outcome": "deployed"
     },
     {
       "date": "2025-12-15",
       "decision": "AnimatedDemo integrated into landing page V16.2.0",
       "rationale": "Watch Demo button in hero launches 12-stage pipeline animation",
-      "outcome": "deployed"
-    },
-    {
-      "date": "2025-12-15",
-      "decision": "Mobile Auction Calendar deployed",
-      "rationale": "FullCalendar with dark theme, list/month views, tap-to-detail modal",
       "outcome": "deployed"
     }
   ],
