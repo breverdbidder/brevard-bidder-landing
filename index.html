@@ -18,11 +18,11 @@
     body {
       font-family: 'Inter', sans-serif;
       overflow-x: hidden;
-      background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%);
+      background: linear-gradient(135deg, #1E3A5F 0%, #2C5F8D 50%, #1E3A5F 100%);
     }
     
     .gradient-text {
-      background: linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6);
+      background: linear-gradient(90deg, #4A90E2, #87CEEB, #4FC3F7);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -31,21 +31,21 @@
     
     @keyframes gradient-shift {
       0%, 100% { filter: hue-rotate(0deg); }
-      50% { filter: hue-rotate(20deg); }
+      50% { filter: hue-rotate(15deg); }
     }
     
     .glass {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
     
     .glow {
-      box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+      box-shadow: 0 0 30px rgba(74, 144, 226, 0.4);
     }
     
     .glow-intense {
-      box-shadow: 0 0 60px rgba(139, 92, 246, 0.8), 0 0 100px rgba(139, 92, 246, 0.4);
+      box-shadow: 0 0 60px rgba(74, 144, 226, 0.6), 0 0 100px rgba(74, 144, 226, 0.3);
     }
     
     .animate-float {
@@ -83,7 +83,7 @@
       left: -2px;
       right: -2px;
       bottom: -2px;
-      background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899);
+      background: linear-gradient(45deg, #4A90E2, #87CEEB, #4FC3F7);
       border-radius: 18px;
       opacity: 0;
       transition: opacity 0.4s;
@@ -92,16 +92,16 @@
     }
     
     .card-hover:hover::before {
-      opacity: 0.7;
+      opacity: 0.6;
     }
     
     .card-hover:hover {
       transform: translateY(-15px) scale(1.02);
-      box-shadow: 0 25px 50px rgba(139, 92, 246, 0.4);
+      box-shadow: 0 25px 50px rgba(74, 144, 226, 0.4);
     }
     
     .btn-primary {
-      background: linear-gradient(90deg, #9333ea, #3b82f6);
+      background: linear-gradient(90deg, #4A90E2, #87CEEB);
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
@@ -124,16 +124,16 @@
     
     .btn-primary:hover {
       transform: scale(1.05);
-      box-shadow: 0 0 40px rgba(139, 92, 246, 0.8);
+      box-shadow: 0 0 40px rgba(74, 144, 226, 0.8);
     }
     
     .btn-secondary {
-      border: 2px solid #a78bfa;
+      border: 2px solid #87CEEB;
       transition: all 0.3s ease;
     }
     
     .btn-secondary:hover {
-      background: rgba(167, 139, 250, 0.2);
+      background: rgba(135, 206, 235, 0.2);
       transform: scale(1.05);
       border-color: #ffffff;
     }
@@ -159,7 +159,7 @@
     
     .pipeline-node:hover {
       transform: scale(1.15) translateY(-5px);
-      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
+      box-shadow: 0 10px 30px rgba(74, 144, 226, 0.5);
     }
     
     .stat-number {
@@ -207,7 +207,7 @@
       width: 64px;
       height: 64px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #9333ea, #3b82f6);
+      background: linear-gradient(135deg, #4A90E2, #87CEEB);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -215,12 +215,12 @@
       cursor: pointer;
       transition: all 0.3s ease;
       z-index: 1000;
-      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
+      box-shadow: 0 10px 30px rgba(74, 144, 226, 0.5);
     }
     
     .floating-btn:hover {
       transform: scale(1.2) rotate(360deg);
-      box-shadow: 0 10px 40px rgba(139, 92, 246, 0.8);
+      box-shadow: 0 10px 40px rgba(74, 144, 226, 0.8);
     }
     
     #particle-canvas {
@@ -233,24 +233,24 @@
       opacity: 0.3;
     }
     
-    .stage-modal {
+    .stage-modal, .video-modal {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%) scale(0);
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(30, 58, 95, 0.98);
       backdrop-filter: blur(20px);
-      border: 2px solid rgba(139, 92, 246, 0.5);
+      border: 2px solid rgba(74, 144, 226, 0.5);
       border-radius: 24px;
       padding: 32px;
-      max-width: 600px;
+      max-width: 900px;
       width: 90%;
       z-index: 2000;
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
     }
     
-    .stage-modal.active {
+    .stage-modal.active, .video-modal.active {
       transform: translate(-50%, -50%) scale(1);
     }
     
@@ -260,7 +260,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(0, 0, 0, 0.8);
       z-index: 1999;
       opacity: 0;
       pointer-events: none;
@@ -280,6 +280,24 @@
     .card-hover:hover .feature-icon {
       transform: rotateY(360deg) scale(1.2);
     }
+    
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 12px;
+      margin-top: 20px;
+    }
+    
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
   </style>
 </head>
 <body>
@@ -295,11 +313,11 @@
         BidDeed.AI
       </h1>
       
-      <p class="text-3xl text-gray-300 mb-4 font-bold">
+      <p class="text-3xl text-gray-200 mb-4 font-bold">
         The Everest Ascent™
       </p>
       
-      <p class="text-xl text-gray-400 mb-12 max-w-2xl mx-auto">
+      <p class="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
         Agentic AI Ecosystem for Foreclosure Intelligence
       </p>
 
@@ -308,7 +326,7 @@
           Start Free Trial
         </button>
         
-        <button class="btn-secondary px-10 py-5 text-white rounded-xl font-bold text-lg">
+        <button onclick="openVideoDemo()" class="btn-secondary px-10 py-5 text-white rounded-xl font-bold text-lg">
           View Demo
         </button>
       </div>
@@ -327,29 +345,25 @@
       <div class="card-hover glass rounded-2xl p-8">
         <div class="feature-icon text-6xl mb-4 animate-pulse-slow">🚀</div>
         <h3 class="text-2xl font-bold text-white mb-3">100x ROI</h3>
-        <p class="text-gray-300 text-lg">$300K value, $3.3K cost</p>
-        <div class="mt-4 text-sm text-purple-400">Click to learn more</div>
+        <p class="text-gray-200 text-lg">$300K value, $3.3K cost</p>
       </div>
 
       <div class="card-hover glass rounded-2xl p-8">
         <div class="feature-icon text-6xl mb-4 animate-pulse-slow" style="animation-delay: 0.2s">🤖</div>
         <h3 class="text-2xl font-bold text-white mb-3">95% Automation</h3>
-        <p class="text-gray-300 text-lg">Minimal human-in-loop</p>
-        <div class="mt-4 text-sm text-purple-400">Click to learn more</div>
+        <p class="text-gray-200 text-lg">Minimal human-in-loop</p>
       </div>
 
       <div class="card-hover glass rounded-2xl p-8">
         <div class="feature-icon text-6xl mb-4 animate-pulse-slow" style="animation-delay: 0.4s">📊</div>
         <h3 class="text-2xl font-bold text-white mb-3">64.4% ML Accuracy</h3>
-        <p class="text-gray-300 text-lg">XGBoost predictions</p>
-        <div class="mt-4 text-sm text-purple-400">Click to learn more</div>
+        <p class="text-gray-200 text-lg">XGBoost predictions</p>
       </div>
 
       <div class="card-hover glass rounded-2xl p-8">
         <div class="feature-icon text-6xl mb-4 animate-pulse-slow" style="animation-delay: 0.6s">⚡</div>
         <h3 class="text-2xl font-bold text-white mb-3">~30 Min Pipeline</h3>
-        <p class="text-gray-300 text-lg">12 stages end-to-end</p>
-        <div class="mt-4 text-sm text-purple-400">Click to learn more</div>
+        <p class="text-gray-200 text-lg">12 stages end-to-end</p>
       </div>
     </div>
   </section>
@@ -360,25 +374,25 @@
       12-Stage Pipeline
     </h2>
     
-    <p class="text-xl text-gray-300 text-center mb-12">
+    <p class="text-xl text-gray-200 text-center mb-12">
       Fully automated from discovery to disposition
     </p>
 
     <div class="max-w-5xl mx-auto glass rounded-2xl p-8">
       <div class="flex flex-wrap justify-center gap-4 mb-8">
-        <div class="pipeline-node glass" style="background: rgba(59, 130, 246, 0.3); border-color: #60a5fa;" data-stage="discovery">
+        <div class="pipeline-node glass" style="background: rgba(74, 144, 226, 0.3); border-color: #4A90E2;" data-stage="discovery">
           <div class="text-3xl mb-2">🔍</div>
           <div class="text-xs font-bold text-white">Discovery</div>
         </div>
         <div class="text-white text-3xl flex items-center">→</div>
         
-        <div class="pipeline-node glass" style="background: rgba(147, 51, 234, 0.3); border-color: #a78bfa;" data-stage="title">
+        <div class="pipeline-node glass" style="background: rgba(135, 206, 235, 0.3); border-color: #87CEEB;" data-stage="title">
           <div class="text-3xl mb-2">📜</div>
           <div class="text-xs font-bold text-white">Title</div>
         </div>
         <div class="text-white text-3xl flex items-center">→</div>
         
-        <div class="pipeline-node glass" style="background: rgba(6, 182, 212, 0.3); border-color: #22d3ee;" data-stage="ml">
+        <div class="pipeline-node glass" style="background: rgba(79, 195, 247, 0.3); border-color: #4FC3F7;" data-stage="ml">
           <div class="text-3xl mb-2">🤖</div>
           <div class="text-xs font-bold text-white">ML Score</div>
         </div>
@@ -397,7 +411,7 @@
         </div>
       </div>
       
-      <div class="text-center mt-6 text-gray-400 text-sm">
+      <div class="text-center mt-6 text-gray-300 text-sm">
         + 7 more automated stages (Lien Priority, Tax Certs, Demographics, etc.)
       </div>
     </div>
@@ -408,22 +422,22 @@
     <div class="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
       <div class="text-center stat-item">
         <div class="stat-number gradient-text mb-2">100x</div>
-        <div class="text-gray-300 text-xl">Return on Investment</div>
+        <div class="text-gray-200 text-xl">Return on Investment</div>
       </div>
       
       <div class="text-center stat-item">
         <div class="stat-number gradient-text mb-2" style="animation-delay: 0.2s">40-55%</div>
-        <div class="text-gray-300 text-xl">FREE Tier Processing</div>
+        <div class="text-gray-200 text-xl">FREE Tier Processing</div>
       </div>
       
       <div class="text-center stat-item">
         <div class="stat-number gradient-text mb-2" style="animation-delay: 0.4s">12</div>
-        <div class="text-gray-300 text-xl">Automated Stages</div>
+        <div class="text-gray-200 text-xl">Automated Stages</div>
       </div>
       
       <div class="text-center stat-item">
         <div class="stat-number gradient-text mb-2" style="animation-delay: 0.6s">~30min</div>
-        <div class="text-gray-300 text-xl">End-to-End Pipeline</div>
+        <div class="text-gray-200 text-xl">End-to-End Pipeline</div>
       </div>
     </div>
   </section>
@@ -434,7 +448,7 @@
       <h2 class="text-5xl font-black text-white mb-6">
         Ready to Transform Your Foreclosure Investing?
       </h2>
-      <p class="text-2xl text-gray-300 mb-10">
+      <p class="text-2xl text-gray-200 mb-10">
         Join the agentic AI revolution. Save $2,500-4,500/month vs offshore engineering.
       </p>
       
@@ -443,7 +457,7 @@
           Get Started Free
         </button>
         
-        <button class="btn-secondary px-12 py-6 text-white rounded-xl font-bold text-2xl">
+        <button onclick="openVideoDemo()" class="btn-secondary px-12 py-6 text-white rounded-xl font-bold text-2xl">
           Schedule Demo
         </button>
       </div>
@@ -460,10 +474,22 @@
         <div class="text-5xl mb-3" id="modalIcon">🔍</div>
         <h3 class="text-3xl font-bold text-white" id="modalTitle">Discovery</h3>
       </div>
-      <button class="text-white text-3xl hover:text-purple-400" onclick="closeModal()">×</button>
+      <button class="text-white text-3xl hover:text-blue-400" onclick="closeModal()">×</button>
     </div>
-    <p class="text-gray-300 text-lg mb-4" id="modalDescription">Loading...</p>
-    <div class="text-sm text-purple-400" id="modalDetails">Loading...</div>
+    <p class="text-gray-200 text-lg mb-4" id="modalDescription">Loading...</p>
+    <div class="text-sm text-blue-300" id="modalDetails">Loading...</div>
+  </div>
+
+  <!-- Video Demo Modal -->
+  <div class="video-modal" id="videoModal">
+    <div class="flex justify-between items-start mb-6">
+      <h3 class="text-3xl font-bold text-white">BidDeed.AI Demo</h3>
+      <button class="text-white text-3xl hover:text-blue-400" onclick="closeVideoModal()">×</button>
+    </div>
+    <div class="video-container">
+      <iframe id="demoVideo" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <p class="text-gray-200 mt-4">See The Everest Ascent™ in action - from property discovery to final report in under 30 minutes.</p>
   </div>
 
   <!-- Floating Action Button -->
@@ -523,6 +549,20 @@
       document.getElementById('modalOverlay').classList.remove('active');
     }
 
+    function openVideoDemo() {
+      // Replace with your actual demo video URL
+      const videoUrl = 'https://www.youtube.com/embed/dQw4w9WgXcQ'; // Placeholder - replace with actual demo
+      document.getElementById('demoVideo').src = videoUrl;
+      document.getElementById('videoModal').classList.add('active');
+      document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    function closeVideoModal() {
+      document.getElementById('videoModal').classList.remove('active');
+      document.getElementById('modalOverlay').classList.remove('active');
+      document.getElementById('demoVideo').src = '';
+    }
+
     document.querySelectorAll('.pipeline-node').forEach(node => {
       node.addEventListener('click', () => {
         const stage = node.getAttribute('data-stage');
@@ -530,7 +570,10 @@
       });
     });
 
-    document.getElementById('modalOverlay').addEventListener('click', closeModal);
+    document.getElementById('modalOverlay').addEventListener('click', () => {
+      closeModal();
+      closeVideoModal();
+    });
 
     // Three.js 3D Background
     const canvas = document.getElementById('canvas3d');
@@ -543,8 +586,8 @@
 
     const geometry = new THREE.TorusKnotGeometry(1.5, 0.5, 100, 16);
     const material = new THREE.MeshStandardMaterial({
-      color: 0x8b5cf6,
-      emissive: 0x8b5cf6,
+      color: 0x4A90E2,
+      emissive: 0x4A90E2,
       emissiveIntensity: 0.5,
       roughness: 0.3,
       metalness: 0.7,
@@ -571,7 +614,7 @@
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     scene.add(ambientLight);
     
-    const pointLight = new THREE.PointLight(0x8b5cf6, 2, 50);
+    const pointLight = new THREE.PointLight(0x4A90E2, 2, 50);
     pointLight.position.set(3, 3, 3);
     scene.add(pointLight);
 
@@ -616,7 +659,7 @@
         if (p.x < 0 || p.x > particleCanvas.width) p.vx *= -1;
         if (p.y < 0 || p.y > particleCanvas.height) p.vy *= -1;
         
-        ctx.fillStyle = 'rgba(139, 92, 246, 0.5)';
+        ctx.fillStyle = 'rgba(74, 144, 226, 0.5)';
         ctx.beginPath();
         ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
         ctx.fill();
@@ -625,7 +668,7 @@
           if (i !== j) {
             const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
             if (dist < 150) {
-              ctx.strokeStyle = `rgba(139, 92, 246, ${0.2 * (1 - dist / 150)})`;
+              ctx.strokeStyle = `rgba(74, 144, 226, ${0.2 * (1 - dist / 150)})`;
               ctx.lineWidth = 1;
               ctx.beginPath();
               ctx.moveTo(p.x, p.y);
