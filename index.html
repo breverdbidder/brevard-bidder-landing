@@ -1,205 +1,690 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BidDeed.AI - The Everest Ascent™</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
     
-    <!-- PWA Meta Tags -->
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#0a0f1a" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="BidDeed.AI" />
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     
-    <!-- Primary Meta Tags -->
-    <title>BidDeed.AI | Distressed Assets Decoded</title>
-    <meta name="title" content="BidDeed.AI | Distressed Assets Decoded" />
-    <meta name="description" content="The Everest Ascent™ - 12-stage AI pipeline transforms 4-hour research into 23-second intelligence for foreclosure and tax deed auctions. An Everest Company." />
-    <meta name="author" content="Ariel Shapira, Founder of Everest Capital USA" />
+    body {
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%);
+    }
     
-    <!-- Open Graph -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://biddeed.ai/" />
-    <meta property="og:title" content="BidDeed.AI | Distressed Assets Decoded" />
-    <meta property="og:description" content="The Everest Ascent™ - 12 stages to the summit of distressed real estate intelligence." />
+    .gradient-text {
+      background: linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: gradient-shift 5s ease infinite;
+    }
     
-    <!-- Premium Fonts: Instrument Serif (display) + Geist (body) + Geist Mono -->
-    <!-- Mapbox GL CSS -->
-    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet" />
+    @keyframes gradient-shift {
+      0%, 100% { filter: hue-rotate(0deg); }
+      50% { filter: hue-rotate(20deg); }
+    }
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    .glass {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
     
-    <!-- Geist Font (Vercel's typeface) via CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.2.0/dist/fonts/geist-sans/style.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.2.0/dist/fonts/geist-mono/style.min.css">
+    .glow {
+      box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+    }
     
-    <style>
-      /* ============ CSS RESET & BASE ============ */
-      *, *::before, *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      
-      :root {
-        /* Typography */
-        --font-display: 'Instrument Serif', Georgia, serif;
-        --font-body: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        --font-mono: 'Geist Mono', 'JetBrains Mono', 'Fira Code', monospace;
-        
-        /* Colors - Everest Brand */
-        --slate-950: #030712;
-        --slate-900: #0a0f1a;
-        --slate-800: #111827;
-        --slate-700: #1e293b;
-        --slate-600: #334155;
-        --slate-500: #64748b;
-        --slate-400: #94a3b8;
-        --slate-300: #cbd5e1;
-        
-        --amber-400: #fbbf24;
-        --amber-500: #f59e0b;
-        --amber-600: #d97706;
-        
-        --emerald-400: #34d399;
-        --emerald-500: #10b981;
-        
-        --red-400: #f87171;
-        --red-500: #ef4444;
-      }
-      
-      html {
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        text-rendering: optimizeLegibility;
-        scroll-behavior: smooth;
-      }
-      
-      body {
-        font-family: var(--font-body);
-        background-color: var(--slate-950);
-        color: white;
-        line-height: 1.6;
-        overflow-x: hidden;
-      }
-      
-      /* Headlines use display serif */
-      h1, h2, h3, h4, h5, h6 {
-        font-family: var(--font-display);
-        font-weight: 400;
-        line-height: 1.2;
-      }
-      
-      /* Monospace */
-      code, pre, .font-mono {
-        font-family: var(--font-mono);
-      }
-      
-      /* ============ SCROLLBAR STYLING ============ */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      
-      ::-webkit-scrollbar-track {
-        background: var(--slate-900);
-      }
-      
-      ::-webkit-scrollbar-thumb {
-        background: var(--slate-700);
-        border-radius: 4px;
-      }
-      
-      ::-webkit-scrollbar-thumb:hover {
-        background: var(--slate-600);
-      }
-      
-      /* ============ SELECTION ============ */
-      ::selection {
-        background: var(--amber-500);
-        color: var(--slate-900);
-      }
-      
-      /* ============ FOCUS STATES ============ */
-      :focus-visible {
-        outline: 2px solid var(--amber-500);
-        outline-offset: 2px;
-      }
-      
-      /* ============ LOADING SCREEN ============ */
-      #loading-screen {
-        position: fixed;
-        inset: 0;
-        background: var(--slate-950);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        transition: opacity 0.5s ease;
-      }
-      
-      #loading-screen.fade-out {
+    .glow-intense {
+      box-shadow: 0 0 60px rgba(139, 92, 246, 0.8), 0 0 100px rgba(139, 92, 246, 0.4);
+    }
+    
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      25% { transform: translateY(-10px) rotate(5deg); }
+      75% { transform: translateY(-5px) rotate(-5deg); }
+    }
+    
+    .animate-pulse-slow {
+      animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    .fade-in {
+      animation: fadeIn 1s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .card-hover {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    
+    .card-hover::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899);
+      border-radius: 18px;
+      opacity: 0;
+      transition: opacity 0.4s;
+      z-index: -1;
+      filter: blur(10px);
+    }
+    
+    .card-hover:hover::before {
+      opacity: 0.7;
+    }
+    
+    .card-hover:hover {
+      transform: translateY(-15px) scale(1.02);
+      box-shadow: 0 25px 50px rgba(139, 92, 246, 0.4);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(90deg, #9333ea, #3b82f6);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+    
+    .btn-primary:hover::before {
+      left: 100%;
+    }
+    
+    .btn-primary:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 40px rgba(139, 92, 246, 0.8);
+    }
+    
+    .btn-secondary {
+      border: 2px solid #a78bfa;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(167, 139, 250, 0.2);
+      transform: scale(1.05);
+      border-color: #ffffff;
+    }
+    
+    #canvas3d {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.4;
+    }
+    
+    .pipeline-node {
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+      min-width: 120px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .pipeline-node:hover {
+      transform: scale(1.15) translateY(-5px);
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
+    }
+    
+    .stat-number {
+      font-size: 4rem;
+      font-weight: 900;
+      line-height: 1;
+      animation: stat-appear 1s ease-out;
+    }
+    
+    @keyframes stat-appear {
+      from { 
         opacity: 0;
-        pointer-events: none;
+        transform: scale(0.5) rotateY(180deg);
       }
+      to { 
+        opacity: 1;
+        transform: scale(1) rotateY(0deg);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .stat-number {
+        font-size: 3rem;
+      }
+    }
+    
+    .scroll-indicator {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+      40% { transform: translateX(-50%) translateY(-20px); }
+      60% { transform: translateX(-50%) translateY(-10px); }
+    }
+    
+    .floating-btn {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #9333ea, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
+    }
+    
+    .floating-btn:hover {
+      transform: scale(1.2) rotate(360deg);
+      box-shadow: 0 10px 40px rgba(139, 92, 246, 0.8);
+    }
+    
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      opacity: 0.3;
+    }
+    
+    .stage-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(139, 92, 246, 0.5);
+      border-radius: 24px;
+      padding: 32px;
+      max-width: 600px;
+      width: 90%;
+      z-index: 2000;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+    
+    .stage-modal.active {
+      transform: translate(-50%, -50%) scale(1);
+    }
+    
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .feature-icon {
+      display: inline-block;
+      transition: transform 0.5s ease;
+    }
+    
+    .card-hover:hover .feature-icon {
+      transform: rotateY(360deg) scale(1.2);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas3d"></canvas>
+  <canvas id="particle-canvas"></canvas>
+  
+  <!-- Hero Section -->
+  <section id="hero" class="relative min-h-screen flex items-center justify-center px-4">
+    <div class="text-center z-10 fade-in">
+      <div class="text-8xl mb-6 animate-float">🏔️</div>
       
-      .loader {
-        width: 48px;
-        height: 48px;
-        border: 3px solid var(--slate-800);
-        border-top-color: var(--amber-500);
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
+      <h1 class="text-7xl font-black mb-6 gradient-text">
+        BidDeed.AI
+      </h1>
       
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
+      <p class="text-3xl text-gray-300 mb-4 font-bold">
+        The Everest Ascent™
+      </p>
       
-      /* ============ UTILITY CLASSES ============ */
-      .container {
-        width: 100%;
-        max-width: 1280px;
-        margin: 0 auto;
-        padding: 0 1.5rem;
-      }
-      
-      .sr-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Loading Screen -->
-    <div id="loading-screen">
-      <div class="loader"></div>
+      <p class="text-xl text-gray-400 mb-12 max-w-2xl mx-auto">
+        Agentic AI Ecosystem for Foreclosure Intelligence
+      </p>
+
+      <div class="flex gap-4 justify-center flex-wrap">
+        <button class="btn-primary px-10 py-5 text-white rounded-xl font-bold text-lg shadow-2xl">
+          Start Free Trial
+        </button>
+        
+        <button class="btn-secondary px-10 py-5 text-white rounded-xl font-bold text-lg">
+          View Demo
+        </button>
+      </div>
     </div>
     
-    <!-- React App Mount Point -->
-    <div id="root"></div>
+    <div class="scroll-indicator text-white text-4xl">↓</div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="relative py-20 px-4">
+    <h2 class="text-6xl font-black text-center text-white mb-16">
+      Why BidDeed.AI?
+    </h2>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+      <div class="card-hover glass rounded-2xl p-8">
+        <div class="feature-icon text-6xl mb-4 animate-pulse-slow">🚀</div>
+        <h3 class="text-2xl font-bold text-white mb-3">100x ROI</h3>
+        <p class="text-gray-300 text-lg">$300K value, $3.3K cost</p>
+        <div class="mt-4 text-sm text-purple-400">Click to learn more</div>
+      </div>
+
+      <div class="card-hover glass rounded-2xl p-8">
+        <div class="feature-icon text-6xl mb-4 animate-pulse-slow" style="animation-delay: 0.2s">🤖</div>
+        <h3 class="text-2xl font-bold text-white mb-3">95% Automation</h3>
+        <p class="text-gray-300 text-lg">Minimal human-in-loop</p>
+        <div class="mt-4 text-sm text-purple-400">Click to learn more</div>
+      </div>
+
+      <div class="card-hover glass rounded-2xl p-8">
+        <div class="feature-icon text-6xl mb-4 animate-pulse-slow" style="animation-delay: 0.4s">📊</div>
+        <h3 class="text-2xl font-bold text-white mb-3">64.4% ML Accuracy</h3>
+        <p class="text-gray-300 text-lg">XGBoost predictions</p>
+        <div class="mt-4 text-sm text-purple-400">Click to learn more</div>
+      </div>
+
+      <div class="card-hover glass rounded-2xl p-8">
+        <div class="feature-icon text-6xl mb-4 animate-pulse-slow" style="animation-delay: 0.6s">⚡</div>
+        <h3 class="text-2xl font-bold text-white mb-3">~30 Min Pipeline</h3>
+        <p class="text-gray-300 text-lg">12 stages end-to-end</p>
+        <div class="mt-4 text-sm text-purple-400">Click to learn more</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pipeline Visualization -->
+  <section id="pipeline" class="relative py-20 px-4">
+    <h2 class="text-6xl font-black text-center text-white mb-8">
+      12-Stage Pipeline
+    </h2>
     
-    <script type="module" src="/src/main.jsx"></script>
+    <p class="text-xl text-gray-300 text-center mb-12">
+      Fully automated from discovery to disposition
+    </p>
+
+    <div class="max-w-5xl mx-auto glass rounded-2xl p-8">
+      <div class="flex flex-wrap justify-center gap-4 mb-8">
+        <div class="pipeline-node glass" style="background: rgba(59, 130, 246, 0.3); border-color: #60a5fa;" data-stage="discovery">
+          <div class="text-3xl mb-2">🔍</div>
+          <div class="text-xs font-bold text-white">Discovery</div>
+        </div>
+        <div class="text-white text-3xl flex items-center">→</div>
+        
+        <div class="pipeline-node glass" style="background: rgba(147, 51, 234, 0.3); border-color: #a78bfa;" data-stage="title">
+          <div class="text-3xl mb-2">📜</div>
+          <div class="text-xs font-bold text-white">Title</div>
+        </div>
+        <div class="text-white text-3xl flex items-center">→</div>
+        
+        <div class="pipeline-node glass" style="background: rgba(6, 182, 212, 0.3); border-color: #22d3ee;" data-stage="ml">
+          <div class="text-3xl mb-2">🤖</div>
+          <div class="text-xs font-bold text-white">ML Score</div>
+        </div>
+        <div class="text-white text-3xl flex items-center">→</div>
+        
+        <div class="pipeline-node glass" style="background: rgba(34, 197, 94, 0.3); border-color: #4ade80;" data-stage="maxbid">
+          <div class="text-3xl mb-2">💰</div>
+          <div class="text-xs font-bold text-white">Max Bid</div>
+        </div>
+      </div>
+      
+      <div class="flex justify-center">
+        <div class="pipeline-node glass" style="background: rgba(239, 68, 68, 0.3); border-color: #f87171;" data-stage="report">
+          <div class="text-3xl mb-2">📄</div>
+          <div class="text-xs font-bold text-white">Report</div>
+        </div>
+      </div>
+      
+      <div class="text-center mt-6 text-gray-400 text-sm">
+        + 7 more automated stages (Lien Priority, Tax Certs, Demographics, etc.)
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section id="stats" class="relative py-20 px-4">
+    <div class="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
+      <div class="text-center stat-item">
+        <div class="stat-number gradient-text mb-2">100x</div>
+        <div class="text-gray-300 text-xl">Return on Investment</div>
+      </div>
+      
+      <div class="text-center stat-item">
+        <div class="stat-number gradient-text mb-2" style="animation-delay: 0.2s">40-55%</div>
+        <div class="text-gray-300 text-xl">FREE Tier Processing</div>
+      </div>
+      
+      <div class="text-center stat-item">
+        <div class="stat-number gradient-text mb-2" style="animation-delay: 0.4s">12</div>
+        <div class="text-gray-300 text-xl">Automated Stages</div>
+      </div>
+      
+      <div class="text-center stat-item">
+        <div class="stat-number gradient-text mb-2" style="animation-delay: 0.6s">~30min</div>
+        <div class="text-gray-300 text-xl">End-to-End Pipeline</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section id="cta" class="relative py-32 px-4">
+    <div class="max-w-4xl mx-auto glass rounded-3xl p-16 text-center glow-intense">
+      <h2 class="text-5xl font-black text-white mb-6">
+        Ready to Transform Your Foreclosure Investing?
+      </h2>
+      <p class="text-2xl text-gray-300 mb-10">
+        Join the agentic AI revolution. Save $2,500-4,500/month vs offshore engineering.
+      </p>
+      
+      <div class="flex gap-4 justify-center flex-wrap">
+        <button class="btn-primary px-12 py-6 text-white rounded-xl font-bold text-2xl shadow-2xl">
+          Get Started Free
+        </button>
+        
+        <button class="btn-secondary px-12 py-6 text-white rounded-xl font-bold text-2xl">
+          Schedule Demo
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal Overlay -->
+  <div class="modal-overlay" id="modalOverlay"></div>
+  
+  <!-- Stage Detail Modal -->
+  <div class="stage-modal" id="stageModal">
+    <div class="flex justify-between items-start mb-6">
+      <div>
+        <div class="text-5xl mb-3" id="modalIcon">🔍</div>
+        <h3 class="text-3xl font-bold text-white" id="modalTitle">Discovery</h3>
+      </div>
+      <button class="text-white text-3xl hover:text-purple-400" onclick="closeModal()">×</button>
+    </div>
+    <p class="text-gray-300 text-lg mb-4" id="modalDescription">Loading...</p>
+    <div class="text-sm text-purple-400" id="modalDetails">Loading...</div>
+  </div>
+
+  <!-- Floating Action Button -->
+  <div class="floating-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+    🚀
+  </div>
+
+  <script>
+    const stageInfo = {
+      discovery: {
+        icon: '🔍',
+        title: 'Discovery',
+        description: 'Scrape auction listings from RealForeclose.com to identify upcoming foreclosure opportunities in Brevard County.',
+        details: 'Automated daily scraping • Real-time updates • 100% coverage of county auctions'
+      },
+      title: {
+        icon: '📜',
+        title: 'Title Search',
+        description: 'AcclaimWeb lien discovery and document analysis to identify all encumbrances and potential risks.',
+        details: 'Automated lien detection • Senior mortgage identification • HOA foreclosure alerts'
+      },
+      ml: {
+        icon: '🤖',
+        title: 'ML Score',
+        description: 'XGBoost machine learning model predicts third-party purchase probability with 64.4% accuracy.',
+        details: '28 plaintiff patterns tracked • Historical auction data analysis • Confidence scoring'
+      },
+      maxbid: {
+        icon: '💰',
+        title: 'Max Bid Calculation',
+        description: 'Formula: (ARV × 70%) - Repairs - $10K - MIN($25K, 15% ARV) to determine optimal bid price.',
+        details: 'Conservative repair estimates • Market-based ARV • Built-in safety margin'
+      },
+      report: {
+        icon: '📄',
+        title: 'Report Generation',
+        description: 'One-page DOCX reports with BCPAO photos, property details, and BID/REVIEW/SKIP recommendations.',
+        details: 'Automated formatting • Professional presentation • Decision rationale included'
+      }
+    };
+
+    function openModal(stage) {
+      const info = stageInfo[stage];
+      if (!info) return;
+      
+      document.getElementById('modalIcon').textContent = info.icon;
+      document.getElementById('modalTitle').textContent = info.title;
+      document.getElementById('modalDescription').textContent = info.description;
+      document.getElementById('modalDetails').textContent = info.details;
+      
+      document.getElementById('stageModal').classList.add('active');
+      document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('stageModal').classList.remove('active');
+      document.getElementById('modalOverlay').classList.remove('active');
+    }
+
+    document.querySelectorAll('.pipeline-node').forEach(node => {
+      node.addEventListener('click', () => {
+        const stage = node.getAttribute('data-stage');
+        openModal(stage);
+      });
+    });
+
+    document.getElementById('modalOverlay').addEventListener('click', closeModal);
+
+    // Three.js 3D Background
+    const canvas = document.getElementById('canvas3d');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 8;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const geometry = new THREE.TorusKnotGeometry(1.5, 0.5, 100, 16);
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x8b5cf6,
+      emissive: 0x8b5cf6,
+      emissiveIntensity: 0.5,
+      roughness: 0.3,
+      metalness: 0.7,
+    });
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+
+    const particlesGeo = new THREE.BufferGeometry();
+    const particlesCount = 300;
+    const positions = new Float32Array(particlesCount * 3);
+    for (let i = 0; i < particlesCount * 3; i++) {
+      positions[i] = (Math.random() - 0.5) * 15;
+    }
+    particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particlesMat = new THREE.PointsMaterial({ 
+      size: 0.05, 
+      color: 0xffffff, 
+      transparent: true, 
+      opacity: 0.6 
+    });
+    const particles3D = new THREE.Points(particlesGeo, particlesMat);
+    scene.add(particles3D);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambientLight);
     
-    <script>
-      // Remove loading screen when app loads
-      window.addEventListener('load', () => {
-        const loader = document.getElementById('loading-screen');
-        if (loader) {
-          loader.classList.add('fade-out');
-          setTimeout(() => loader.remove(), 500);
+    const pointLight = new THREE.PointLight(0x8b5cf6, 2, 50);
+    pointLight.position.set(3, 3, 3);
+    scene.add(pointLight);
+
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+      
+      mesh.rotation.x = t * 0.3;
+      mesh.rotation.y = t * 0.5;
+      particles3D.rotation.y = t * 0.1;
+      pointLight.position.x = Math.sin(t) * 3;
+      pointLight.position.z = Math.cos(t) * 3;
+      
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // 2D Particle Network
+    const particleCanvas = document.getElementById('particle-canvas');
+    const ctx = particleCanvas.getContext('2d');
+    particleCanvas.width = window.innerWidth;
+    particleCanvas.height = window.innerHeight;
+
+    const particles2D = [];
+    for (let i = 0; i < 50; i++) {
+      particles2D.push({
+        x: Math.random() * particleCanvas.width,
+        y: Math.random() * particleCanvas.height,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+      });
+    }
+
+    function drawParticles() {
+      ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+      
+      particles2D.forEach((p, i) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        
+        if (p.x < 0 || p.x > particleCanvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > particleCanvas.height) p.vy *= -1;
+        
+        ctx.fillStyle = 'rgba(139, 92, 246, 0.5)';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        particles2D.forEach((p2, j) => {
+          if (i !== j) {
+            const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+            if (dist < 150) {
+              ctx.strokeStyle = `rgba(139, 92, 246, ${0.2 * (1 - dist / 150)})`;
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.stroke();
+            }
+          }
+        });
+      });
+      
+      requestAnimationFrame(drawParticles);
+    }
+    drawParticles();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      
+      particleCanvas.width = window.innerWidth;
+      particleCanvas.height = window.innerHeight;
+    });
+
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
         }
       });
-    </script>
-  </body>
+    }, observerOptions);
+
+    document.querySelectorAll('section').forEach(section => {
+      if (section.id !== 'hero') {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(30px)';
+        section.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+        observer.observe(section);
+      }
+    });
+
+    const statObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !entry.target.classList.contains('counted')) {
+          entry.target.classList.add('counted');
+          const statNumber = entry.target.querySelector('.stat-number');
+          statNumber.style.animation = 'stat-appear 1s ease-out';
+        }
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.stat-item').forEach(item => {
+      statObserver.observe(item);
+    });
+  </script>
+</body>
 </html>
