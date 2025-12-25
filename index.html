@@ -18,12 +18,10 @@
     body {
       font-family: 'Inter', sans-serif;
       overflow-x: hidden;
-      /* BidDeed.AI Brand Colors: Navy (#1E3A5F) to Purple gradient */
       background: linear-gradient(135deg, #1E3A5F 0%, #2D1B4E 50%, #1E3A5F 100%);
     }
     
     .gradient-text {
-      /* BidDeed.AI Brand: Blue to Purple gradient */
       background: linear-gradient(90deg, #4A90E2, #7B68EE, #9370DB);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
@@ -283,21 +281,51 @@
       transform: rotateY(360deg) scale(1.2);
     }
 
-    .video-container {
-      position: relative;
-      padding-bottom: 56.25%;
-      height: 0;
-      overflow: hidden;
-      border-radius: 16px;
+    /* Animated Demo Styles */
+    .demo-stage {
+      opacity: 0.3;
+      transition: all 0.5s ease;
+      border: 2px solid rgba(255, 255, 255, 0.2);
     }
 
-    .video-container iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
+    .demo-stage.active {
+      opacity: 1;
+      border-color: #7B68EE;
+      box-shadow: 0 0 20px rgba(123, 104, 238, 0.6);
+      transform: scale(1.05);
+    }
+
+    .demo-stage.completed {
+      opacity: 1;
+      border-color: #4ade80;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
       height: 100%;
-      border: 0;
+      background: linear-gradient(90deg, #7B68EE, #4A90E2);
+      transition: width 0.5s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .data-item {
+      animation: slideIn 0.3s ease forwards;
     }
   </style>
 </head>
@@ -336,31 +364,123 @@
     <div class="scroll-indicator text-white text-4xl">↓</div>
   </section>
 
-  <!-- Video Demo Section -->
+  <!-- Animated Demo Section -->
   <section id="demo" class="relative py-20 px-4">
     <h2 class="text-6xl font-black text-center text-white mb-8">
-      See It In Action
+      See The Everest Ascent™ In Action
     </h2>
     
-    <p class="text-xl text-gray-300 text-center mb-12">
-      Watch how BidDeed.AI transforms foreclosure investing
+    <p class="text-xl text-gray-300 text-center mb-4">
+      Real Case Study: 123 Main St, Melbourne FL 32901
+    </p>
+    <p class="text-sm text-gray-400 text-center mb-12">
+      Judgment: $285,000 | Watch as BidDeed.AI processes this property through all 12 stages
     </p>
 
-    <div class="max-w-4xl mx-auto glass rounded-2xl p-8">
-      <div class="video-container">
-        <iframe 
-          src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
-          title="BidDeed.AI Demo" 
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-          allowfullscreen>
-        </iframe>
+    <div class="max-w-6xl mx-auto">
+      <!-- Progress Bar -->
+      <div class="mb-8">
+        <div class="flex justify-between text-sm text-gray-400 mb-2">
+          <span>Pipeline Progress</span>
+          <span id="progressText">Stage 0/12</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
       </div>
-      <div class="text-center mt-6">
-        <p class="text-gray-300 text-lg mb-4">
-          See the complete 12-stage pipeline in action
-        </p>
-        <button class="btn-primary px-8 py-3 text-white rounded-lg font-semibold" onclick="window.location.href='mailto:ariel@biddeed.ai?subject=Schedule Demo'">
-          Schedule Live Demo
+
+      <!-- Case Study Card -->
+      <div class="glass rounded-2xl p-6 mb-8">
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <h3 class="text-2xl font-bold text-white mb-4">Property Details</h3>
+            <div class="space-y-2 text-gray-300">
+              <div class="flex justify-between">
+                <span>Address:</span>
+                <span class="font-semibold">123 Main St, Melbourne FL</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Parcel:</span>
+                <span class="font-semibold">2835546</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Plaintiff:</span>
+                <span class="font-semibold">Bank of America</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Judgment:</span>
+                <span class="font-semibold text-yellow-400">$285,000</span>
+              </div>
+            </div>
+          </div>
+          <div id="liveData">
+            <h3 class="text-2xl font-bold text-white mb-4">Live Analysis</h3>
+            <div class="space-y-2 text-gray-300 text-sm" id="analysisData">
+              <div class="text-gray-500 italic">Processing will begin when you click "Start Demo"...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 12 Stages Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="demo-stage glass rounded-xl p-4" data-stage="1">
+          <div class="text-3xl mb-2">🔍</div>
+          <div class="text-xs font-bold text-white">1. Discovery</div>
+        </div>
+        <div class="demo-stage glass rounded-xl p-4" data-stage="2">
+          <div class="text-3xl mb-2">🕷️</div>
+          <div class="text-xs font-bold text-white">2. Scraping</div>
+        </div>
+        <div class="demo-stage glass rounded-xl p-4" data-stage="3">
+          <div class="text-3xl mb-2">📜</div>
+          <div class="text-xs font-bold text-white">3. Title Search</div>
+        </div>
+        <div class="demo-stage glass rounded-xl p-4" data-stage="4">
+          <div class="text-3xl mb-2">🔗</div>
+          <div class="text-xs font-bold text-white">4. Lien Priority</div>
+        </div>
+        <div class="demo-stage glass rounded-xl p-4" data-stage="5">
+          <div class="text-3xl mb-2">🎫</div>
+          <div class="text-xs font-bold text-white">5. Tax Certs</div>
+        </div>
+        <div class="demo-stage glass rounded-xl p-4" data-stage="6">
+          <div class="text-3xl mb-2">📊</div>
+          <div class="text-xs font-bold text-white">6. Demographics</div>
+        </div>
+        <div class="demo-stage glass rounded-xl p-4" data-stage="7">
+          <div class="text-3xl mb-2">🤖</div>
+          <div class="text-xs font-bold text-white">7. ML Score</div>
+        </div>
+        <div class="demo-stage glass rounded-xl p-4" data-stage="8">
+          <div class="text-3xl mb-2">💰</div>
+          <div class="text-xs font-bold text-white">8. Max Bid</div>
+        </div>
+        <div class="demo-stage glass rounded-xl p-4" data-stage="9">
+          <div class="text-3xl mb-2">✅</div>
+          <div class="text-xs font-bold text-white">9. Decision</div>
+        </div>
+        <div class="demo-stage glass rounded-xl p-4" data-stage="10">
+          <div class="text-3xl mb-2">📄</div>
+          <div class="text-xs font-bold text-white">10. Report</div>
+        </div>
+        <div class="demo-stage glass rounded-xl p-4" data-stage="11">
+          <div class="text-3xl mb-2">📍</div>
+          <div class="text-xs font-bold text-white">11. Disposition</div>
+        </div>
+        <div class="demo-stage glass rounded-xl p-4" data-stage="12">
+          <div class="text-3xl mb-2">🗄️</div>
+          <div class="text-xs font-bold text-white">12. Archive</div>
+        </div>
+      </div>
+
+      <!-- Control Buttons -->
+      <div class="text-center">
+        <button id="startDemo" class="btn-primary px-8 py-4 text-white rounded-xl font-bold text-lg shadow-2xl">
+          ▶️ Start Demo
+        </button>
+        <button id="resetDemo" class="btn-secondary px-8 py-4 text-white rounded-xl font-bold text-lg ml-4" style="display: none;">
+          🔄 Reset
         </button>
       </div>
     </div>
@@ -517,6 +637,151 @@
   </div>
 
   <script>
+    // Demo Animation Logic
+    const stageData = [
+      { 
+        stage: 1, 
+        name: 'Discovery',
+        data: ['Found on RealForeclose.com', 'Auction Date: Dec 17, 2025', 'Case: 2023CA000123']
+      },
+      { 
+        stage: 2, 
+        name: 'Scraping',
+        data: ['Address: 123 Main St, Melbourne', 'Defendant: John Doe', 'Filing Date: Jan 15, 2023']
+      },
+      { 
+        stage: 3, 
+        name: 'Title Search',
+        data: ['AcclaimWeb Search Complete', 'Found 3 liens', 'Senior Mortgage: $250K']
+      },
+      { 
+        stage: 4, 
+        name: 'Lien Priority',
+        data: ['1st: Bank of America $250K', '2nd: County Tax $2.5K', '3rd: HOA $1.2K']
+      },
+      { 
+        stage: 5, 
+        name: 'Tax Certificates',
+        data: ['RealTDM Check: Clear', 'No delinquent taxes', 'Last payment: Nov 2024']
+      },
+      { 
+        stage: 6, 
+        name: 'Demographics',
+        data: ['Zip: 32901', 'Median Income: $78K', 'Vacancy Rate: 5.2%']
+      },
+      { 
+        stage: 7, 
+        name: 'ML Score',
+        data: ['Third-Party Probability: 23%', 'Plaintiff Pattern: Low Risk', 'Confidence: 89%']
+      },
+      { 
+        stage: 8, 
+        name: 'Max Bid',
+        data: ['ARV: $425K', 'Repairs: $45K', 'Max Bid: $242,500']
+      },
+      { 
+        stage: 9, 
+        name: 'Decision',
+        data: ['Bid/Judgment Ratio: 85%', 'Recommendation: BID ✅', 'Risk Level: LOW']
+      },
+      { 
+        stage: 10, 
+        name: 'Report',
+        data: ['DOCX Generated', 'BCPAO Photo Included', 'Email Sent']
+      },
+      { 
+        stage: 11, 
+        name: 'Disposition',
+        data: ['Status: Pending Auction', 'Tracking Active', 'Alert Set']
+      },
+      { 
+        stage: 12, 
+        name: 'Archive',
+        data: ['Stored in Supabase', 'ML Training Data Added', 'Historical Record Complete']
+      }
+    ];
+
+    let currentStage = 0;
+    let demoInterval;
+
+    function startDemo() {
+      currentStage = 0;
+      document.getElementById('startDemo').style.display = 'none';
+      document.getElementById('resetDemo').style.display = 'inline-block';
+      document.getElementById('analysisData').innerHTML = '<div class="text-yellow-400">⏳ Processing started...</div>';
+      
+      // Reset all stages
+      document.querySelectorAll('.demo-stage').forEach(stage => {
+        stage.classList.remove('active', 'completed');
+      });
+      
+      demoInterval = setInterval(processStage, 2000);
+    }
+
+    function processStage() {
+      if (currentStage >= stageData.length) {
+        clearInterval(demoInterval);
+        document.getElementById('analysisData').innerHTML += 
+          '<div class="data-item text-green-400 mt-4">✅ Pipeline Complete! Property ready for auction.</div>';
+        return;
+      }
+
+      const stage = stageData[currentStage];
+      
+      // Mark previous as completed
+      if (currentStage > 0) {
+        const prevStage = document.querySelector(`.demo-stage[data-stage="${currentStage}"]`);
+        prevStage.classList.remove('active');
+        prevStage.classList.add('completed');
+      }
+      
+      // Mark current as active
+      const currentStageElement = document.querySelector(`.demo-stage[data-stage="${stage.stage}"]`);
+      currentStageElement.classList.add('active');
+      
+      // Update progress
+      const progress = ((currentStage + 1) / stageData.length) * 100;
+      document.getElementById('progressFill').style.width = `${progress}%`;
+      document.getElementById('progressText').textContent = `Stage ${currentStage + 1}/12`;
+      
+      // Add data to analysis
+      const dataHtml = `
+        <div class="data-item mb-3">
+          <div class="font-bold text-white mb-1">${stage.name} Complete:</div>
+          ${stage.data.map(item => `<div class="text-sm">• ${item}</div>`).join('')}
+        </div>
+      `;
+      
+      if (currentStage === 0) {
+        document.getElementById('analysisData').innerHTML = dataHtml;
+      } else {
+        document.getElementById('analysisData').innerHTML += dataHtml;
+      }
+      
+      // Scroll analysis into view
+      document.getElementById('liveData').scrollTop = document.getElementById('analysisData').scrollHeight;
+      
+      currentStage++;
+    }
+
+    function resetDemo() {
+      clearInterval(demoInterval);
+      currentStage = 0;
+      document.getElementById('startDemo').style.display = 'inline-block';
+      document.getElementById('resetDemo').style.display = 'none';
+      document.getElementById('progressFill').style.width = '0%';
+      document.getElementById('progressText').textContent = 'Stage 0/12';
+      document.getElementById('analysisData').innerHTML = '<div class="text-gray-500 italic">Processing will begin when you click "Start Demo"...</div>';
+      
+      document.querySelectorAll('.demo-stage').forEach(stage => {
+        stage.classList.remove('active', 'completed');
+      });
+    }
+
+    document.getElementById('startDemo').addEventListener('click', startDemo);
+    document.getElementById('resetDemo').addEventListener('click', resetDemo);
+
+    // Modal functions
     const stageInfo = {
       discovery: {
         icon: '🔍',
@@ -577,7 +842,7 @@
 
     document.getElementById('modalOverlay').addEventListener('click', closeModal);
 
-    // Three.js 3D Background
+    // Three.js 3D Background (keeping existing code)
     const canvas = document.getElementById('canvas3d');
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
