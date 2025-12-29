@@ -1,5 +1,5 @@
-// BidDeed.AI App Router V18
-// Routes: / = Landing, #demo = Real Data, #pipeline = 12-Stage, #chat = V18 Chat, #telemetry = Dashboard
+// BidDeed.AI App Router V18.1
+// Routes: / = Landing, #demo = Real Data, #pipeline = 12-Stage, #chat = V18 Chat, #telemetry = Dashboard, #data = 120-Day Analytics
 import React from 'react';
 import { useState, useEffect } from 'react';
 import App from './App';
@@ -7,6 +7,7 @@ import RealDataDemo from './RealDataDemo';
 import PipelineDemo from './PipelineDemo';
 import ChatV18 from './ChatV18';
 import TelemetryDashboard from './components/TelemetryDashboard';
+import AuctionDataDashboard from './components/AuctionDataDashboard';
 
 export default function AppRouter() {
   const [route, setRoute] = useState(window.location.hash);
@@ -16,6 +17,11 @@ export default function AppRouter() {
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  // Route to 120-Day Auction Data Analytics
+  if (route === '#data' || route === '#analytics' || route === '#auctions') {
+    return <AuctionDataDashboard />;
+  }
 
   // Route to Telemetry Dashboard
   if (route === '#telemetry' || route === '#metrics' || route === '#dashboard') {
