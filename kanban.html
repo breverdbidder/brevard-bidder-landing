@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BidDeed.AI - The Everest Ascent™ Pipeline</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { createClient } = supabase;
+
+        // Supabase client
+        const supabaseClient = createClient(
+            'https://mocerqjnksmhcjzxrewo.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vY2VycWpua3NtaGNqenhyZXdvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ1MzI1MjYsImV4cCI6MjA1MDEwODUyNn0.fL255mO0V8-rrU0Il3L41cIdQXUau-HRQXiamTqp9nE'
+        );
+
+        // The 12 stages of The Everest Ascent™
+        const STAGES = [
+            { id: 1, name: 'Discovery', icon: '🔍', color: 'blue' },
+            { id: 2, name: 'Scraping', icon: '🌐', color: 'indigo' },
+            { id: 3, name: 'Title Search', icon: '📋', color: 'purple' },
+            { id: 4, name: 'Lien Priority', icon: '⚖️', color: 'pink' },
+            { id: 5, name: 'Tax Certs', icon: '📜', color: 'red' },
+            { id: 6, name: 'Demographics', icon: '📊', color: 'orange' },
+            { id: 7, name: 'ML Score', icon: '🤖', color: 'amber' },
+            { id: 8, name: 'Max Bid', icon: '💰', color: 'yellow' },
+            { id: 9, name: 'Decision Log', icon: '📝', color: 'lime' },
+            { id: 10, name: 'Report', icon: '📄', color: 'green' },
+            { id: 11, name: 'Disposition', icon: '✅', color: 'emerald' },
+            { id: 12, name: 'Archive', icon: '🗄️', color: 'teal' }
+        ];
+
+        const MOCK_PROPERTIES = [
+            {
+                id: 1,
+                address: '123 Ocean Blvd, Satellite Beach',
+                case_number: '2025-CA-001234',
+                stage: 3,
+                plaintiff: 'Wells Fargo Bank',
+                estimated_value: 450000,
+                judgment: 320000,
+                status: 'active',
+                progress: 67
+            },
+            {
+                id: 2,
+                address: '456 Riverside Dr, Viera',
+                case_number: '2025-CA-002345',
+                stage: 7,
+                plaintiff: 'Bank of America',
+                estimated_value: 380000,
+                judgment: 285000,
+                status: 'active',
+                progress: 85
+            },
+            {
+                id: 3,
+                address: '789 Palm Way, Merritt Island',
+                case_number: '2025-CA-003456',
+                stage: 4,
+                plaintiff: 'Chase Bank',
+                estimated_value: 520000,
+                judgment: 410000,
+                status: 'review',
+                progress: 42
+            },
+            {
+                id: 4,
+                address: '321 Harbor Ct, Melbourne',
+                case_number: '2025-CA-004567',
+                stage: 9,
+                plaintiff: 'CitiMortgage',
+                estimated_value: 295000,
+                judgment: 215000,
+                status: 'active',
+                progress: 91
+            },
+            {
+                id: 5,
+                address: '654 Beach St, Indialantic',
+                case_number: '2025-CA-005678',
+                stage: 1,
+                plaintiff: 'US Bank',
+                estimated_value: 410000,
+                judgment: 298000,
+                status: 'active',
+                progress: 12
+            }
+        ];
+
+        function PropertyCard({ property, onDragStart }) {
+            const colors = {
+                active: 'bg-blue-50 border-blue-200',
+                review: 'bg-yellow-50 border-yellow-200',
+                bid: 'bg-green-50 border-green-200',
+                skip: 'bg-red-50 border-red-200'
+            };
+
+            return (
+                <div
+                    draggable
+                    onDragStart={(e) => onDragStart(e, property)}
+                    className={`p-3 mb-2 rounded-lg border-2 ${colors[property.status]} cursor-move hover:shadow-md transition-shadow`}
+                >
+                    <div className="flex justify-between items-start mb-2">
+                        <div className="flex-1">
+                            <div className="font-semibold text-sm text-gray-800 mb-1">
+                                {property.address.split(',')[0]}
+                            </div>
+                            <div className="text-xs text-gray-600">
+                                {property.case_number}
+                            </div>
+                        </div>
+                        <div className="text-xs font-mono bg-gray-100 px-2 py-1 rounded">
+                            {property.progress}%
+                        </div>
+                    </div>
+                    <div className="text-xs text-gray-600 space-y-1">
+                        <div className="flex justify-between">
+                            <span>ARV:</span>
+                            <span className="font-semibold">${(property.estimated_value / 1000).toFixed(0)}K</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span>Judgment:</span>
+                            <span>${(property.judgment / 1000).toFixed(0)}K</span>
+                        </div>
+                    </div>
+                    <div className="mt-2">
+                        <div className="w-full bg-gray-200 rounded-full h-1.5">
+                            <div
+                                className="bg-blue-600 h-1.5 rounded-full transition-all"
+                                style={{ width: `${property.progress}%` }}
+                            ></div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function StageColumn({ stage, properties, onDrop, onDragOver }) {
+            const colorClasses = {
+                blue: 'bg-blue-100 border-blue-300',
+                indigo: 'bg-indigo-100 border-indigo-300',
+                purple: 'bg-purple-100 border-purple-300',
+                pink: 'bg-pink-100 border-pink-300',
+                red: 'bg-red-100 border-red-300',
+                orange: 'bg-orange-100 border-orange-300',
+                amber: 'bg-amber-100 border-amber-300',
+                yellow: 'bg-yellow-100 border-yellow-300',
+                lime: 'bg-lime-100 border-lime-300',
+                green: 'bg-green-100 border-green-300',
+                emerald: 'bg-emerald-100 border-emerald-300',
+                teal: 'bg-teal-100 border-teal-300'
+            };
+
+            return (
+                <div
+                    className="flex-shrink-0 w-72 bg-white rounded-lg shadow-sm border border-gray-200"
+                    onDrop={(e) => onDrop(e, stage.id)}
+                    onDragOver={onDragOver}
+                >
+                    <div className={`p-3 rounded-t-lg border-b-2 ${colorClasses[stage.color]}`}>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                                <span className="text-2xl">{stage.icon}</span>
+                                <div>
+                                    <div className="font-semibold text-gray-800">{stage.name}</div>
+                                    <div className="text-xs text-gray-600">Stage {stage.id}/12</div>
+                                </div>
+                            </div>
+                            <div className="bg-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                                {properties.length}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="p-3 space-y-2 max-h-[600px] overflow-y-auto">
+                        {properties.length === 0 ? (
+                            <div className="text-center text-gray-400 text-sm py-8">
+                                No properties
+                            </div>
+                        ) : (
+                            properties.map(property => (
+                                <PropertyCard key={property.id} property={property} onDragStart={(e, p) => {
+                                    e.dataTransfer.setData('propertyId', p.id);
+                                }} />
+                            ))
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        function KanbanBoard() {
+            const [properties, setProperties] = useState(MOCK_PROPERTIES);
+            const [stats, setStats] = useState({ total: 5, active: 4, review: 1 });
+
+            const handleDragOver = (e) => {
+                e.preventDefault();
+            };
+
+            const handleDrop = (e, targetStage) => {
+                e.preventDefault();
+                const propertyId = parseInt(e.dataTransfer.getData('propertyId'));
+                
+                setProperties(prev => 
+                    prev.map(p => 
+                        p.id === propertyId 
+                            ? { ...p, stage: targetStage, progress: Math.min(95, (targetStage / 12) * 100) }
+                            : p
+                    )
+                );
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+                    {/* Header */}
+                    <div className="bg-white border-b border-gray-200 shadow-sm">
+                        <div className="px-6 py-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h1 className="text-2xl font-bold text-gray-900">
+                                        🏔️ The Everest Ascent™ Pipeline
+                                    </h1>
+                                    <p className="text-sm text-gray-600 mt-1">
+                                        BidDeed.AI Foreclosure Intelligence • 12-Stage Autonomous Analysis
+                                    </p>
+                                </div>
+                                <div className="flex space-x-4">
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
+                                        <div className="text-xs text-gray-600">Total Properties</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-green-600">{stats.active}</div>
+                                        <div className="text-xs text-gray-600">Active</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-yellow-600">{stats.review}</div>
+                                        <div className="text-xs text-gray-600">In Review</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Kanban Board */}
+                    <div className="p-6 overflow-x-auto">
+                        <div className="flex space-x-4 pb-4">
+                            {STAGES.map(stage => (
+                                <StageColumn
+                                    key={stage.id}
+                                    stage={stage}
+                                    properties={properties.filter(p => p.stage === stage.id)}
+                                    onDrop={handleDrop}
+                                    onDragOver={handleDragOver}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Footer Stats */}
+                    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
+                        <div className="px-6 py-3">
+                            <div className="flex items-center justify-between text-sm">
+                                <div className="flex items-center space-x-6">
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                                        <span className="text-gray-600">Active: {properties.filter(p => p.status === 'active').length}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                        <span className="text-gray-600">Review: {properties.filter(p => p.status === 'review').length}</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                        <span className="text-gray-600">BID Ready: {properties.filter(p => p.stage >= 9).length}</span>
+                                    </div>
+                                </div>
+                                <div className="text-gray-500 text-xs">
+                                    Last updated: {new Date().toLocaleTimeString()} • Drag properties to change stage
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<KanbanBoard />, document.getElementById('root'));
+    </script>
+</body>
+</html>
