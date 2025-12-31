@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 Year in Review - Shapira Ecosystem</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/recharts@2.5.0/dist/Recharts.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1, h2, h3 {
+            font-family: 'Instrument Serif', Georgia, serif;
+            color: #f8fafc;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.25rem;
+            color: #94a3b8;
+            margin-bottom: 3rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stat-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(139, 92, 246, 0.4);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.2);
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .chart-section {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #f8fafc;
+        }
+        
+        .domain-chip {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .domain-business {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+        
+        .domain-michael {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .domain-family {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+        
+        .domain-personal {
+            background: rgba(139, 92, 246, 0.2);
+            color: #a78bfa;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(100, 116, 139, 0.2);
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="root"></div>
+    </div>
+
+    <script type="text/babel">
+        const { PieChart, Pie, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } = Recharts;
+        
+        const data = {
+  "stats": {
+    "total_conversations": 40,
+    "github_commits": 250,
+    "biddeed_versions": "17",
+    "roi_multiplier": 100
+  },
+  "domain_breakdown": [
+    {
+      "name": "BUSINESS",
+      "value": 28
+    },
+    {
+      "name": "MICHAEL",
+      "value": 5
+    },
+    {
+      "name": "FAMILY",
+      "value": 4
+    },
+    {
+      "name": "PERSONAL",
+      "value": 3
+    }
+  ],
+  "monthly_trend": [
+    {
+      "month": "Dec",
+      "conversations": 40,
+      "commits": 85
+    }
+  ],
+  "top_achievements": [
+    {
+      "achievement": "ForecastEngine\u2122 Suite",
+      "impact": 97
+    },
+    {
+      "achievement": "Smart Router V6",
+      "impact": 92
+    },
+    {
+      "achievement": "MCP Integration",
+      "impact": 88
+    },
+    {
+      "achievement": "Layer 8 IP Protection",
+      "impact": 85
+    },
+    {
+      "achievement": "V17 Deployment",
+      "impact": 82
+    }
+  ]
+};
+        
+        const COLORS = {
+            BUSINESS: '#6366f1',
+            MICHAEL: '#10b981',
+            FAMILY: '#fbbf24',
+            PERSONAL: '#8b5cf6'
+        };
+        
+        function Dashboard() {
+            return (
+                <div>
+                    <h1>2025 Year in Review</h1>
+                    <p className="subtitle">The Year of Agentic Autonomy - Shapira Ecosystem</p>
+                    
+                    <div className="stats-grid">
+                        <div className="stat-card">
+                            <div className="stat-value">{data.stats.total_conversations}</div>
+                            <div className="stat-label">Strategic Sessions</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-value">{data.stats.github_commits}</div>
+                            <div className="stat-label">GitHub Commits</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-value">V{data.stats.biddeed_versions}</div>
+                            <div className="stat-label">BidDeed.AI Versions</div>
+                        </div>
+                        <div className="stat-card">
+                            <div className="stat-value">{data.stats.roi_multiplier}x</div>
+                            <div className="stat-label">Internal ROI</div>
+                        </div>
+                    </div>
+                    
+                    <div className="chart-section">
+                        <h2 className="chart-title">Domain Distribution</h2>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <PieChart>
+                                <Pie
+                                    data={data.domain_breakdown}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    cx="50%"
+                                    cy="50%"
+                                    outerRadius={100}
+                                    label
+                                >
+                                    {data.domain_breakdown.map((entry, index) => (
+                                        <Cell key={`cell-${index}`} fill={COLORS[entry.name]} />
+                                    ))}
+                                </Pie>
+                                <Tooltip />
+                                <Legend />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                    
+                    <div className="chart-section">
+                        <h2 className="chart-title">Monthly Activity Trend</h2>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <LineChart data={data.monthly_trend}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(100, 116, 139, 0.2)" />
+                                <XAxis dataKey="month" stroke="#94a3b8" />
+                                <YAxis stroke="#94a3b8" />
+                                <Tooltip 
+                                    contentStyle={{
+                                        background: 'rgba(30, 41, 59, 0.95)',
+                                        border: '1px solid rgba(100, 116, 139, 0.3)',
+                                        borderRadius: '8px',
+                                        color: '#e2e8f0'
+                                    }}
+                                />
+                                <Legend />
+                                <Line 
+                                    type="monotone" 
+                                    dataKey="conversations" 
+                                    stroke="#6366f1" 
+                                    strokeWidth={2}
+                                    dot={{ fill: '#6366f1', r: 4 }}
+                                />
+                                <Line 
+                                    type="monotone" 
+                                    dataKey="commits" 
+                                    stroke="#8b5cf6" 
+                                    strokeWidth={2}
+                                    dot={{ fill: '#8b5cf6', r: 4 }}
+                                />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                    
+                    <div className="chart-section">
+                        <h2 className="chart-title">Top Achievements</h2>
+                        <ResponsiveContainer width="100%" height={400}>
+                            <BarChart data={data.top_achievements} layout="horizontal">
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(100, 116, 139, 0.2)" />
+                                <XAxis type="number" stroke="#94a3b8" />
+                                <YAxis dataKey="achievement" type="category" width={200} stroke="#94a3b8" />
+                                <Tooltip 
+                                    contentStyle={{
+                                        background: 'rgba(30, 41, 59, 0.95)',
+                                        border: '1px solid rgba(100, 116, 139, 0.3)',
+                                        borderRadius: '8px',
+                                        color: '#e2e8f0'
+                                    }}
+                                />
+                                <Bar dataKey="impact" fill="#8b5cf6" radius={[0, 8, 8, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
+                    
+                    <div className="footer">
+                        <p>Generated on {new Date().toLocaleDateString('en-US', {{ 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            timeZone: 'America/New_York'
+                        }})} EST</p>
+                        <p style={{marginTop: '0.5rem'}}>Data Sources: {data.stats.total_conversations} conversations, {data.stats.github_commits} commits, Supabase metrics</p>
+                    </div>
+                </div>
+            );
+        }
+        
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<Dashboard />);
+    </script>
+</body>
+</html>
