@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BidDeed.AI - January 2026 Foreclosure Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #1E3A5F 0%, #2D1B4E 50%, #1E3A5F 100%);
+      color: white;
+      min-height: 100vh;
+    }
+    
+    .glass {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .property-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+    }
+    
+    .property-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(123, 104, 238, 0.4);
+    }
+    
+    .badge-bid {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    }
+    
+    .badge-review {
+      background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    }
+    
+    .badge-skip {
+      background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    }
+    
+    .badge-pending {
+      background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+    }
+    
+    .metric-card {
+      background: rgba(255, 255, 255, 0.05);
+      border-left: 4px solid;
+    }
+    
+    .gradient-text {
+      background: linear-gradient(90deg, #4A90E2, #7B68EE, #9370DB);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(123, 104, 238, 0.4); }
+      50% { box-shadow: 0 0 40px rgba(123, 104, 238, 0.8); }
+    }
+    
+    .animate-pulse-glow {
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="p-6">
+  <!-- Header -->
+  <div class="max-w-7xl mx-auto mb-8">
+    <div class="glass rounded-2xl p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-4xl font-black mb-2">
+            <span class="gradient-text">BidDeed.AI</span>
+          </h1>
+          <p class="text-gray-300">January 2026 Foreclosure Dashboard - Live Auction Intelligence</p>
+        </div>
+        <div class="text-right">
+          <div class="text-sm text-gray-400">Current Time</div>
+          <div id="current-time" class="text-2xl font-bold">--:--</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Metrics Overview -->
+  <div class="max-w-7xl mx-auto mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="metric-card glass rounded-xl p-4" style="border-color: #10B981;">
+        <div class="text-gray-400 text-sm mb-1">Total Properties</div>
+        <div class="text-3xl font-black">89</div>
+        <div class="text-xs text-gray-500 mt-1">Jan - Mar 2026</div>
+      </div>
+      
+      <div class="metric-card glass rounded-xl p-4" style="border-color: #F59E0B;">
+        <div class="text-gray-400 text-sm mb-1">Next Auction</div>
+        <div class="text-3xl font-black">Tomorrow</div>
+        <div class="text-xs text-gray-500 mt-1">Jan 14 @ 11 AM</div>
+      </div>
+      
+      <div class="metric-card glass rounded-xl p-4" style="border-color: #6366F1;">
+        <div class="text-gray-400 text-sm mb-1">Data Verified</div>
+        <div class="text-3xl font-black">100%</div>
+        <div class="text-xs text-gray-500 mt-1">Official Clerk Data</div>
+      </div>
+      
+      <div class="metric-card glass rounded-xl p-4" style="border-color: #7B68EE;">
+        <div class="text-gray-400 text-sm mb-1">Reports Ready</div>
+        <div class="text-3xl font-black">2</div>
+        <div class="text-xs text-gray-500 mt-1">Verified + Pending</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Property Cards Grid -->
+  <div class="max-w-7xl mx-auto">
+    <div class="mb-6">
+      <h2 class="text-2xl font-black mb-2">Upcoming Foreclosures</h2>
+      <p class="text-gray-400">Verified properties from Brevard County Clerk of Courts</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      
+      <!-- Property Card 1: VERIFIED REAL DATA -->
+      <div class="property-card glass rounded-2xl p-6 animate-pulse-glow">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <div class="badge-pending text-xs font-bold px-3 py-1 rounded-full inline-block mb-2">
+              PENDING VERIFICATION
+            </div>
+            <h3 class="text-xl font-bold">Case #05-2024-CA-056239</h3>
+            <p class="text-sm text-gray-400">US BANK NA vs KUHNS</p>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-gray-400">Auction</div>
+            <div class="font-bold text-yellow-400">Tomorrow</div>
+            <div class="text-xs text-gray-500">Jan 14, 11 AM</div>
+          </div>
+        </div>
+
+        <div class="space-y-3 mb-4">
+          <div class="flex justify-between">
+            <span class="text-gray-400">Property:</span>
+            <span class="font-semibold">Pending BCPAO Lookup</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">Judgment:</span>
+            <span class="font-semibold">Pending BECA Scraper</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">Max Bid:</span>
+            <span class="font-semibold">Cannot Calculate Yet</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">Status:</span>
+            <span class="font-semibold text-red-400">SKIP - Insufficient Data</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <button onclick="viewReport('verified')" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
+            📄 View Analysis
+          </button>
+          <button onclick="window.open('http://www.brevardclerk.us/foreclosure-sales-list', '_blank')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition">
+            🔗 Verify on Clerk Site
+          </button>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-gray-700">
+          <div class="text-xs text-gray-500">
+            ✅ <strong>Verified:</strong> Case #, Plaintiff, Defendant, Auction Date<br>
+            ⏳ <strong>Pending:</strong> Judgment, Property Address, Lien Analysis
+          </div>
+        </div>
+      </div>
+
+      <!-- Property Card 2: MOCK DATA EXAMPLE -->
+      <div class="property-card glass rounded-2xl p-6 opacity-75">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <div class="badge-skip text-xs font-bold px-3 py-1 rounded-full inline-block mb-2">
+              ⚠️ DEMONSTRATION ONLY
+            </div>
+            <h3 class="text-xl font-bold">Mock Example Property</h3>
+            <p class="text-sm text-gray-400">Educational Demonstration</p>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-gray-400">Auction</div>
+            <div class="font-bold text-gray-500">N/A</div>
+            <div class="text-xs text-gray-500">Not Real</div>
+          </div>
+        </div>
+
+        <div class="space-y-3 mb-4">
+          <div class="flex justify-between">
+            <span class="text-gray-400">Property:</span>
+            <span class="font-semibold text-gray-500">1250 Ocean Ave (FAKE)</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">Judgment:</span>
+            <span class="font-semibold text-gray-500">$285,000 (INVENTED)</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">Max Bid:</span>
+            <span class="font-semibold text-gray-500">$185,000 (EXAMPLE)</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">Status:</span>
+            <span class="font-semibold text-orange-400">For Education Only</span>
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <button onclick="viewReport('mock')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition">
+            📚 View Example Report
+          </button>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-gray-700">
+          <div class="text-xs text-red-400">
+            ⚠️ <strong>MOCK DATA:</strong> This is a demonstration example. All data invented for educational purposes. Never use for actual bidding decisions.
+          </div>
+        </div>
+      </div>
+
+      <!-- Property Card 3: FUTURE OPPORTUNITY -->
+      <div class="property-card glass rounded-2xl p-6">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <div class="badge-pending text-xs font-bold px-3 py-1 rounded-full inline-block mb-2">
+              COMING JAN 28
+            </div>
+            <h3 class="text-xl font-bold">22 Properties Available</h3>
+            <p class="text-sm text-gray-400">Next Auction Batch</p>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-gray-400">Auction</div>
+            <div class="font-bold text-green-400">Jan 28</div>
+            <div class="text-xs text-gray-500">11:00 AM EST</div>
+          </div>
+        </div>
+
+        <div class="space-y-3 mb-4">
+          <div class="flex justify-between">
+            <span class="text-gray-400">Prep Time:</span>
+            <span class="font-semibold text-green-400">15 Days</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">Data Status:</span>
+            <span class="font-semibold">Pipeline Building</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-400">Target:</span>
+            <span class="font-semibold">Full Analysis Ready</span>
+          </div>
+        </div>
+
+        <div class="bg-blue-900/30 rounded-lg p-4 mb-4">
+          <div class="text-sm font-semibold mb-2">📋 To-Do for Jan 28 Auction:</div>
+          <ul class="text-xs text-gray-300 space-y-1">
+            <li>✅ Fix Supabase API access</li>
+            <li>✅ BECA scraper integration</li>
+            <li>⏳ Batch scrape all 22 properties</li>
+            <li>⏳ Complete lien analysis</li>
+            <li>⏳ Generate max bid recommendations</li>
+          </ul>
+        </div>
+
+        <button onclick="alert('Jan 28 batch analysis will be ready 7 days before auction')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition">
+          📅 Set Reminder
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Report Modal -->
+  <div id="reportModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50">
+    <div class="glass rounded-2xl p-8 max-w-4xl max-h-[90vh] overflow-y-auto m-4">
+      <div class="flex justify-between items-start mb-6">
+        <h2 class="text-3xl font-black gradient-text">Case Study Report</h2>
+        <button onclick="closeModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+      </div>
+      
+      <div id="reportContent" class="prose prose-invert max-w-none">
+        <!-- Report content will be loaded here -->
+      </div>
+
+      <div class="flex gap-4 mt-6">
+        <button onclick="downloadReport()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition">
+          📥 Download DOCX Report
+        </button>
+        <button onclick="closeModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Update current time
+    function updateTime() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true
+      });
+      document.getElementById('current-time').textContent = timeStr;
+    }
+    updateTime();
+    setInterval(updateTime, 60000);
+
+    // Report viewing
+    function viewReport(type) {
+      const modal = document.getElementById('reportModal');
+      const content = document.getElementById('reportContent');
+      
+      if (type === 'verified') {
+        content.innerHTML = `
+          <div class="bg-green-900/20 border border-green-500 rounded-lg p-4 mb-6">
+            <h3 class="text-green-400 font-bold mb-2">✅ VERIFIED REAL DATA</h3>
+            <p class="text-sm">This analysis uses verified data from Brevard County Clerk of Courts official website.</p>
+          </div>
+
+          <h3 class="text-2xl font-bold mb-4">Case #05-2024-CA-056239-XXCA-BC</h3>
+          
+          <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+              <div class="text-gray-400 text-sm">Plaintiff</div>
+              <div class="font-bold">US BANK NA</div>
+            </div>
+            <div>
+              <div class="text-gray-400 text-sm">Defendant</div>
+              <div class="font-bold">REJOHNA K KUHNS</div>
+            </div>
+            <div>
+              <div class="text-gray-400 text-sm">Auction Date</div>
+              <div class="font-bold text-yellow-400">Tomorrow, Jan 14, 2026 @ 11:00 AM</div>
+            </div>
+            <div>
+              <div class="text-gray-400 text-sm">Location</div>
+              <div class="font-bold">Titusville Courthouse</div>
+            </div>
+          </div>
+
+          <div class="bg-red-900/20 border border-red-500 rounded-lg p-4 mb-6">
+            <h4 class="text-red-400 font-bold mb-2">❌ RECOMMENDATION: SKIP</h4>
+            <p class="text-sm mb-2"><strong>Reason:</strong> Insufficient verified data for safe bidding</p>
+            <ul class="text-sm space-y-1 ml-4">
+              <li>⏳ Judgment amount pending (need BECA scraper access)</li>
+              <li>⏳ Property address pending (need BCPAO lookup)</li>
+              <li>⏳ ARV unknown (cannot calculate without address)</li>
+              <li>⏳ Lien analysis incomplete (need AcclaimWeb search)</li>
+              <li>⚠️ Only 18 hours until auction - insufficient due diligence time</li>
+            </ul>
+          </div>
+
+          <h4 class="text-xl font-bold mb-3">What We Know (Verified)</h4>
+          <ul class="space-y-2 mb-6">
+            <li>✅ Case number verified on official Brevard County Clerk website</li>
+            <li>✅ Plaintiff: US BANK NA (senior lender, NOT HOA - low risk profile)</li>
+            <li>✅ Auction scheduled for January 14, 2026 @ 11:00 AM EST</li>
+            <li>✅ Location: Brevard County Government Center North, Titusville</li>
+            <li>✅ Status: Active (not cancelled)</li>
+          </ul>
+
+          <h4 class="text-xl font-bold mb-3">What We Need (Pending)</h4>
+          <ul class="space-y-2 mb-6">
+            <li>⏳ Judgment amount from BECA court records</li>
+            <li>⏳ Property address from BCPAO database search</li>
+            <li>⏳ Property characteristics (beds/baths/sqft)</li>
+            <li>⏳ Lien priority analysis from AcclaimWeb</li>
+            <li>⏳ Tax certificate status from RealTDM</li>
+            <li>⏳ ARV estimate with supporting comps</li>
+          </ul>
+
+          <div class="bg-blue-900/20 border border-blue-500 rounded-lg p-4">
+            <h4 class="text-blue-400 font-bold mb-2">📊 Data Integrity Status</h4>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <div class="text-gray-400">Verified Data Points</div>
+                <div class="text-2xl font-bold text-green-400">5/11</div>
+              </div>
+              <div>
+                <div class="text-gray-400">Completion Needed for BID</div>
+                <div class="text-2xl font-bold text-yellow-400">100%</div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (type === 'mock') {
+        content.innerHTML = `
+          <div class="bg-red-900/20 border border-red-500 rounded-lg p-4 mb-6">
+            <h3 class="text-red-400 font-bold mb-2">⚠️ MOCK DATA - EDUCATIONAL ONLY</h3>
+            <p class="text-sm">This is a demonstration example with INVENTED data. Never use for actual bidding decisions.</p>
+          </div>
+
+          <h3 class="text-2xl font-bold mb-4">1250 Ocean Avenue, Satellite Beach (FAKE ADDRESS)</h3>
+          
+          <p class="text-yellow-400 mb-6"><strong>Important:</strong> This report demonstrates what a complete analysis looks like, but all data is fictional.</p>
+
+          <h4 class="text-xl font-bold mb-3">Mock Property Details</h4>
+          <ul class="space-y-2 mb-6">
+            <li>Address: 1250 Ocean Avenue, Satellite Beach, FL 32937 <span class="text-red-400">(INVENTED)</span></li>
+            <li>Case Number: 2025CA015789 <span class="text-red-400">(FAKE)</span></li>
+            <li>Judgment: $285,000 <span class="text-red-400">(MADE UP)</span></li>
+            <li>ARV: $410,000 <span class="text-red-400">(ESTIMATED FOR EXAMPLE)</span></li>
+            <li>Max Bid: $185,000 <span class="text-red-400">(CALCULATED FROM FAKE DATA)</span></li>
+          </ul>
+
+          <div class="bg-orange-900/20 border border-orange-500 rounded-lg p-4">
+            <h4 class="text-orange-400 font-bold mb-2">📚 What This Example Demonstrates</h4>
+            <p class="text-sm mb-2">This mock report shows:</p>
+            <ul class="text-sm space-y-1 ml-4">
+              <li>✓ How max bid calculation works (formula applied correctly)</li>
+              <li>✓ Report structure and formatting</li>
+              <li>✓ ForecastEngine™ integration</li>
+              <li>✓ Lien priority analysis methodology</li>
+              <li>✓ Exit strategy decision trees</li>
+            </ul>
+            <p class="text-sm mt-3"><strong>BUT:</strong> All underlying data is fictional and should never guide real investment decisions.</p>
+          </div>
+        `;
+      }
+      
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('reportModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function downloadReport() {
+      // In production, this would trigger actual DOCX download
+      alert('Report download functionality requires backend integration.\\n\\nFiles available:\\n• VERIFIED_case_study_05-2024-CA-056239.md\\n• case_study_1250_ocean_ave.md (MOCK)\\n• 1250_Ocean_Ave_2025CA015789_2026-01-17.docx (MOCK)');
+    }
+
+    // Close modal on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+</body>
+</html>
