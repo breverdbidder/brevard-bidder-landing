@@ -85,7 +85,7 @@ biddeed-ai/
 Intelligent LLM routing for cost optimization:
 | Tier | Model | Cost | Use Case |
 |------|-------|------|----------|
-| FREE | Gemini 2.5 Flash | $0 | 40-55% of calls |
+| FREE | Gemini 2.5 Flash | $0 | 90% of calls |
 | ULTRA_CHEAP | DeepSeek V3.2 | $0.28/1M | Simple analysis |
 | CHEAP | Claude Haiku | $0.25/1M | Standard tasks |
 | QUALITY | Claude Sonnet | $3/1M | Complex analysis |
