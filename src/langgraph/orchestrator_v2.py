@@ -9,7 +9,7 @@ ENHANCEMENTS OVER V1:
 - Parallel stage execution (stages 3,5,6 run concurrently)
 - Auto-checkpoint every 50K tokens
 - Supabase state persistence
-- Smart Router V5 integration with 40-55% FREE tier target
+- Smart Router V5 integration with 90% FREE tier target
 """
 
 import asyncio
