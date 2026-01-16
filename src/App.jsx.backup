@@ -298,7 +298,7 @@ const App = () => {
     { 
       icon: '⚡', 
       title: 'Smart Router', 
-      desc: 'Multi-tier LLM routing achieves 40-55% FREE processing. DeepSeek V3.2 for ultra-cheap operations. Maximum intelligence, minimum cost.',
+      desc: 'Multi-tier LLM routing achieves 90% FREE processing. DeepSeek V3.2 for ultra-cheap operations. Maximum intelligence, minimum cost.',
       highlight: '55% FREE'
     },
     { 
