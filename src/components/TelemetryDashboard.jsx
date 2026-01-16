@@ -604,7 +604,7 @@ export default function TelemetryDashboard() {
         <StatCard
           title="Free Tier %"
           value={`${(todayMetrics.free_tier_percentage || 0).toFixed(1)}%`}
-          subtitle="Target: 40-55%"
+          subtitle="Target: 90%"
           trend={freeTierTrend}
           color={COLORS.green}
           icon="🎯"
