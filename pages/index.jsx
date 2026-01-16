@@ -384,7 +384,7 @@ export default function BidDeed.AI() {
             ))}
           </div>
           <p className="text-center text-neutral-500 text-sm mt-4">
-            Target: 40-55% FREE tier • Current: 52% ✅
+            Target: 90% FREE tier • Current: 52% ✅
           </p>
         </div>
 
