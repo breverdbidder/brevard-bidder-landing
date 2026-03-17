@@ -1,1000 +1,361 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BidDeed.AI - The Everest Ascent™</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      font-family: 'Inter', sans-serif;
-      overflow-x: hidden;
-      background: linear-gradient(135deg, #1E3A5F 0%, #2D1B4E 50%, #1E3A5F 100%);
-    }
-    
-    .gradient-text {
-      background: linear-gradient(90deg, #4A90E2, #7B68EE, #9370DB);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: gradient-shift 5s ease infinite;
-    }
-    
-    @keyframes gradient-shift {
-      0%, 100% { filter: hue-rotate(0deg); }
-      50% { filter: hue-rotate(15deg); }
-    }
-    
-    .glass {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .glow {
-      box-shadow: 0 0 30px rgba(123, 104, 238, 0.5);
-    }
-    
-    .glow-intense {
-      box-shadow: 0 0 60px rgba(123, 104, 238, 0.8), 0 0 100px rgba(123, 104, 238, 0.4);
-    }
-    
-    .animate-float {
-      animation: float 3s ease-in-out infinite;
-    }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      25% { transform: translateY(-10px) rotate(5deg); }
-      75% { transform: translateY(-5px) rotate(-5deg); }
-    }
-    
-    .animate-pulse-slow {
-      animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    }
-    
-    .fade-in {
-      animation: fadeIn 1s ease-in;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .card-hover {
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-    }
-    
-    .card-hover::before {
-      content: '';
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      background: linear-gradient(45deg, #4A90E2, #7B68EE, #9370DB);
-      border-radius: 18px;
-      opacity: 0;
-      transition: opacity 0.4s;
-      z-index: -1;
-      filter: blur(10px);
-    }
-    
-    .card-hover:hover::before {
-      opacity: 0.7;
-    }
-    
-    .card-hover:hover {
-      transform: translateY(-15px) scale(1.02);
-      box-shadow: 0 25px 50px rgba(123, 104, 238, 0.4);
-    }
-    
-    .btn-primary {
-      background: linear-gradient(90deg, #7B68EE, #4A90E2);
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .btn-primary::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-      transition: left 0.5s;
-    }
-    
-    .btn-primary:hover::before {
-      left: 100%;
-    }
-    
-    .btn-primary:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 40px rgba(123, 104, 238, 0.8);
-    }
-    
-    .btn-secondary {
-      border: 2px solid #7B68EE;
-      transition: all 0.3s ease;
-    }
-    
-    .btn-secondary:hover {
-      background: rgba(123, 104, 238, 0.2);
-      transform: scale(1.05);
-      border-color: #ffffff;
-    }
-    
-    #canvas3d {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      opacity: 0.4;
-    }
-    
-    .pipeline-node {
-      padding: 16px;
-      border-radius: 12px;
-      text-align: center;
-      min-width: 120px;
-      transition: all 0.3s ease;
-      cursor: pointer;
-    }
-    
-    .pipeline-node:hover {
-      transform: scale(1.15) translateY(-5px);
-      box-shadow: 0 10px 30px rgba(123, 104, 238, 0.5);
-    }
-    
-    .stat-number {
-      font-size: 4rem;
-      font-weight: 900;
-      line-height: 1;
-      animation: stat-appear 1s ease-out;
-    }
-    
-    @keyframes stat-appear {
-      from { 
-        opacity: 0;
-        transform: scale(0.5) rotateY(180deg);
-      }
-      to { 
-        opacity: 1;
-        transform: scale(1) rotateY(0deg);
-      }
-    }
-    
-    @media (max-width: 768px) {
-      .stat-number {
-        font-size: 3rem;
-      }
-    }
-    
-    .scroll-indicator {
-      position: absolute;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      animation: bounce 2s infinite;
-    }
-    
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
-      40% { transform: translateX(-50%) translateY(-20px); }
-      60% { transform: translateX(-50%) translateY(-10px); }
-    }
-    
-    .floating-btn {
-      position: fixed;
-      bottom: 32px;
-      right: 32px;
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #7B68EE, #4A90E2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      z-index: 1000;
-      box-shadow: 0 10px 30px rgba(123, 104, 238, 0.5);
-    }
-    
-    .floating-btn:hover {
-      transform: scale(1.2) rotate(360deg);
-      box-shadow: 0 10px 40px rgba(123, 104, 238, 0.8);
-    }
-    
-    #particle-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -2;
-      opacity: 0.3;
-    }
-    
-    .stage-modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0);
-      background: rgba(30, 58, 95, 0.95);
-      backdrop-filter: blur(20px);
-      border: 2px solid rgba(123, 104, 238, 0.5);
-      border-radius: 24px;
-      padding: 32px;
-      max-width: 600px;
-      width: 90%;
-      z-index: 2000;
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-    }
-    
-    .stage-modal.active {
-      transform: translate(-50%, -50%) scale(1);
-    }
-    
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 1999;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
-    
-    .modal-overlay.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    
-    .feature-icon {
-      display: inline-block;
-      transition: transform 0.5s ease;
-    }
-    
-    .card-hover:hover .feature-icon {
-      transform: rotateY(360deg) scale(1.2);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BidDeed.AI — Distressed Assets Decoded</title>
+<meta name="description" content="AI-powered foreclosure auction intelligence. The Everest Ascent™ — 12 stages from discovery to disposition.">
+<meta property="og:title" content="BidDeed.AI — Distressed Assets Decoded">
+<meta property="og:description" content="What Claude did for code, we do for real estate. For everyone. Everywhere.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://biddeed.ai">
+<meta name="theme-color" content="#020617">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{--navy:#1E3A5F;--navy-900:#07111C;--navy-800:#0F2035;--navy-700:#162D4A;--orange:#F59E0B;--orange-dim:rgba(245,158,11,.12);--cyan:#03B3CB;--bg:#020617;--bg2:#0f172a;--bg3:#1e293b;--sl400:#94a3b8;--sl300:#cbd5e1;--sl200:#e2e8f0;--bid:#10B981;--review:#F59E0B;--skip:#EF4444}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--sl300);-webkit-font-smoothing:antialiased;overflow-x:hidden;line-height:1.6}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--navy-700);border-radius:2px}
 
-    /* Animated Demo Styles */
-    .demo-stage {
-      opacity: 0.3;
-      transition: all 0.5s ease;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-    }
+#scene-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.35}
 
-    .demo-stage.active {
-      opacity: 1;
-      border-color: #7B68EE;
-      box-shadow: 0 0 20px rgba(123, 104, 238, 0.6);
-      transform: scale(1.05);
-    }
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;background:rgba(2,6,23,.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(30,58,95,.3)}
+.logo{display:flex;align-items:center;gap:.6rem;font-family:'DM Serif Display',serif;font-size:1.3rem;color:#fff;text-decoration:none}
+.logo-mark{width:32px;height:32px;background:linear-gradient(135deg,var(--orange),#D97706);border-radius:8px;display:grid;place-items:center;font-size:.65rem;font-weight:800;color:var(--bg);font-family:'JetBrains Mono',monospace}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-links a{color:var(--sl400);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:#fff}
+.cta-btn{background:var(--orange);color:var(--bg);padding:.5rem 1.2rem;border-radius:8px;font-weight:600;font-size:.85rem;text-decoration:none;transition:all .2s;border:none;cursor:pointer}
+.cta-btn:hover{background:#D97706;transform:translateY(-1px)}
 
-    .demo-stage.completed {
-      opacity: 1;
-      border-color: #4ade80;
-    }
+.hero{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:8rem 2rem 4rem}
+.hero-inner{max-width:750px;margin:0 auto;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:var(--orange-dim);border:1px solid rgba(245,158,11,.25);padding:.35rem .9rem;border-radius:20px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--orange);margin-bottom:1.5rem;letter-spacing:.04em}
+.hero-badge::before{content:'';width:6px;height:6px;background:var(--bid);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-family:'DM Serif Display',serif;font-size:clamp(2.5rem,6vw,4.2rem);color:#fff;line-height:1.1;margin-bottom:1rem;letter-spacing:-.02em}
+h1 em{color:var(--orange);font-style:italic}
+.hero-sub{font-size:1.1rem;color:var(--sl400);max-width:560px;margin:0 auto 2rem;font-weight:300;line-height:1.7}
+.hero-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn-outline{color:#fff;padding:.6rem 1.4rem;border-radius:8px;font-weight:500;font-size:.9rem;text-decoration:none;border:1px solid rgba(255,255,255,.15);transition:all .2s;background:transparent}
+.btn-outline:hover{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.05)}
 
-    .progress-bar {
-      height: 4px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 2px;
-      overflow: hidden;
-    }
+/* Chat Demo */
+.chat-demo{max-width:500px;margin:3rem auto 0;background:var(--bg2);border:1px solid var(--navy-700);border-radius:12px;overflow:hidden}
+.chat-header{padding:.6rem 1rem;background:var(--navy-800);border-bottom:1px solid var(--navy-700);display:flex;align-items:center;gap:.5rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--sl400)}
+.chat-header .dot{width:6px;height:6px;border-radius:50%;background:var(--bid)}
+.chat-messages{padding:1rem;min-height:80px}
+.chat-msg{background:rgba(30,58,95,.3);border-radius:8px;padding:.6rem .9rem;font-size:.85rem;color:var(--sl300);margin-bottom:.5rem;max-width:85%;animation:fadeUp .4s ease}
+.chat-msg.ai{border-left:2px solid var(--orange);margin-left:auto}
+.chat-msg .verdict{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:600;margin-top:.3rem}
+.verdict.bid{background:rgba(16,185,129,.15);color:var(--bid)}
+.verdict.skip{background:rgba(239,68,68,.15);color:var(--skip)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #7B68EE, #4A90E2);
-      transition: width 0.5s ease;
-    }
+/* Stats */
+.stats{position:relative;z-index:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1.5rem;max-width:900px;margin:0 auto;padding:0 2rem 4rem}
+.stat-card{background:rgba(15,32,53,.6);backdrop-filter:blur(10px);border:1px solid rgba(30,58,95,.4);border-radius:12px;padding:1.5rem;text-align:center}
+.stat-num{font-family:'DM Serif Display',serif;font-size:2.5rem;color:#fff;line-height:1}
+.stat-num .accent{color:var(--orange)}
+.stat-label{font-size:.8rem;color:var(--sl400);margin-top:.4rem;font-weight:500}
 
-    @keyframes slideIn {
-      from {
-        opacity: 0;
-        transform: translateX(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
+/* Ascent Pipeline */
+.pipeline{position:relative;z-index:1;padding:4rem 2rem;max-width:900px;margin:0 auto}
+.section-title{font-family:'DM Serif Display',serif;font-size:2rem;color:#fff;text-align:center;margin-bottom:.5rem}
+.section-sub{text-align:center;color:var(--sl400);margin-bottom:3rem;font-size:.95rem}
+.ascent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem}
+.ascent-stage{background:var(--bg2);border:1px solid var(--navy-700);border-radius:10px;padding:1rem;transition:all .3s;position:relative;overflow:hidden}
+.ascent-stage:hover{border-color:rgba(245,158,11,.4);transform:translateY(-2px)}
+.ascent-stage::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--orange),var(--cyan));opacity:0;transition:opacity .3s}
+.ascent-stage:hover::before{opacity:1}
+.stage-num{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--orange);margin-bottom:.4rem;letter-spacing:.08em}
+.stage-name{font-family:'DM Serif Display',serif;font-size:1rem;color:#fff;margin-bottom:.3rem}
+.stage-desc{font-size:.75rem;color:var(--sl400);line-height:1.5}
 
-    .data-item {
-      animation: slideIn 0.3s ease forwards;
-    }
-  </style>
+/* Features */
+.features{position:relative;z-index:1;padding:4rem 2rem;max-width:1000px;margin:0 auto}
+.feat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
+.feat{background:var(--bg2);border:1px solid var(--navy-700);border-radius:12px;padding:1.5rem;transition:all .3s}
+.feat:hover{border-color:rgba(245,158,11,.3);transform:translateY(-3px)}
+.feat-icon{width:40px;height:40px;background:var(--orange-dim);border:1px solid rgba(245,158,11,.2);border-radius:10px;display:grid;place-items:center;font-size:1.1rem;margin-bottom:1rem}
+.feat h3{font-family:'DM Serif Display',serif;font-size:1.1rem;color:#fff;margin-bottom:.5rem}
+.feat p{font-size:.82rem;color:var(--sl400);line-height:1.6}
+
+/* CTA */
+.final-cta{position:relative;z-index:1;text-align:center;padding:5rem 2rem}
+.final-cta h2{font-family:'DM Serif Display',serif;font-size:2.2rem;color:#fff;margin-bottom:.8rem}
+.final-cta p{color:var(--sl400);margin-bottom:2rem;font-size:1rem}
+
+footer{position:relative;z-index:1;text-align:center;padding:2rem;border-top:1px solid rgba(30,58,95,.3);font-size:.75rem;color:var(--sl400)}
+footer a{color:var(--orange);text-decoration:none}
+
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .6s,transform .6s}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:640px){
+  nav{padding:.8rem 1rem}
+  .nav-links a:not(.cta-btn){display:none}
+  .hero{padding:6rem 1.2rem 3rem}
+  h1{font-size:2rem}
+  .stats{grid-template-columns:repeat(2,1fr);gap:1rem;padding:0 1.2rem 3rem}
+  .ascent-grid{grid-template-columns:repeat(2,1fr)}
+  .feat-grid{grid-template-columns:1fr}
+}
+</style>
 </head>
 <body>
-  <canvas id="canvas3d"></canvas>
-  <canvas id="particle-canvas"></canvas>
-  
-  <!-- Hero Section -->
-  <section id="hero" class="relative min-h-screen flex items-center justify-center px-4">
-    <div class="text-center z-10 fade-in">
-      <div class="text-8xl mb-6 animate-float">🏔️</div>
-      
-      <h1 class="text-7xl font-black mb-6 gradient-text">
-        BidDeed.AI
-      </h1>
-      
-      <p class="text-3xl text-gray-300 mb-4 font-bold">
-        The Everest Ascent™
-      </p>
-      
-      <p class="text-xl text-gray-400 mb-12 max-w-2xl mx-auto">
-        Agentic AI Ecosystem for Foreclosure Intelligence
-      </p>
 
-      <div class="flex gap-4 justify-center flex-wrap">
-        <button class="btn-primary px-10 py-5 text-white rounded-xl font-bold text-lg shadow-2xl" onclick="window.location.href='mailto:ariel@biddeed.ai?subject=Free Trial Request'">
-          Start Free Trial
-        </button>
-        
-        <button class="btn-secondary px-10 py-5 text-white rounded-xl font-bold text-lg" onclick="document.getElementById('demo').scrollIntoView({behavior: 'smooth'})">
-          View Demo
-        </button>
-      </div>
-    </div>
-    
-    <div class="scroll-indicator text-white text-4xl">↓</div>
-  </section>
+<canvas id="scene-canvas"></canvas>
 
-  <!-- Animated Demo Section -->
-  <section id="demo" class="relative py-20 px-4">
-    <h2 class="text-6xl font-black text-center text-white mb-8">
-      See The Everest Ascent™ In Action
-    </h2>
-    
-    <p class="text-xl text-gray-300 text-center mb-4">
-      Real Case Study: 123 Main St, Melbourne FL 32901
-    </p>
-    <p class="text-sm text-gray-400 text-center mb-12">
-      Judgment: $285,000 | Watch as BidDeed.AI processes this property through all 12 stages
-    </p>
-
-    <div class="max-w-6xl mx-auto">
-      <!-- Progress Bar -->
-      <div class="mb-8">
-        <div class="flex justify-between text-sm text-gray-400 mb-2">
-          <span>Pipeline Progress</span>
-          <span id="progressText">Stage 0/12</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-        </div>
-      </div>
-
-      <!-- Case Study Card -->
-      <div class="glass rounded-2xl p-6 mb-8">
-        <div class="grid md:grid-cols-2 gap-6">
-          <div>
-            <h3 class="text-2xl font-bold text-white mb-4">Property Details</h3>
-            <div class="space-y-2 text-gray-300">
-              <div class="flex justify-between">
-                <span>Address:</span>
-                <span class="font-semibold">123 Main St, Melbourne FL</span>
-              </div>
-              <div class="flex justify-between">
-                <span>Parcel:</span>
-                <span class="font-semibold">2835546</span>
-              </div>
-              <div class="flex justify-between">
-                <span>Plaintiff:</span>
-                <span class="font-semibold">Bank of America</span>
-              </div>
-              <div class="flex justify-between">
-                <span>Judgment:</span>
-                <span class="font-semibold text-yellow-400">$285,000</span>
-              </div>
-            </div>
-          </div>
-          <div id="liveData">
-            <h3 class="text-2xl font-bold text-white mb-4">Live Analysis</h3>
-            <div class="space-y-2 text-gray-300 text-sm" id="analysisData">
-              <div class="text-gray-500 italic">Processing will begin when you click "Start Demo"...</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 12 Stages Grid -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div class="demo-stage glass rounded-xl p-4" data-stage="1">
-          <div class="text-3xl mb-2">🔍</div>
-          <div class="text-xs font-bold text-white">1. Discovery</div>
-        </div>
-        <div class="demo-stage glass rounded-xl p-4" data-stage="2">
-          <div class="text-3xl mb-2">🕷️</div>
-          <div class="text-xs font-bold text-white">2. Scraping</div>
-        </div>
-        <div class="demo-stage glass rounded-xl p-4" data-stage="3">
-          <div class="text-3xl mb-2">📜</div>
-          <div class="text-xs font-bold text-white">3. Title Search</div>
-        </div>
-        <div class="demo-stage glass rounded-xl p-4" data-stage="4">
-          <div class="text-3xl mb-2">🔗</div>
-          <div class="text-xs font-bold text-white">4. Lien Priority</div>
-        </div>
-        <div class="demo-stage glass rounded-xl p-4" data-stage="5">
-          <div class="text-3xl mb-2">🎫</div>
-          <div class="text-xs font-bold text-white">5. Tax Certs</div>
-        </div>
-        <div class="demo-stage glass rounded-xl p-4" data-stage="6">
-          <div class="text-3xl mb-2">📊</div>
-          <div class="text-xs font-bold text-white">6. Demographics</div>
-        </div>
-        <div class="demo-stage glass rounded-xl p-4" data-stage="7">
-          <div class="text-3xl mb-2">🤖</div>
-          <div class="text-xs font-bold text-white">7. ML Score</div>
-        </div>
-        <div class="demo-stage glass rounded-xl p-4" data-stage="8">
-          <div class="text-3xl mb-2">💰</div>
-          <div class="text-xs font-bold text-white">8. Max Bid</div>
-        </div>
-        <div class="demo-stage glass rounded-xl p-4" data-stage="9">
-          <div class="text-3xl mb-2">✅</div>
-          <div class="text-xs font-bold text-white">9. Decision</div>
-        </div>
-        <div class="demo-stage glass rounded-xl p-4" data-stage="10">
-          <div class="text-3xl mb-2">📄</div>
-          <div class="text-xs font-bold text-white">10. Report</div>
-        </div>
-        <div class="demo-stage glass rounded-xl p-4" data-stage="11">
-          <div class="text-3xl mb-2">📍</div>
-          <div class="text-xs font-bold text-white">11. Disposition</div>
-        </div>
-        <div class="demo-stage glass rounded-xl p-4" data-stage="12">
-          <div class="text-3xl mb-2">🗄️</div>
-          <div class="text-xs font-bold text-white">12. Archive</div>
-        </div>
-      </div>
-
-      <!-- Control Buttons -->
-      <div class="text-center">
-        <button id="startDemo" class="btn-primary px-8 py-4 text-white rounded-xl font-bold text-lg shadow-2xl">
-          ▶️ Start Demo
-        </button>
-        <button id="resetDemo" class="btn-secondary px-8 py-4 text-white rounded-xl font-bold text-lg ml-4" style="display: none;">
-          🔄 Reset
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Features Section -->
-  <section id="features" class="relative py-20 px-4">
-    <h2 class="text-6xl font-black text-center text-white mb-16">
-      Why BidDeed.AI?
-    </h2>
-
-    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-      <div class="card-hover glass rounded-2xl p-8">
-        <div class="feature-icon text-6xl mb-4 animate-pulse-slow">🚀</div>
-        <h3 class="text-2xl font-bold text-white mb-3">100x ROI</h3>
-        <p class="text-gray-300 text-lg">$300K value, $3.3K cost</p>
-      </div>
-
-      <div class="card-hover glass rounded-2xl p-8">
-        <div class="feature-icon text-6xl mb-4 animate-pulse-slow" style="animation-delay: 0.2s">🤖</div>
-        <h3 class="text-2xl font-bold text-white mb-3">95% Automation</h3>
-        <p class="text-gray-300 text-lg">Minimal human-in-loop</p>
-      </div>
-
-      <div class="card-hover glass rounded-2xl p-8">
-        <div class="feature-icon text-6xl mb-4 animate-pulse-slow" style="animation-delay: 0.4s">📊</div>
-        <h3 class="text-2xl font-bold text-white mb-3">64.4% ML Accuracy</h3>
-        <p class="text-gray-300 text-lg">XGBoost predictions</p>
-      </div>
-
-      <div class="card-hover glass rounded-2xl p-8">
-        <div class="feature-icon text-6xl mb-4 animate-pulse-slow" style="animation-delay: 0.6s">⚡</div>
-        <h3 class="text-2xl font-bold text-white mb-3">~30 Min Pipeline</h3>
-        <p class="text-gray-300 text-lg">12 stages end-to-end</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Pipeline Visualization -->
-  <section id="pipeline" class="relative py-20 px-4">
-    <h2 class="text-6xl font-black text-center text-white mb-8">
-      12-Stage Pipeline
-    </h2>
-    
-    <p class="text-xl text-gray-300 text-center mb-12">
-      Fully automated from discovery to disposition
-    </p>
-
-    <div class="max-w-5xl mx-auto glass rounded-2xl p-8">
-      <div class="flex flex-wrap justify-center gap-4 mb-8">
-        <div class="pipeline-node glass" style="background: rgba(74, 144, 226, 0.3); border-color: #4A90E2;" data-stage="discovery">
-          <div class="text-3xl mb-2">🔍</div>
-          <div class="text-xs font-bold text-white">Discovery</div>
-        </div>
-        <div class="text-white text-3xl flex items-center">→</div>
-        
-        <div class="pipeline-node glass" style="background: rgba(123, 104, 238, 0.3); border-color: #7B68EE;" data-stage="title">
-          <div class="text-3xl mb-2">📜</div>
-          <div class="text-xs font-bold text-white">Title</div>
-        </div>
-        <div class="text-white text-3xl flex items-center">→</div>
-        
-        <div class="pipeline-node glass" style="background: rgba(147, 112, 219, 0.3); border-color: #9370DB;" data-stage="ml">
-          <div class="text-3xl mb-2">🤖</div>
-          <div class="text-xs font-bold text-white">ML Score</div>
-        </div>
-        <div class="text-white text-3xl flex items-center">→</div>
-        
-        <div class="pipeline-node glass" style="background: rgba(34, 197, 94, 0.3); border-color: #4ade80;" data-stage="maxbid">
-          <div class="text-3xl mb-2">💰</div>
-          <div class="text-xs font-bold text-white">Max Bid</div>
-        </div>
-      </div>
-      
-      <div class="flex justify-center">
-        <div class="pipeline-node glass" style="background: rgba(239, 68, 68, 0.3); border-color: #f87171;" data-stage="report">
-          <div class="text-3xl mb-2">📄</div>
-          <div class="text-xs font-bold text-white">Report</div>
-        </div>
-      </div>
-      
-      <div class="text-center mt-6 text-gray-400 text-sm">
-        + 7 more automated stages (Lien Priority, Tax Certs, Demographics, etc.)
-      </div>
-    </div>
-  </section>
-
-  <!-- Stats Section -->
-  <section id="stats" class="relative py-20 px-4">
-    <div class="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
-      <div class="text-center stat-item">
-        <div class="stat-number gradient-text mb-2">100x</div>
-        <div class="text-gray-300 text-xl">Return on Investment</div>
-      </div>
-      
-      <div class="text-center stat-item">
-        <div class="stat-number gradient-text mb-2" style="animation-delay: 0.2s">90%</div>
-        <div class="text-gray-300 text-xl">FREE Tier Processing</div>
-      </div>
-      
-      <div class="text-center stat-item">
-        <div class="stat-number gradient-text mb-2" style="animation-delay: 0.4s">12</div>
-        <div class="text-gray-300 text-xl">Automated Stages</div>
-      </div>
-      
-      <div class="text-center stat-item">
-        <div class="stat-number gradient-text mb-2" style="animation-delay: 0.6s">~30min</div>
-        <div class="text-gray-300 text-xl">End-to-End Pipeline</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA Section -->
-  <section id="cta" class="relative py-32 px-4">
-    <div class="max-w-4xl mx-auto glass rounded-3xl p-16 text-center glow-intense">
-      <h2 class="text-5xl font-black text-white mb-6">
-        Ready to Transform Your Foreclosure Investing?
-      </h2>
-      <p class="text-2xl text-gray-300 mb-10">
-        Join the agentic AI revolution. Save $2,500-4,500/month vs offshore engineering.
-      </p>
-      
-      <div class="flex gap-4 justify-center flex-wrap">
-        <button class="btn-primary px-12 py-6 text-white rounded-xl font-bold text-2xl shadow-2xl" onclick="window.location.href='mailto:ariel@biddeed.ai?subject=Get Started'">
-          Get Started Free
-        </button>
-        
-        <button class="btn-secondary px-12 py-6 text-white rounded-xl font-bold text-2xl" onclick="window.location.href='mailto:ariel@biddeed.ai?subject=Schedule Demo'">
-          Schedule Demo
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Modal Overlay -->
-  <div class="modal-overlay" id="modalOverlay"></div>
-  
-  <!-- Stage Detail Modal -->
-  <div class="stage-modal" id="stageModal">
-    <div class="flex justify-between items-start mb-6">
-      <div>
-        <div class="text-5xl mb-3" id="modalIcon">🔍</div>
-        <h3 class="text-3xl font-bold text-white" id="modalTitle">Discovery</h3>
-      </div>
-      <button class="text-white text-3xl hover:text-purple-400" onclick="closeModal()">×</button>
-    </div>
-    <p class="text-gray-300 text-lg mb-4" id="modalDescription">Loading...</p>
-    <div class="text-sm text-purple-400" id="modalDetails">Loading...</div>
+<nav>
+  <a href="/" class="logo">
+    <div class="logo-mark">BD</div>
+    BidDeed<span style="color:var(--orange)">.AI</span>
+  </a>
+  <div class="nav-links">
+    <a href="#pipeline">The Ascent</a>
+    <a href="#features">Features</a>
+    <a href="/app" class="cta-btn">Launch App</a>
   </div>
+</nav>
 
-  <!-- Floating Action Button -->
-  <div class="floating-btn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-    🚀
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">AGENTIC AI · BREVARD COUNTY</div>
+    <h1>Distressed Assets<br><em>Decoded.</em></h1>
+    <p class="hero-sub">AI agents analyze foreclosure auctions end-to-end — title search, lien priority, tax certificates, ML scoring, and max bid calculation. What Claude did for code, we do for real estate.</p>
+    <div class="hero-actions">
+      <a href="/app" class="cta-btn" style="padding:.7rem 2rem;font-size:1rem">Analyze an Auction</a>
+      <a href="#pipeline" class="btn-outline">The Everest Ascent™</a>
+    </div>
+    <div class="chat-demo">
+      <div class="chat-header"><span class="dot"></span> BidDeed AI Analyst</div>
+      <div class="chat-messages" id="chatDemo"></div>
+    </div>
   </div>
+</section>
 
-  <script>
-    // Demo Animation Logic
-    const stageData = [
-      { 
-        stage: 1, 
-        name: 'Discovery',
-        data: ['Found on RealForeclose.com', 'Auction Date: Dec 17, 2025', 'Case: 2023CA000123']
-      },
-      { 
-        stage: 2, 
-        name: 'Scraping',
-        data: ['Address: 123 Main St, Melbourne', 'Defendant: John Doe', 'Filing Date: Jan 15, 2023']
-      },
-      { 
-        stage: 3, 
-        name: 'Title Search',
-        data: ['AcclaimWeb Search Complete', 'Found 3 liens', 'Senior Mortgage: $250K']
-      },
-      { 
-        stage: 4, 
-        name: 'Lien Priority',
-        data: ['1st: Bank of America $250K', '2nd: County Tax $2.5K', '3rd: HOA $1.2K']
-      },
-      { 
-        stage: 5, 
-        name: 'Tax Certificates',
-        data: ['RealTDM Check: Clear', 'No delinquent taxes', 'Last payment: Nov 2024']
-      },
-      { 
-        stage: 6, 
-        name: 'Demographics',
-        data: ['Zip: 32901', 'Median Income: $78K', 'Vacancy Rate: 5.2%']
-      },
-      { 
-        stage: 7, 
-        name: 'ML Score',
-        data: ['Third-Party Probability: 23%', 'Plaintiff Pattern: Low Risk', 'Confidence: 89%']
-      },
-      { 
-        stage: 8, 
-        name: 'Max Bid',
-        data: ['ARV: $425K', 'Repairs: $45K', 'Max Bid: $242,500']
-      },
-      { 
-        stage: 9, 
-        name: 'Decision',
-        data: ['Bid/Judgment Ratio: 85%', 'Recommendation: BID ✅', 'Risk Level: LOW']
-      },
-      { 
-        stage: 10, 
-        name: 'Report',
-        data: ['DOCX Generated', 'BCPAO Photo Included', 'Email Sent']
-      },
-      { 
-        stage: 11, 
-        name: 'Disposition',
-        data: ['Status: Pending Auction', 'Tracking Active', 'Alert Set']
-      },
-      { 
-        stage: 12, 
-        name: 'Archive',
-        data: ['Stored in Supabase', 'ML Training Data Added', 'Historical Record Complete']
+<section class="stats">
+  <div class="stat-card reveal">
+    <div class="stat-num"><span data-target="12">0</span></div>
+    <div class="stat-label">AI Pipeline Stages</div>
+  </div>
+  <div class="stat-card reveal">
+    <div class="stat-num"><span data-target="1393">0</span><span class="accent">+</span></div>
+    <div class="stat-label">Auctions Analyzed</div>
+  </div>
+  <div class="stat-card reveal">
+    <div class="stat-num"><span class="accent">&lt;3</span>min</div>
+    <div class="stat-label">Per Property</div>
+  </div>
+  <div class="stat-card reveal">
+    <div class="stat-num">BID<span class="accent">/</span>SKIP</div>
+    <div class="stat-label">Clear Decisions</div>
+  </div>
+</section>
+
+<section class="pipeline" id="pipeline">
+  <h2 class="section-title reveal">The Everest Ascent™</h2>
+  <p class="section-sub reveal">12 stages. Zero guesswork. AI agents handle every step.</p>
+  <div class="ascent-grid">
+    <div class="ascent-stage reveal"><div class="stage-num">STAGE 01</div><div class="stage-name">DiscoverWise</div><div class="stage-desc">Scrape upcoming foreclosure dockets from court systems.</div></div>
+    <div class="ascent-stage reveal"><div class="stage-num">STAGE 02</div><div class="stage-name">ScrapeWise</div><div class="stage-desc">Pull property details, BCPAO data, and case info.</div></div>
+    <div class="ascent-stage reveal"><div class="stage-num">STAGE 03</div><div class="stage-name">TitleWise</div><div class="stage-desc">Search recorded documents — mortgages, liens, judgments.</div></div>
+    <div class="ascent-stage reveal"><div class="stage-num">STAGE 04</div><div class="stage-name">LienWise</div><div class="stage-desc">Analyze lien priority. Detect senior mortgage survival.</div></div>
+    <div class="ascent-stage reveal"><div class="stage-num">STAGE 05</div><div class="stage-name">TaxWise</div><div class="stage-desc">Check tax certificate status and delinquent amounts.</div></div>
+    <div class="ascent-stage reveal"><div class="stage-num">STAGE 06</div><div class="stage-name">DemoWise</div><div class="stage-desc">Census demographics, income levels, vacancy rates.</div></div>
+    <div class="ascent-stage reveal"><div class="stage-num">STAGE 07</div><div class="stage-name">ScoreWise</div><div class="stage-desc">ML model predicts third-party purchase probability.</div></div>
+    <div class="ascent-stage reveal"><div class="stage-num">STAGE 08</div><div class="stage-name">BidWise</div><div class="stage-desc">Calculate max bid: (ARV×70%)-Repairs-Buffer.</div></div>
+    <div class="ascent-stage reveal"><div class="stage-num">STAGE 09</div><div class="stage-name">DecisionWise</div><div class="stage-desc">BID / REVIEW / SKIP with full audit trail.</div></div>
+    <div class="ascent-stage reveal"><div class="stage-num">STAGE 10</div><div class="stage-name">ReportWise</div><div class="stage-desc">One-page DOCX with photos, ML data, recommendation.</div></div>
+    <div class="ascent-stage reveal"><div class="stage-num">STAGE 11</div><div class="stage-name">DispoWise</div><div class="stage-desc">Track disposition — flip, hold, wholesale, or pass.</div></div>
+    <div class="ascent-stage reveal"><div class="stage-num">STAGE 12</div><div class="stage-name">VaultWise</div><div class="stage-desc">Archive to Supabase. Feed ML model for next cycle.</div></div>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <h2 class="section-title reveal">Why BidDeed.AI</h2>
+  <p class="section-sub reveal">Built by an investor, for investors.</p>
+  <div class="feat-grid">
+    <div class="feat reveal">
+      <div class="feat-icon">🔍</div>
+      <h3>Lien Discovery Agent</h3>
+      <p>Searches actual recorded documents — AcclaimWeb, RealTDM, BCPAO. No guesswork. Detects HOA foreclosures where senior mortgages survive.</p>
+    </div>
+    <div class="feat reveal">
+      <div class="feat-icon">🤖</div>
+      <h3>NLP Chat Interface</h3>
+      <p>Ask in plain English: "Should I bid on case 2024-CA-012345?" Get a BID/SKIP recommendation with the reasoning chain.</p>
+    </div>
+    <div class="feat reveal">
+      <div class="feat-icon">📊</div>
+      <h3>ML Predictions</h3>
+      <p>Trained on 1,393+ historical auctions. Predicts third-party probability, likely sale price, and optimal bid strategy.</p>
+    </div>
+    <div class="feat reveal">
+      <div class="feat-icon">⚡</div>
+      <h3>3-Minute Analysis</h3>
+      <p>What used to take 2-3 hours of manual research per property now takes under 3 minutes. Analyze an entire docket in an afternoon.</p>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta">
+  <h2 class="reveal">Stop Guessing. Start Bidding Smart.</h2>
+  <p class="reveal">BidDeed.AI — the agentic AI ecosystem for foreclosure investors.</p>
+  <a href="/app" class="cta-btn reveal" style="padding:.8rem 2.5rem;font-size:1.05rem">Get Early Access</a>
+</section>
+
+<footer>
+  <p>&copy; 2026 BidDeed.AI · Everest Capital USA · <a href="mailto:ariel@biddeed.ai">ariel@biddeed.ai</a></p>
+</footer>
+
+<script>
+/* === Three.js House/Building === */
+(function(){
+  const canvas = document.getElementById('scene-canvas');
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 1000);
+  camera.position.set(3, 2.5, 5);
+  camera.lookAt(0, 0.5, 0);
+  const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  const group = new THREE.Group();
+  scene.add(group);
+
+  // Wireframe building base
+  const baseGeo = new THREE.BoxGeometry(1.6, 1.4, 1.2);
+  const baseMat = new THREE.MeshBasicMaterial({color:0x1E3A5F, wireframe:true, transparent:true, opacity:0.3});
+  const base = new THREE.Mesh(baseGeo, baseMat);
+  base.position.y = 0.7;
+  group.add(base);
+
+  // Roof (pyramid)
+  const roofGeo = new THREE.ConeGeometry(1.3, 0.8, 4);
+  const roofMat = new THREE.MeshBasicMaterial({color:0xF59E0B, wireframe:true, transparent:true, opacity:0.4});
+  const roof = new THREE.Mesh(roofGeo, roofMat);
+  roof.position.y = 1.8;
+  roof.rotation.y = Math.PI/4;
+  group.add(roof);
+
+  // Ground grid
+  const gridGeo = new THREE.PlaneGeometry(8, 8, 16, 16);
+  const gridMat = new THREE.MeshBasicMaterial({color:0x1E3A5F, wireframe:true, transparent:true, opacity:0.1});
+  const grid = new THREE.Mesh(gridGeo, gridMat);
+  grid.rotation.x = -Math.PI/2;
+  group.add(grid);
+
+  // Floating data particles
+  const pCount = 150;
+  const pGeo = new THREE.BufferGeometry();
+  const pos = new Float32Array(pCount*3);
+  for(let i=0;i<pCount;i++){
+    pos[i*3] = (Math.random()-0.5)*6;
+    pos[i*3+1] = Math.random()*4;
+    pos[i*3+2] = (Math.random()-0.5)*6;
+  }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const pMat = new THREE.PointsMaterial({color:0x03B3CB, size:0.03, transparent:true, opacity:0.5});
+  group.add(new THREE.Points(pGeo, pMat));
+
+  // Orbit rings
+  for(let i=0;i<3;i++){
+    const rGeo = new THREE.RingGeometry(1.8+i*0.6, 1.82+i*0.6, 64);
+    const rMat = new THREE.MeshBasicMaterial({color:i===1?0xF59E0B:0x1E3A5F, transparent:true, opacity:0.15, side:THREE.DoubleSide});
+    const r = new THREE.Mesh(rGeo, rMat);
+    r.rotation.x = Math.PI/2 + i*0.2;
+    r.rotation.z = i*0.4;
+    r.position.y = 1;
+    group.add(r);
+  }
+
+  function animate(){
+    requestAnimationFrame(animate);
+    group.rotation.y += 0.003;
+    const pts = group.children[4];
+    if(pts && pts.geometry){
+      const p = pts.geometry.attributes.position.array;
+      for(let i=1;i<p.length;i+=3){
+        p[i] += 0.003;
+        if(p[i] > 4) p[i] = 0;
       }
-    ];
-
-    let currentStage = 0;
-    let demoInterval;
-
-    function startDemo() {
-      currentStage = 0;
-      document.getElementById('startDemo').style.display = 'none';
-      document.getElementById('resetDemo').style.display = 'inline-block';
-      document.getElementById('analysisData').innerHTML = '<div class="text-yellow-400">⏳ Processing started...</div>';
-      
-      // Reset all stages
-      document.querySelectorAll('.demo-stage').forEach(stage => {
-        stage.classList.remove('active', 'completed');
-      });
-      
-      demoInterval = setInterval(processStage, 2000);
+      pts.geometry.attributes.position.needsUpdate = true;
     }
+    renderer.render(scene, camera);
+  }
+  animate();
 
-    function processStage() {
-      if (currentStage >= stageData.length) {
-        clearInterval(demoInterval);
-        document.getElementById('analysisData').innerHTML += 
-          '<div class="data-item text-green-400 mt-4">✅ Pipeline Complete! Property ready for auction.</div>';
-        return;
-      }
-
-      const stage = stageData[currentStage];
-      
-      // Mark previous as completed
-      if (currentStage > 0) {
-        const prevStage = document.querySelector(`.demo-stage[data-stage="${currentStage}"]`);
-        prevStage.classList.remove('active');
-        prevStage.classList.add('completed');
-      }
-      
-      // Mark current as active
-      const currentStageElement = document.querySelector(`.demo-stage[data-stage="${stage.stage}"]`);
-      currentStageElement.classList.add('active');
-      
-      // Update progress
-      const progress = ((currentStage + 1) / stageData.length) * 100;
-      document.getElementById('progressFill').style.width = `${progress}%`;
-      document.getElementById('progressText').textContent = `Stage ${currentStage + 1}/12`;
-      
-      // Add data to analysis
-      const dataHtml = `
-        <div class="data-item mb-3">
-          <div class="font-bold text-white mb-1">${stage.name} Complete:</div>
-          ${stage.data.map(item => `<div class="text-sm">• ${item}</div>`).join('')}
-        </div>
-      `;
-      
-      if (currentStage === 0) {
-        document.getElementById('analysisData').innerHTML = dataHtml;
-      } else {
-        document.getElementById('analysisData').innerHTML += dataHtml;
-      }
-      
-      // Scroll analysis into view
-      document.getElementById('liveData').scrollTop = document.getElementById('analysisData').scrollHeight;
-      
-      currentStage++;
-    }
-
-    function resetDemo() {
-      clearInterval(demoInterval);
-      currentStage = 0;
-      document.getElementById('startDemo').style.display = 'inline-block';
-      document.getElementById('resetDemo').style.display = 'none';
-      document.getElementById('progressFill').style.width = '0%';
-      document.getElementById('progressText').textContent = 'Stage 0/12';
-      document.getElementById('analysisData').innerHTML = '<div class="text-gray-500 italic">Processing will begin when you click "Start Demo"...</div>';
-      
-      document.querySelectorAll('.demo-stage').forEach(stage => {
-        stage.classList.remove('active', 'completed');
-      });
-    }
-
-    document.getElementById('startDemo').addEventListener('click', startDemo);
-    document.getElementById('resetDemo').addEventListener('click', resetDemo);
-
-    // Modal functions
-    const stageInfo = {
-      discovery: {
-        icon: '🔍',
-        title: 'Discovery',
-        description: 'Scrape auction listings from RealForeclose.com to identify upcoming foreclosure opportunities in Brevard County.',
-        details: 'Automated daily scraping • Real-time updates • 100% coverage of county auctions'
-      },
-      title: {
-        icon: '📜',
-        title: 'Title Search',
-        description: 'AcclaimWeb lien discovery and document analysis to identify all encumbrances and potential risks.',
-        details: 'Automated lien detection • Senior mortgage identification • HOA foreclosure alerts'
-      },
-      ml: {
-        icon: '🤖',
-        title: 'ML Score',
-        description: 'XGBoost machine learning model predicts third-party purchase probability with 64.4% accuracy.',
-        details: '28 plaintiff patterns tracked • Historical auction data analysis • Confidence scoring'
-      },
-      maxbid: {
-        icon: '💰',
-        title: 'Max Bid Calculation',
-        description: 'Formula: (ARV × 70%) - Repairs - $10K - MIN($25K, 15% ARV) to determine optimal bid price.',
-        details: 'Conservative repair estimates • Market-based ARV • Built-in safety margin'
-      },
-      report: {
-        icon: '📄',
-        title: 'Report Generation',
-        description: 'One-page DOCX reports with BCPAO photos, property details, and BID/REVIEW/SKIP recommendations.',
-        details: 'Automated formatting • Professional presentation • Decision rationale included'
-      }
-    };
-
-    function openModal(stage) {
-      const info = stageInfo[stage];
-      if (!info) return;
-      
-      document.getElementById('modalIcon').textContent = info.icon;
-      document.getElementById('modalTitle').textContent = info.title;
-      document.getElementById('modalDescription').textContent = info.description;
-      document.getElementById('modalDetails').textContent = info.details;
-      
-      document.getElementById('stageModal').classList.add('active');
-      document.getElementById('modalOverlay').classList.add('active');
-    }
-
-    function closeModal() {
-      document.getElementById('stageModal').classList.remove('active');
-      document.getElementById('modalOverlay').classList.remove('active');
-    }
-
-    document.querySelectorAll('.pipeline-node').forEach(node => {
-      node.addEventListener('click', () => {
-        const stage = node.getAttribute('data-stage');
-        openModal(stage);
-      });
-    });
-
-    document.getElementById('modalOverlay').addEventListener('click', closeModal);
-
-    // Three.js 3D Background (keeping existing code)
-    const canvas = document.getElementById('canvas3d');
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 8;
-
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  window.addEventListener('resize', ()=>{
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+})();
 
-    const geometry = new THREE.TorusKnotGeometry(1.5, 0.5, 100, 16);
-    const material = new THREE.MeshStandardMaterial({
-      color: 0x7B68EE,
-      emissive: 0x7B68EE,
-      emissiveIntensity: 0.5,
-      roughness: 0.3,
-      metalness: 0.7,
+/* === Chat Demo === */
+(function(){
+  const sequences = [
+    [
+      {text:"Analyze 05-2024-CA-028841 — 923 Slocum St, Melbourne", user:true},
+      {text:"3BR/2BA, 1,344 sqft. ARV: $285K. Judgment: $189K. HOA foreclosure — senior mortgage ($152K) survives. Max bid: $37,500. Bid/Jdg: 20%.<br><span class='verdict skip'>SKIP — SENIOR LIEN SURVIVES</span>", user:false}
+    ],
+    [
+      {text:"What about 1450 Palm Bay Rd NE?", user:true},
+      {text:"4BR/2BA, 1,876 sqft. ARV: $340K. Judgment: $215K. Bank foreclosure — clean title on sale. Max bid: $168K. Bid/Jdg: 78%.<br><span class='verdict bid'>BID — STRONG MARGIN</span>", user:false}
+    ]
+  ];
+  const container = document.getElementById('chatDemo');
+  let sIdx=0;
+  function showSequence(){
+    container.innerHTML='';
+    const seq = sequences[sIdx];
+    seq.forEach((msg,i)=>{
+      setTimeout(()=>{
+        const div = document.createElement('div');
+        div.className = 'chat-msg' + (msg.user?'':' ai');
+        div.innerHTML = msg.text;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+      }, i*1800);
     });
-    const mesh = new THREE.Mesh(geometry, material);
-    scene.add(mesh);
+    sIdx = (sIdx+1)%sequences.length;
+    setTimeout(showSequence, 6000);
+  }
+  setTimeout(showSequence, 2000);
+})();
 
-    const particlesGeo = new THREE.BufferGeometry();
-    const particlesCount = 300;
-    const positions = new Float32Array(particlesCount * 3);
-    for (let i = 0; i < particlesCount * 3; i++) {
-      positions[i] = (Math.random() - 0.5) * 15;
+/* === Scroll Reveals === */
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')});
+},{threshold:0.15});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+/* === Counter Animation === */
+const counterObs = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting) return;
+    const el = e.target;
+    const target = parseInt(el.dataset.target);
+    if(!target) return;
+    const dur = 2000;
+    const start = performance.now();
+    function tick(now){
+      const p = Math.min((now-start)/dur, 1);
+      const ease = 1-Math.pow(1-p, 3);
+      el.textContent = Math.floor(target*ease).toLocaleString();
+      if(p<1) requestAnimationFrame(tick);
     }
-    particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const particlesMat = new THREE.PointsMaterial({ 
-      size: 0.05, 
-      color: 0xffffff, 
-      transparent: true, 
-      opacity: 0.6 
-    });
-    const particles3D = new THREE.Points(particlesGeo, particlesMat);
-    scene.add(particles3D);
-
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-    scene.add(ambientLight);
-    
-    const pointLight = new THREE.PointLight(0x7B68EE, 2, 50);
-    pointLight.position.set(3, 3, 3);
-    scene.add(pointLight);
-
-    const clock = new THREE.Clock();
-    function animate() {
-      requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
-      
-      mesh.rotation.x = t * 0.3;
-      mesh.rotation.y = t * 0.5;
-      particles3D.rotation.y = t * 0.1;
-      pointLight.position.x = Math.sin(t) * 3;
-      pointLight.position.z = Math.cos(t) * 3;
-      
-      renderer.render(scene, camera);
-    }
-    animate();
-
-    // 2D Particle Network
-    const particleCanvas = document.getElementById('particle-canvas');
-    const ctx = particleCanvas.getContext('2d');
-    particleCanvas.width = window.innerWidth;
-    particleCanvas.height = window.innerHeight;
-
-    const particles2D = [];
-    for (let i = 0; i < 50; i++) {
-      particles2D.push({
-        x: Math.random() * particleCanvas.width,
-        y: Math.random() * particleCanvas.height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-      });
-    }
-
-    function drawParticles() {
-      ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
-      
-      particles2D.forEach((p, i) => {
-        p.x += p.vx;
-        p.y += p.vy;
-        
-        if (p.x < 0 || p.x > particleCanvas.width) p.vx *= -1;
-        if (p.y < 0 || p.y > particleCanvas.height) p.vy *= -1;
-        
-        ctx.fillStyle = 'rgba(123, 104, 238, 0.5)';
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-        ctx.fill();
-        
-        particles2D.forEach((p2, j) => {
-          if (i !== j) {
-            const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-            if (dist < 150) {
-              ctx.strokeStyle = `rgba(123, 104, 238, ${0.2 * (1 - dist / 150)})`;
-              ctx.lineWidth = 1;
-              ctx.beginPath();
-              ctx.moveTo(p.x, p.y);
-              ctx.lineTo(p2.x, p2.y);
-              ctx.stroke();
-            }
-          }
-        });
-      });
-      
-      requestAnimationFrame(drawParticles);
-    }
-    drawParticles();
-
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      
-      particleCanvas.width = window.innerWidth;
-      particleCanvas.height = window.innerHeight;
-    });
-
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -100px 0px'
-    };
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.style.opacity = '1';
-          entry.target.style.transform = 'translateY(0)';
-        }
-      });
-    }, observerOptions);
-
-    document.querySelectorAll('section').forEach(section => {
-      if (section.id !== 'hero') {
-        section.style.opacity = '0';
-        section.style.transform = 'translateY(30px)';
-        section.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-        observer.observe(section);
-      }
-    });
-
-    const statObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && !entry.target.classList.contains('counted')) {
-          entry.target.classList.add('counted');
-          const statNumber = entry.target.querySelector('.stat-number');
-          statNumber.style.animation = 'stat-appear 1s ease-out';
-        }
-      });
-    }, { threshold: 0.5 });
-
-    document.querySelectorAll('.stat-item').forEach(item => {
-      statObserver.observe(item);
-    });
-  </script>
+    requestAnimationFrame(tick);
+    counterObs.unobserve(el);
+  });
+},{threshold:0.5});
+document.querySelectorAll('[data-target]').forEach(el=>counterObs.observe(el));
+</script>
 </body>
 </html>
