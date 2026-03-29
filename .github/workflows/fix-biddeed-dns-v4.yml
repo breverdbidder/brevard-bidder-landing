@@ -1,0 +1,39 @@
+name: Fix BidDeed DNS v4 - Delete+ReAdd Pages Domain
+on:
+  repository_dispatch:
+    types: [fix-biddeed-pages-v4]
+  workflow_dispatch:
+jobs:
+  dns:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Delete and re-add biddeed.ai to trigger auto DNS creation
+        env:
+          CF_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CF_ACCT: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          echo '=== Get current domains list ==='
+          DOMAINS=$(curl -s "https://api.cloudflare.com/client/v4/accounts/$CF_ACCT/pages/projects/brevard-bidder-landing/domains" \
+            -H "Authorization: Bearer $CF_TOKEN")
+          echo "Domains: $DOMAINS"
+          echo '=== Delete biddeed.ai custom domain ==='
+          DEL=$(curl -s -X DELETE "https://api.cloudflare.com/client/v4/accounts/$CF_ACCT/pages/projects/brevard-bidder-landing/domains/biddeed.ai" \
+            -H "Authorization: Bearer $CF_TOKEN")
+          echo "Delete result: $DEL"
+          sleep 3
+          echo '=== Re-add biddeed.ai custom domain (CF should auto-create DNS) ==='
+          ADD=$(curl -s -X POST "https://api.cloudflare.com/client/v4/accounts/$CF_ACCT/pages/projects/brevard-bidder-landing/domains" \
+            -H "Authorization: Bearer $CF_TOKEN" -H "Content-Type: application/json" \
+            -d '{"name":"biddeed.ai"}')
+          echo "Add result: $ADD"
+          echo '=== Get domains list after ==='
+          DOMAINS2=$(curl -s "https://api.cloudflare.com/client/v4/accounts/$CF_ACCT/pages/projects/brevard-bidder-landing/domains" \
+            -H "Authorization: Bearer $CF_TOKEN")
+          echo "Domains after: $DOMAINS2"
+          echo '=== Check DNS and HTTP ==='
+          sleep 15
+          dig biddeed.ai A +short || echo 'no A'
+          dig biddeed.ai CNAME +short || echo 'no CNAME'
+          LIVE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 https://biddeed.ai 2>/dev/null || echo 000)
+          echo "biddeed.ai: HTTP $LIVE"
