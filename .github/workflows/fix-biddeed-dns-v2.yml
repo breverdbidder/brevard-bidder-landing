@@ -1,0 +1,40 @@
+name: Fix BidDeed DNS v2 (cli-anything-biddeed dispatch)
+on:
+  repository_dispatch:
+    types: [fix-biddeed-dns-v2]
+  workflow_dispatch:
+jobs:
+  dns:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Test both CF tokens and add DNS records
+        env:
+          CF_TOKEN1: ${{ secrets.CF_API_TOKEN }}
+          CF_TOKEN2: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCT: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          ZONE_ID=dcb6876f057e0bb88be181d6e8d0dcbc
+          echo '=== Testing CF_API_TOKEN ==='
+          R1=$(curl -s "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
+            -H "Authorization: Bearer $CF_TOKEN1")
+          echo $R1 | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'CF_API_TOKEN: success={d.get(\"success\")}, records={len(d.get(\"result\") or [])}')" 2>/dev/null || echo 'CF_API_TOKEN parse error'
+          echo '=== Testing CLOUDFLARE_API_TOKEN ==='
+          R2=$(curl -s "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
+            -H "Authorization: Bearer $CF_TOKEN2")
+          echo $R2 | python3 -c "import json,sys; d=json.load(sys.stdin); print(f'CLOUDFLARE_API_TOKEN: success={d.get(\"success\")}, records={len(d.get(\"result\") or [])}')" 2>/dev/null || echo 'CLOUDFLARE_API_TOKEN parse error'
+          echo '=== Trying CF_API_TOKEN to create CNAME ==='
+          RESULT=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
+            -H "Authorization: Bearer $CF_TOKEN1" -H "Content-Type: application/json" \
+            -d '{"type":"CNAME","name":"biddeed.ai","content":"brevard-bidder-landing.pages.dev","ttl":1,"proxied":true}')
+          echo $RESULT | python3 -c "import json,sys; d=json.load(sys.stdin); print('OK CF_API_TOKEN apex CNAME' if d.get('success') else f'FAIL CF_API_TOKEN: {d.get(\"errors\")}')"
+          echo '=== Trying CLOUDFLARE_API_TOKEN to create CNAME ==='
+          RESULT2=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
+            -H "Authorization: Bearer $CF_TOKEN2" -H "Content-Type: application/json" \
+            -d '{"type":"CNAME","name":"biddeed.ai","content":"brevard-bidder-landing.pages.dev","ttl":1,"proxied":true}')
+          echo $RESULT2 | python3 -c "import json,sys; d=json.load(sys.stdin); print('OK CLOUDFLARE_API_TOKEN apex CNAME' if d.get('success') else f'FAIL CLOUDFLARE_API_TOKEN: {d.get(\"errors\")}')"
+          echo '=== Check if either worked ==='
+          sleep 5
+          dig biddeed.ai CNAME +short || echo 'no DNS yet'
+          LIVE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 https://biddeed.ai 2>/dev/null || echo 000)
+          echo "biddeed.ai: HTTP $LIVE"
