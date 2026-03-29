@@ -1,0 +1,38 @@
+name: Fix BidDeed DNS v3 - CF Pages Custom Domain
+on:
+  repository_dispatch:
+    types: [fix-biddeed-pages-domain]
+  workflow_dispatch:
+jobs:
+  dns:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Add biddeed.ai as CF Pages custom domain (auto-creates DNS)
+        env:
+          CF_TOKEN1: ${{ secrets.CF_API_TOKEN }}
+          CF_TOKEN2: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCT: ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          echo '=== CF Account ID ==='
+          echo "CF_ACCT length: ${#CF_ACCT}"
+          echo '=== Try CF_API_TOKEN: Add biddeed.ai to Pages project ==='
+          P1=$(curl -s -X POST "https://api.cloudflare.com/client/v4/accounts/$CF_ACCT/pages/projects/brevard-bidder-landing/domains" \
+            -H "Authorization: Bearer $CF_TOKEN1" -H "Content-Type: application/json" \
+            -d '{"name":"biddeed.ai"}')
+          echo "CF_API_TOKEN Pages result: $P1"
+          echo '=== Try CLOUDFLARE_API_TOKEN: Add biddeed.ai to Pages project ==='
+          P2=$(curl -s -X POST "https://api.cloudflare.com/client/v4/accounts/$CF_ACCT/pages/projects/brevard-bidder-landing/domains" \
+            -H "Authorization: Bearer $CF_TOKEN2" -H "Content-Type: application/json" \
+            -d '{"name":"biddeed.ai"}')
+          echo "CLOUDFLARE_API_TOKEN Pages result: $P2"
+          echo '=== List CF Pages projects to verify account access ==='
+          PROJ=$(curl -s "https://api.cloudflare.com/client/v4/accounts/$CF_ACCT/pages/projects/brevard-bidder-landing" \
+            -H "Authorization: Bearer $CF_TOKEN1")
+          echo $PROJ | python3 -c "import json,sys; d=json.load(sys.stdin); r=d.get('result',{}); print(f'Project: {r.get(\"name\",\"?\")}, domains: {r.get(\"domains\",[])}')" 2>/dev/null || echo "Failed to get project"
+          echo '=== Check DNS after Pages domain add ==='
+          sleep 10
+          dig biddeed.ai A +short || echo 'no A record'
+          dig biddeed.ai CNAME +short || echo 'no CNAME'
+          LIVE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 https://biddeed.ai 2>/dev/null || echo 000)
+          echo "biddeed.ai: HTTP $LIVE"
