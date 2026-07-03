@@ -357,5 +357,104 @@ const counterObs = new IntersectionObserver((entries)=>{
 },{threshold:0.5});
 document.querySelectorAll('[data-target]').forEach(el=>counterObs.observe(el));
 </script>
+
+<!-- SPRINT5 #1 — Member support chat widget (additive, zero-regression: appended
+     before </body>, does not modify any existing element, CTA, or nav on this
+     page). Backend: supabase/functions/support-agent (support@zonewise.ai). -->
+<style>
+#bd-support-launcher{position:fixed;right:20px;bottom:20px;z-index:9999;width:56px;height:56px;border-radius:50%;background:#F59E0B;color:#020617;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.4);font-size:24px;display:flex;align-items:center;justify-content:center}
+#bd-support-launcher:hover{background:#D97706}
+#bd-support-panel{position:fixed;right:20px;bottom:88px;z-index:9999;width:320px;max-width:calc(100vw - 40px);height:420px;max-height:calc(100vh - 140px);background:#0F172A;border:1px solid #1E293B;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.5);display:none;flex-direction:column;font-family:'Inter',system-ui,sans-serif;overflow:hidden}
+#bd-support-panel.bd-open{display:flex}
+#bd-support-header{background:#1E3A5F;color:#E2E8F0;padding:12px 14px;font-size:13px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+#bd-support-header button{background:none;border:none;color:#94a3b8;cursor:pointer;font-size:16px}
+#bd-support-log{flex:1;overflow-y:auto;padding:12px;font-size:13px;color:#E2E8F0}
+.bd-msg{margin-bottom:10px;line-height:1.5;white-space:pre-wrap}
+.bd-msg-user{color:#F59E0B;text-align:right}
+.bd-msg-assistant{color:#E2E8F0}
+#bd-support-form{display:flex;border-top:1px solid #1E293B;padding:8px}
+#bd-support-input{flex:1;background:#020617;color:#E2E8F0;border:1px solid #1E293B;border-radius:6px;padding:8px 10px;font-size:13px}
+#bd-support-form button{margin-left:6px;background:#F59E0B;color:#020617;border:none;border-radius:6px;padding:8px 12px;font-weight:600;cursor:pointer;font-size:13px}
+</style>
+<button id="bd-support-launcher" aria-label="Open support chat">&#128172;</button>
+<div id="bd-support-panel">
+  <div id="bd-support-header"><span>BidDeed.AI Support</span><button id="bd-support-close" aria-label="Close">&times;</button></div>
+  <div id="bd-support-log"></div>
+  <form id="bd-support-form">
+    <input id="bd-support-input" type="text" autocomplete="off" placeholder="Ask a question..." maxlength="2000" />
+    <button type="submit">Send</button>
+  </form>
+</div>
+<script>
+(function(){
+  var SUPPORT_AGENT_URL = 'https://mocerqjnksmhcjzxrewo.supabase.co/functions/v1/support-agent';
+  var POSTHOG_KEY = 'phc_zUQGNqDUYXbpJn7RGKt2wwnHfP8GXge2MZsYAJXTs14';
+  var POSTHOG_HOST = 'https://us.i.posthog.com';
+  var SUPPORTED_LOCALES = ['en','he','ru','fr','zh'];
+
+  function getSessionId(){
+    try {
+      var id = sessionStorage.getItem('bd_support_session');
+      if (!id) { id = crypto.randomUUID(); sessionStorage.setItem('bd_support_session', id); }
+      return id;
+    } catch (e) { return 'anon-' + Date.now(); }
+  }
+
+  function getLocale(){
+    var lang = (navigator.language || 'en').slice(0,2).toLowerCase();
+    return SUPPORTED_LOCALES.indexOf(lang) !== -1 ? lang : 'en';
+  }
+
+  function captureEvent(name, props){
+    try {
+      navigator.sendBeacon(POSTHOG_HOST + '/capture/', JSON.stringify({
+        api_key: POSTHOG_KEY, event: name, distinct_id: getSessionId(),
+        properties: props || {}, timestamp: new Date().toISOString()
+      }));
+    } catch (e) { /* best-effort only, never block the widget */ }
+  }
+
+  var launcher = document.getElementById('bd-support-launcher');
+  var panel = document.getElementById('bd-support-panel');
+  var closeBtn = document.getElementById('bd-support-close');
+  var log = document.getElementById('bd-support-log');
+  var form = document.getElementById('bd-support-form');
+  var input = document.getElementById('bd-support-input');
+
+  launcher.addEventListener('click', function(){ panel.classList.toggle('bd-open'); });
+  closeBtn.addEventListener('click', function(){ panel.classList.remove('bd-open'); });
+
+  function appendMsg(role, text){
+    var div = document.createElement('div');
+    div.className = 'bd-msg bd-msg-' + role;
+    div.textContent = text;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  form.addEventListener('submit', function(ev){
+    ev.preventDefault();
+    var message = input.value.trim();
+    if (!message) return;
+    appendMsg('user', message);
+    input.value = '';
+    captureEvent('support_chat_message', { role: 'user', locale: getLocale() });
+
+    fetch(SUPPORT_AGENT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: getSessionId(), message: message, locale: getLocale() })
+    })
+      .then(function(res){ return res.json(); })
+      .then(function(data){
+        appendMsg('assistant', data.reply || "Sorry, I couldn't get a response — please email support@biddeed.ai.");
+        captureEvent('support_chat_message', { role: 'assistant', escalated: !!data.escalated, model_tier: data.model_tier || null });
+      })
+      .catch(function(){
+        appendMsg('assistant', "Sorry, I couldn't reach support right now — please email support@biddeed.ai.");
+      });
+  });
+})();
+</script>
 </body>
 </html>
